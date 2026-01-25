@@ -6,12 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CODEDE - @yield('title', '')</title>
+    <title>CODEDE - @yield('title', 'Iniciar Sesión')</title>
 
-    {{-- Icon --}}
+    <!-- Icon -->
     <link rel="icon" href="{{ asset('img/icono.png') }}" type="image/png">
-
-    <!-- Fonts -->
 
     {{-- Scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
