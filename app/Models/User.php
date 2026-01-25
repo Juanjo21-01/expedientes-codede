@@ -3,33 +3,34 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use Notifiable, TwoFactorAuthenticatable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // Nombre de la tabla
+    protected $table = 'users';
+
+    // Atributos asignables
     protected $fillable = [
-        'name',
+        'nombres',
+        'apellidos',
+        'cargo',
+        'telefono',
         'email',
         'password',
+        'estado',
+        'role_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    // Atributos ocultos para arrays
     protected $hidden = [
         'password',
         'two_factor_secret',
@@ -37,11 +38,7 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    // Atributos que deben ser casteados
     protected function casts(): array
     {
         return [
@@ -50,9 +47,7 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the user's initials
-     */
+    // Accesores y Mutadores
     public function initials(): string
     {
         return Str::of($this->name)
@@ -60,5 +55,43 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    // ---- Relaciones ----
+
+    // --> ROLES -> Muchos a Uno
+    public function role() : BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    // -> MUNICIPIOS -> Muchos a Muchos
+    public function municipios() : BelongsToMany
+    {
+        return $this->belongsToMany(Municipio::class, 'usuario_municipio');
+    }
+
+    // -> EXPEDIENTES (responsable_id) -> Uno a Muchos
+    public function expedientes() : HasMany
+    {
+        return $this->hasMany(Expediente::class, 'responsable_id');
+    }
+
+    // -> EXPEDIENTES (financiero_revisor_id) -> Uno a Muchos
+    public function expedientesRevisados() : HasMany
+    {
+        return $this->hasMany(Expediente::class, 'financiero_revisor_id');
+    }
+
+    // -> REVISIONES FINANCIERAS -> Uno a Muchos
+    public function revisionesFinancieras() : HasMany
+    {
+        return $this->hasMany(RevisionFinanciera::class, 'revisor_id');
+    }
+    
+    // -> BITACORAS -> Uno a Muchos
+    public function bitacoras() : HasMany
+    {
+        return $this->hasMany(Bitacora::class, 'user_id');
     }
 }
