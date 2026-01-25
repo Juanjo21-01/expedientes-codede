@@ -15,7 +15,7 @@ class UserAdminSeeder extends Seeder
     public function run(): void
     {
         // Asignar el rol de administrador al usuario principal
-        $adminRole = Role::where('nombre', 'Administrador/Director')->first();
+        $adminRole = Role::where('nombre', 'Administrador')->first();
 
         // Crear el usuario administrador si no existe
         User::firstOrCreate(
