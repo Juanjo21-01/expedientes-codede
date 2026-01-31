@@ -18,6 +18,6 @@ class TipoNotificacion extends Model
     // --> NOTIFICACIONES -> Uno a Muchos
     public function notificaciones(): HasMany
     {
-        return $this->hasMany(Notificacion::class, 'tipo_notificacion_id');
+        return $this->hasMany(NotificacionEnviada::class, 'tipo_notificacion_id');
     }
 }

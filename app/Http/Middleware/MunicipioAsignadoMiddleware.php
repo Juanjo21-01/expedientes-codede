@@ -23,19 +23,29 @@ class MunicipioAsignadoMiddleware
         $role = $user->role->nombre;
 
         // ROL -> ADMIN Y DIRECTOR VEN TODOS LOS MUNICIPIOS
-        if (in_array($role, ['Administrador', 'Director', 'Jefe Administrativo-Financiero'])) {
+        if (in_array($role, ['Administrador', 'Director General', 'Jefe Administrativo-Financiero'])) {
             return $next($request);
         }
 
         // ROL -> TECNICO Y MUNICIPAL DEBEN DE TENER MUNICIPIO ASIGNADO
-        $routeParam = $request->route('expediente') ?? $request->route('municipio_id');
+        $expediente = $request->route('expediente');
+        $municipioId = $request->route('municipio_id');
 
-        if ($routeParam && method_exists($routeParam, 'municipio_id')){
-            $municipioId = $routeParam->municipio_id ?? $routeParam->municipio->id;
-
-            if (!$user->municipios->contains('id', $municipioId)) {
-                abort(403, 'Acceso Denegado: No tienes permiso para acceder a este municipio.');
+        // Si viene un expediente en la ruta
+        if ($expediente) {
+            // Si es un objeto Expediente (route model binding)
+            if ($expediente instanceof \App\Models\Expediente) {
+                $municipioId = $expediente->municipio_id;
+            } elseif (is_numeric($expediente)) {
+                // Si es un ID, buscar el expediente
+                $exp = \App\Models\Expediente::find($expediente);
+                $municipioId = $exp ? $exp->municipio_id : null;
             }
+        }
+
+        // Verificar que el usuario tenga asignado el municipio
+        if ($municipioId && !$user->municipios->contains('id', $municipioId)) {
+            abort(403, 'Acceso Denegado: No tienes permiso para acceder a este municipio.');
         }
 
         return $next($request);

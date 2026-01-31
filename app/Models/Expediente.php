@@ -28,13 +28,6 @@ class Expediente extends Model
         'observaciones',
         'etiquetas',
         'fecha_ultima_actualizacion',
-        'financiero_estado',
-        'financiero_revisor_id',
-        'financiero_fecha_recepcion',
-        'financiero_fecha_revision',
-        'financiero_fecha_complemento',
-        'financiero_monto_aprobado',
-        'financiero_comentarios',
     ];
 
     // Atributos que deben ser casteados
@@ -66,12 +59,6 @@ class Expediente extends Model
     public function tipoSolicitud() : BelongsTo
     {
         return $this->belongsTo(TipoSolicitud::class, 'tipo_solicitud_id');
-    }
-
-    // --> REVISOR FINANCIERO (USUARIO) -> Muchos a Uno
-    public function revisorFinanciero() : BelongsTo
-    {
-        return $this->belongsTo(User::class, 'financiero_revisor_id');
     }
 
     // -> REVISIONES FINANCIERAS -> Uno a Muchos

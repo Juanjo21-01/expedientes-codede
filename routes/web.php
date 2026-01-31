@@ -1,64 +1,132 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Livewire\Dashboard;
-use App\Http\Livewire\Guia\Show as GuiaShow;
-use App\Http\Livewire\Expedientes\Index as ExpedientesIndex;
-use App\Http\Livewire\Expedientes\Create as ExpedientesCreate;
-use App\Http\Livewire\Expedientes\Show as ExpedientesShow;
-// use App\Http\Livewire\Admin\Usuarios\Index as UsuariosIndex;
 use App\Models\User;
-use App\Http\Livewire\Admin\Municipios\Index as MunicipiosIndex;
-use App\Http\Livewire\Admin\Guias\Index as GuiasIndex;
-use App\Http\Livewire\Reportes\Index as ReportesIndex;
-use App\Http\Livewire\Bitacora\Index as BitacoraIndex;
+use App\Models\Expediente;
+use App\Models\Municipio;
+use App\Models\Guia;
 
-// Ruta pública
-Route::get('/', function () {
-    return view('auth.login');
-})->name('inicio');
+/*
+|--------------------------------------------------------------------------
+| Rutas Públicas
+|--------------------------------------------------------------------------
+*/
 
-// Rutas privadas -> Grupo autenticado
+// Redirigir a login
+Route::get('/', fn() => redirect()->route('login'))->name('inicio');
+
+/*
+|--------------------------------------------------------------------------
+| Rutas Autenticadas
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth', 'usuario_activo'])->group(function () {
+
     // Redireccionar al dashboard
     Route::get('/', fn() => redirect()->route('dashboard'));
-
-    // Dashboard (todos)
-    // Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    /*
+    |----------------------------------------------------------------------
+    | Dashboard - Todos los usuarios autenticados
+    |----------------------------------------------------------------------
+    */
     Route::view('dashboard', 'pages.dashboard')->name('dashboard');
 
-    // Solo administrador
-    Route::middleware('role:Administrador')->name('admin.')->group(function () {
 
-        // Usuarios
-        Route::livewire('/usuarios', 'pages::admin.usuarios.index')
-        ->can('viewAny', User::class)
-        ->name('usuarios.index');
-        // Route::get('/usuarios', UsuariosIndex::class)->can('viewAny', \App\Models\User::class)->name('usuarios.index');
-        // create/edit con can('create/update', User::class)
+    /*
+    |----------------------------------------------------------------------
+    | Guía - Todos pueden ver la guía actual
+    |----------------------------------------------------------------------
+    */
+    Route::livewire('/guia', 'pages::guia.show')->name('guia');
 
-        // Route::get('/municipios', MunicipiosIndex::class)->can('viewAny', \App\Models\Municipio::class)->name('municipios.index');
+    /*
+    |----------------------------------------------------------------------
+    | Perfil - Todos pueden ver/editar su perfil
+    |----------------------------------------------------------------------
+    */
+    Route::livewire('/perfil', 'pages::perfil.show')->name('perfil');
 
-        // Route::get('/guias', GuiasIndex::class)->can('viewAny', \App\Models\Guia::class)->name('guias.index');
+    /*
+    |----------------------------------------------------------------------
+    | Expedientes - Acceso según rol y municipio asignado
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('expedientes')->name('expedientes.')->group(function () {
+        
+        // Listado de expedientes
+        Route::livewire('/', 'pages::expedientes.index')->name('index');
 
-        // Route::get('/bitacora', BitacoraIndex::class)->name('bitacora');
+        // Crear expediente (solo Técnico)
+        Route::livewire('/crear', 'pages::expedientes.create')
+            ->can('create', Expediente::class)
+            ->name('create');
+
+        // Ver expediente (Policy)
+        Route::livewire('/{expediente}', 'pages::expedientes.show')
+            ->can('view', 'expediente')
+            ->name('show');
+
+        // Editar expediente (Policy)
+        Route::livewire('/{expediente}/editar', 'pages::expedientes.edit')
+            ->can('update', 'expediente')
+            ->name('edit');
+
+        // Revisión financiera (solo Jefe Financiero)
+        Route::livewire('/{expediente}/revision', 'pages::expedientes.revision-financiera')
+            ->can('revisarFinanciera', 'expediente')
+            ->name('revision');
+
     });
 
-    // Guía (todos)
-    // Route::get('/guia', GuiaShow::class)->name('guia');
+    /*
+    |----------------------------------------------------------------------
+    | Reportes - Solo Director General y Jefe Financiero
+    |----------------------------------------------------------------------
+    */
+    Route::livewire('/reportes', 'pages::reportes.index')
+        ->middleware('role:Director General,Jefe Administrativo-Financiero')
+        ->name('reportes');
 
-    // Expedientes
-    Route::middleware('municipio_asignado')->group(function () {
-        // Route::get('/expedientes', ExpedientesIndex::class)->name('expedientes.index');
-        // Route::get('/expedientes/crear', ExpedientesCreate::class)->can('create', \App\Models\Expediente::class)->name('expedientes.create');
-        // Route::get('/expedientes/{expediente}', ExpedientesShow::class)->can('view', [\App\Models\Expediente::class, 'expediente'])->name('expedientes.show');
-        // Agregaremos edit en Show o separate
+    /*
+    |----------------------------------------------------------------------
+    | Administración - Solo Administrador
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('admin')->name('admin.')->middleware('role:Administrador')->group(function () {
+
+        // Gestión de Usuarios
+        Route::prefix('usuarios')->name('usuarios.')->group(function () {
+            Route::livewire('/', 'pages::admin.usuarios.index')->name('index');
+            Route::livewire('/crear', 'pages::admin.usuarios.create')->name('create');
+            Route::livewire('/{user}/editar', 'pages::admin.usuarios.edit')->name('edit');
+        });
+
+        // Gestión de Municipios
+        Route::prefix('municipios')->name('municipios.')->group(function () {
+            Route::livewire('/', 'pages::admin.municipios.index')->name('index');
+            Route::livewire('/crear', 'pages::admin.municipios.create')->name('create');
+            Route::livewire('/{municipio}/editar', 'pages::admin.municipios.edit')->name('edit');
+        });
+
+        // Gestión de Guías
+        Route::prefix('guias')->name('guias.')->group(function () {
+            Route::livewire('/', 'pages::admin.guias.index')->name('index');
+            Route::livewire('/crear', 'pages::admin.guias.create')->name('create');
+            Route::livewire('/{guia}/editar', 'pages::admin.guias.edit')->name('edit');
+        });
+
+        // Bitácora (solo lectura)
+        Route::livewire('/bitacora', 'pages::admin.bitacora.index')->name('bitacora');
+
     });
 
-    // Reportes (Director + Jefe)
-    Route::middleware('role:Director,Jefe Administrativo-Financiero')->group(function () {
-        // Route::get('/reportes', ReportesIndex::class)->name('reportes');
-    });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Archivos de rutas adicionales
+|--------------------------------------------------------------------------
+*/
 
 require __DIR__.'/settings.php';

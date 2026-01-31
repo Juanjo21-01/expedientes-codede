@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users');
             $table->enum('entidad', ['Guía', 'Expediente', 'Proyecto', 'Usuario']);
-            $table->enum('tipo', ['Creación', 'Eliminación', 'Reporte']);
+            $table->enum('tipo', ['Creación', 'Eliminación', 'Reporte', 'Cambio de Estado', 'Revisión']);
             $table->text('detalle');
             $table->timestamps();
         });

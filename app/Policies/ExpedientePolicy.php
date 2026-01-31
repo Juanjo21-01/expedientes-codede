@@ -21,8 +21,8 @@ class ExpedientePolicy
     public function view(User $user, Expediente $expediente): bool
     {
         return match ($user->role->nombre) {
-            'Administrador', 'Director' => true,
-            'Jefe Administrativo-Financiero' => $expediente->estado === 'En revisión',
+            'Administrador', 'Director General' => true,
+            'Jefe Administrativo-Financiero' => in_array($expediente->estado, ['En Revisión', 'Completo', 'Incompleto']),
             'Técnico', 'Municipal' => $user->municipios->contains($expediente->municipio_id),
             default => false,
         };
@@ -34,42 +34,34 @@ class ExpedientePolicy
         return $user->role->nombre === 'Técnico';
     }
 
-    // Editar (Técnico solo en Borrador/Rechazado/Incompleto, Director override)
+    // Editar (Técnico solo en Recibido/Rechazado/Incompleto, Admin override)
     public function update(User $user, Expediente $expediente): bool
     {
         if ($user->role->nombre === 'Administrador') {
             return true;
         }
 
-        // if ($user->role->nombre === 'Director') {
-        //     // Override excepcional: requiere justificación en request
-        //     if (request()->has('override_justification') && !empty(request('override_justification'))) {
-        //         return true;
-        //     }
-        //     return false; // Sin justificación, no permite
-        // }
-
         if ($user->role->nombre === 'Técnico') {
             return $user->municipios->contains($expediente->municipio_id) &&
-                in_array($expediente->estado, ['Borrador', 'Rechazado', 'Incompleto']);
+                in_array($expediente->estado, ['Recibido', 'Rechazado', 'Incompleto']);
         }
 
         return false;
     }
 
     // Acción revisión financiera (solo Jefe, y expediente en revisión)
-    public function revisarFinanciera(User $user, Expediente $expediente)
+    public function revisarFinanciera(User $user, Expediente $expediente): bool
     {
         return $user->role->nombre === 'Jefe Administrativo-Financiero' &&
-            $expediente->estado === 'En revisión';
+            $expediente->estado === 'En Revisión';
     }
 
-    // Enviar a revisión (Técnico, desde Borrador)
-    public function enviarRevision(User $user, Expediente $expediente)
+    // Enviar a revisión (Técnico, desde Recibido)
+    public function enviarRevision(User $user, Expediente $expediente): bool
     {
         return $user->role->nombre === 'Técnico' &&
             $user->municipios->contains($expediente->municipio_id) &&
-            $expediente->estado === 'Borrador';
+            $expediente->estado === 'Recibido';
     }
 
     // Borrar (solo Administrador)
