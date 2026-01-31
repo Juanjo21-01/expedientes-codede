@@ -6,7 +6,8 @@ use App\Http\Livewire\Guia\Show as GuiaShow;
 use App\Http\Livewire\Expedientes\Index as ExpedientesIndex;
 use App\Http\Livewire\Expedientes\Create as ExpedientesCreate;
 use App\Http\Livewire\Expedientes\Show as ExpedientesShow;
-use App\Http\Livewire\Admin\Usuarios\Index as UsuariosIndex;
+// use App\Http\Livewire\Admin\Usuarios\Index as UsuariosIndex;
+use App\Models\User;
 use App\Http\Livewire\Admin\Municipios\Index as MunicipiosIndex;
 use App\Http\Livewire\Admin\Guias\Index as GuiasIndex;
 use App\Http\Livewire\Reportes\Index as ReportesIndex;
@@ -27,7 +28,12 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     Route::view('dashboard', 'pages.dashboard')->name('dashboard');
 
     // Solo administrador
-    Route::middleware('role:Administrador')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('role:Administrador')->name('admin.')->group(function () {
+
+        // Usuarios
+        Route::livewire('/usuarios', 'pages::admin.usuarios.index')
+        ->can('viewAny', User::class)
+        ->name('usuarios.index');
         // Route::get('/usuarios', UsuariosIndex::class)->can('viewAny', \App\Models\User::class)->name('usuarios.index');
         // create/edit con can('create/update', User::class)
 

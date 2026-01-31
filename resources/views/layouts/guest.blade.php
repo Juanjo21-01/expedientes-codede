@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CODEDE - @yield('title', 'Iniciar Sesión')</title>
+    <title>CODEDE {{ $title ?? '' }}</title>
 
     <!-- Icon -->
     <link rel="icon" href="{{ asset('img/icono.png') }}" type="image/png">
@@ -17,7 +17,11 @@
 </head>
 
 <body class="bg-base-200 min-h-screen flex items-center justify-center">
-    {{ $slot }}
+    <div class="card w-96 bg-base-100 shadow-xl">
+        <div class="card-body">
+            {{ $slot }}
+        </div>
+    </div>
 
     @livewireScripts
 </body>
