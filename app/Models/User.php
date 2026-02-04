@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -44,52 +45,117 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'estado' => 'boolean',
         ];
     }
 
-    // Accesores y Mutadores
+    // ---- Accesores ----
+
+    /**
+     * Nombre completo del usuario
+     */
+    public function getNombreCompletoAttribute(): string
+    {
+        return "{$this->nombres} {$this->apellidos}";
+    }
+
+    /**
+     * Iniciales del usuario (para avatares)
+     */
+    public function getInicialesAttribute(): string
+    {
+        return strtoupper(
+            Str::substr($this->nombres, 0, 1) .
+            Str::substr($this->apellidos, 0, 1)
+        );
+    }
+
+    /**
+     * Método legacy para compatibilidad
+     */
     public function initials(): string
     {
-        return Str::of($this->name)
-            ->explode(' ')
-            ->take(2)
-            ->map(fn ($word) => Str::substr($word, 0, 1))
-            ->implode('');
+        return $this->iniciales;
     }
 
     // ---- Relaciones ----
 
-    // --> ROLES -> Muchos a Uno
-    public function role() : BelongsTo
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
 
-    // -> MUNICIPIOS -> Muchos a Muchos
-    public function municipios() : BelongsToMany
+    public function municipios(): BelongsToMany
     {
         return $this->belongsToMany(Municipio::class, 'usuario_municipio');
     }
 
-    // -> EXPEDIENTES (responsable_id) -> Uno a Muchos
-    public function expedientes() : HasMany
+    public function expedientes(): HasMany
     {
         return $this->hasMany(Expediente::class, 'responsable_id');
     }
 
-    // -> REVISIONES FINANCIERAS -> Uno a Muchos
-    public function revisionesFinancieras() : HasMany
+    public function revisionesFinancieras(): HasMany
     {
         return $this->hasMany(RevisionFinanciera::class, 'revisor_id');
     }
-    
-    // -> BITACORAS -> Uno a Muchos
-    public function bitacoras() : HasMany
+
+    public function bitacoras(): HasMany
     {
         return $this->hasMany(Bitacora::class, 'user_id');
     }
 
-    // ---- Helpers de Rol ----
+    // ---- Scopes ----
+
+    /**
+     * Usuarios activos
+     */
+    public function scopeActivos(Builder $query): Builder
+    {
+        return $query->where('estado', true);
+    }
+
+    /**
+     * Usuarios inactivos
+     */
+    public function scopeInactivos(Builder $query): Builder
+    {
+        return $query->where('estado', false);
+    }
+
+    /**
+     * Usuarios por rol
+     */
+    public function scopeDeRol(Builder $query, string $nombreRol): Builder
+    {
+        return $query->whereHas('role', fn($q) => $q->where('nombre', $nombreRol));
+    }
+
+    /**
+     * Usuarios que tienen asignado un municipio específico
+     */
+    public function scopeConMunicipio(Builder $query, int $municipioId): Builder
+    {
+        return $query->whereHas('municipios', fn($q) => $q->where('municipios.id', $municipioId));
+    }
+
+    /**
+     * Solo técnicos
+     */
+    public function scopeTecnicos(Builder $query): Builder
+    {
+        return $query->deRol(Role::TECNICO);
+    }
+
+    /**
+     * Solo municipales
+     */
+    public function scopeMunicipales(Builder $query): Builder
+    {
+        return $query->deRol(Role::MUNICIPAL);
+    }
+
+    // ---- Helpers de Rol (usando constantes de Role) ----
 
     /**
      * Verifica si el usuario tiene alguno de los roles especificados
@@ -99,51 +165,87 @@ class User extends Authenticatable
         return in_array($this->role->nombre, $roles);
     }
 
-    /**
-     * Verifica si el usuario es Administrador
-     */
     public function isAdmin(): bool
     {
-        return $this->role->nombre === 'Administrador';
+        return $this->role->esAdmin();
     }
 
-    /**
-     * Verifica si el usuario es Director General
-     */
     public function isDirector(): bool
     {
-        return $this->role->nombre === 'Director General';
+        return $this->role->esDirector();
     }
 
-    /**
-     * Verifica si el usuario es Jefe Administrativo-Financiero
-     */
     public function isJefeFinanciero(): bool
     {
-        return $this->role->nombre === 'Jefe Administrativo-Financiero';
+        return $this->role->esJefeFinanciero();
     }
 
-    /**
-     * Verifica si el usuario es Técnico
-     */
     public function isTecnico(): bool
     {
-        return $this->role->nombre === 'Técnico';
+        return $this->role->esTecnico();
     }
 
-    /**
-     * Verifica si el usuario es Municipal
-     */
     public function isMunicipal(): bool
     {
-        return $this->role->nombre === 'Municipal';
+        return $this->role->esMunicipal();
+    }
+
+    public function hasGlobalAccess(): bool
+    {
+        return $this->role->tieneAccesoGlobal();
+    }
+
+    public function requiereMunicipios(): bool
+    {
+        return $this->role->requiereMunicipios();
+    }
+
+    // ---- Helpers de Estado ----
+
+    public function estaActivo(): bool
+    {
+        return $this->estado === true;
+    }
+
+    public function estaInactivo(): bool
+    {
+        return $this->estado === false;
+    }
+
+    public function activar(): bool
+    {
+        return $this->update(['estado' => true]);
+    }
+
+    public function desactivar(): bool
+    {
+        return $this->update(['estado' => false]);
+    }
+
+    // ---- Helpers de Municipios ----
+
+    /**
+     * Verifica si el usuario tiene acceso a un municipio específico
+     */
+    public function tieneAccesoAMunicipio(int $municipioId): bool
+    {
+        // Acceso global = acceso a todos los municipios
+        if ($this->hasGlobalAccess()) {
+            return true;
+        }
+
+        return $this->municipios()->where('municipios.id', $municipioId)->exists();
     }
 
     /**
-     * Verifica si el usuario tiene acceso global (Admin, Director, Jefe Financiero)
+     * Obtiene los IDs de municipios a los que tiene acceso
      */
-    public function hasGlobalAccess(): bool
+    public function getMunicipiosIdsAttribute(): array
     {
-        return $this->hasRole('Administrador', 'Director General', 'Jefe Administrativo-Financiero');
+        if ($this->hasGlobalAccess()) {
+            return Municipio::pluck('id')->toArray();
+        }
+
+        return $this->municipios->pluck('id')->toArray();
     }
 }

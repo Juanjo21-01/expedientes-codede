@@ -96,11 +96,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:Administrador')->group(function () {
 
         // Gestión de Usuarios
-        Route::prefix('usuarios')->name('usuarios.')->group(function () {
-            Route::livewire('/', 'pages::admin.usuarios.index')->name('index');
-            Route::livewire('/crear', 'pages::admin.usuarios.create')->name('create');
-            Route::livewire('/{user}/editar', 'pages::admin.usuarios.edit')->name('edit');
-        });
+        Route::livewire('/usuarios', 'pages::admin.usuarios.index')->name('usuarios.index');
 
         // Gestión de Municipios
         Route::prefix('municipios')->name('municipios.')->group(function () {

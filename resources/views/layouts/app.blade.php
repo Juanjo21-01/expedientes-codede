@@ -9,7 +9,7 @@
     <title>CODEDE {{ $title ?? '' }}</title>
 
     {{-- Icon --}}
-    <link rel="icon" href="{{ asset('img/icono.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
 
     {{-- Scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -67,7 +67,7 @@
                 </div>
 
                 <!-- Logo/Title -->
-                <div class="flex-1">
+                <div class="flex-1 px-2 mx-2">
                     <a href="{{ route('dashboard') }}" class="btn btn-ghost text-xl gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-6 h-6 text-primary">
@@ -100,9 +100,9 @@
                     <!-- User dropdown -->
                     <div class="dropdown dropdown-end">
                         <label tabindex="0" class="btn btn-ghost btn-circle avatar placeholder">
-                            <div class="bg-primary text-primary-content rounded-full w-10">
-                                <span
-                                    class="text-lg font-semibold">{{ strtoupper(substr(auth()->user()->nombres ?? 'U', 0, 1)) }}</span>
+                            <div
+                                class="bg-primary text-primary-content rounded-full w-10 h-10 flex items-center justify-center">
+                                <span class="text-lg font-semibold">{{ auth()->user()->iniciales ?? 'U' }}</span>
                             </div>
                         </label>
                         <ul tabindex="0"
@@ -163,7 +163,8 @@
                 <div class="p-4 border-b border-base-300">
                     <div class="flex items-center gap-3">
                         <div class="avatar placeholder">
-                            <div class="bg-primary text-primary-content rounded-lg w-12">
+                            <div
+                                class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -309,9 +310,9 @@
                 <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-base-300 bg-base-100">
                     <div class="flex items-center gap-3">
                         <div class="avatar placeholder">
-                            <div class="bg-neutral text-neutral-content rounded-full w-10">
-                                <span
-                                    class="text-sm">{{ strtoupper(substr(auth()->user()->nombres ?? 'U', 0, 1)) }}</span>
+                            <div
+                                class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
+                                <span class="text-sm">{{ auth()->user()->iniciales ?? 'U' }}</span>
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
