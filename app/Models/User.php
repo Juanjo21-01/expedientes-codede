@@ -11,6 +11,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -85,9 +86,33 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    /**
+     * Municipios activos asignados al usuario
+     */
     public function municipios(): BelongsToMany
     {
-        return $this->belongsToMany(Municipio::class, 'usuario_municipio');
+        return $this->belongsToMany(Municipio::class, 'usuario_municipio')
+            ->withPivot('estado', 'created_at', 'updated_at')
+            ->wherePivot('estado', true);
+    }
+
+    /**
+     * Todos los municipios asignados (incluyendo inactivos) - para historial
+     */
+    public function todosMunicipios(): BelongsToMany
+    {
+        return $this->belongsToMany(Municipio::class, 'usuario_municipio')
+            ->withPivot('estado', 'created_at', 'updated_at');
+    }
+
+    /**
+     * Municipios inactivos (historial)
+     */
+    public function municipiosHistorial(): BelongsToMany
+    {
+        return $this->belongsToMany(Municipio::class, 'usuario_municipio')
+            ->withPivot('estado', 'created_at', 'updated_at')
+            ->wherePivot('estado', false);
     }
 
     public function expedientes(): HasMany
@@ -247,5 +272,59 @@ class User extends Authenticatable
         }
 
         return $this->municipios->pluck('id')->toArray();
+    }
+
+    /**
+     * Sincroniza municipios con soft delete (mantiene historial)
+     * - Desactiva los municipios que ya no están en la lista
+     * - Activa o crea los municipios que están en la lista
+     */
+    public function syncMunicipiosConHistorial(array $municipioIds): void
+    {
+        $municipioIds = array_map('intval', $municipioIds);
+        
+        // Obtener IDs actuales activos
+        $actualesActivos = $this->municipios()->pluck('municipios.id')->toArray();
+        
+        // Municipios a desactivar (estaban activos pero ya no están en la nueva lista)
+        $aDesactivar = array_diff($actualesActivos, $municipioIds);
+        
+        // Municipios a activar/crear
+        $aActivar = $municipioIds;
+
+        // Desactivar los que ya no están
+        if (!empty($aDesactivar)) {
+            DB::table('usuario_municipio')
+                ->where('user_id', $this->id)
+                ->whereIn('municipio_id', $aDesactivar)
+                ->update(['estado' => false, 'updated_at' => now()]);
+        }
+
+        // Activar o crear los nuevos
+        foreach ($aActivar as $municipioId) {
+            DB::table('usuario_municipio')
+                ->updateOrInsert(
+                    ['user_id' => $this->id, 'municipio_id' => $municipioId],
+                    ['estado' => true, 'updated_at' => now(), 'created_at' => now()]
+                );
+        }
+    }
+
+    /**
+     * Desactiva todos los municipios del usuario (soft delete)
+     */
+    public function desactivarTodosMunicipios(): void
+    {
+        DB::table('usuario_municipio')
+            ->where('user_id', $this->id)
+            ->update(['estado' => false, 'updated_at' => now()]);
+    }
+
+    /**
+     * Verifica si el usuario tiene municipios asignados (activos o en historial)
+     */
+    public function tieneMunicipiosEnHistorial(): bool
+    {
+        return $this->todosMunicipios()->exists();
     }
 }

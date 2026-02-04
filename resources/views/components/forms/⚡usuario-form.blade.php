@@ -6,6 +6,7 @@ use Livewire\Attributes\Computed;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Municipio;
+use Illuminate\Support\Facades\DB;
 
 new class extends Component {
     // ID del usuario (null = crear, int = editar)
@@ -19,7 +20,9 @@ new class extends Component {
     public $email = '';
     public $password = '';
     public $roleId = '';
+    public $roleIdOriginal = ''; // Para detectar cambio de rol en edición
     public $municipiosSeleccionados = [];
+    public $municipioSeleccionado = ''; // Para rol Municipal (select simple)
 
     // Mount: cargar usuario si existe
     public function mount($usuarioId = null)
@@ -57,11 +60,93 @@ new class extends Component {
         return Municipio::activos()->ordenados()->get();
     }
 
+    // Computed: Municipios disponibles para rol Municipal (excluir los que ya tienen usuario activo)
+    #[Computed]
+    public function municipiosDisponiblesMunicipal()
+    {
+        $municipiosOcupados = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::MUNICIPAL)->where('users.estado', true)->where('usuario_municipio.estado', true)->when($this->usuarioId, fn($q) => $q->where('users.id', '!=', $this->usuarioId))->pluck('usuario_municipio.municipio_id')->toArray();
+
+        return Municipio::activos()->ordenados()->whereNotIn('id', $municipiosOcupados)->get();
+    }
+
+    // Computed: Municipios disponibles para rol Técnico (marcar los que ya están asignados a otro técnico)
+    #[Computed]
+    public function municipiosConEstadoTecnico()
+    {
+        $municipiosOcupados = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::TECNICO)->where('users.estado', true)->where('usuario_municipio.estado', true)->when($this->usuarioId, fn($q) => $q->where('users.id', '!=', $this->usuarioId))->pluck('usuario_municipio.municipio_id')->toArray();
+
+        return Municipio::activos()
+            ->ordenados()
+            ->get()
+            ->map(function ($municipio) use ($municipiosOcupados) {
+                $municipio->ocupado = in_array($municipio->id, $municipiosOcupados);
+                return $municipio;
+            });
+    }
+
+    // Computed: Nombres de municipios seleccionados (para mostrar badges)
+    #[Computed]
+    public function nombresMunicipiosSeleccionados()
+    {
+        if (empty($this->municipiosSeleccionados)) {
+            return [];
+        }
+        return Municipio::whereIn('id', $this->municipiosSeleccionados)->ordenados()->pluck('nombre', 'id')->toArray();
+    }
+
     // Computed: Rol seleccionado (retorna el modelo Role)
     #[Computed]
     public function rolSeleccionado()
     {
         return $this->roleId ? Role::find($this->roleId) : null;
+    }
+
+    // Computed: Rol original del usuario (para detectar cambios)
+    #[Computed]
+    public function rolOriginal()
+    {
+        return $this->roleIdOriginal ? Role::find($this->roleIdOriginal) : null;
+    }
+
+    // Computed: Verificar si se puede cambiar el rol (solo si no tiene municipios en historial)
+    #[Computed]
+    public function puedesCambiarRol()
+    {
+        if (!$this->usuarioId) {
+            return true; // Usuario nuevo, puede elegir cualquier rol
+        }
+
+        $usuario = User::find($this->usuarioId);
+        if (!$usuario) {
+            return true;
+        }
+
+        // Si el rol original requiere municipios, verificar si tiene historial
+        if ($this->rolOriginal?->requiereMunicipios()) {
+            return !$usuario->tieneMunicipiosEnHistorial();
+        }
+
+        return true;
+    }
+
+    // Toggle municipio para técnico (checkbox)
+    public function toggleMunicipio($municipioId)
+    {
+        $municipioId = (int) $municipioId;
+
+        if (in_array($municipioId, $this->municipiosSeleccionados)) {
+            $this->municipiosSeleccionados = array_values(array_diff($this->municipiosSeleccionados, [$municipioId]));
+        } else {
+            $this->municipiosSeleccionados[] = $municipioId;
+        }
+
+        $this->resetErrorBag('municipiosSeleccionados');
+    }
+
+    // Quitar municipio de la selección
+    public function quitarMunicipio($municipioId)
+    {
+        $this->municipiosSeleccionados = array_values(array_diff($this->municipiosSeleccionados, [(int) $municipioId]));
     }
 
     // Cargar Usuario
@@ -79,14 +164,45 @@ new class extends Component {
             $this->telefono = $usuario->telefono ?? '';
             $this->email = $usuario->email;
             $this->roleId = $usuario->role_id;
-            $this->municipiosSeleccionados = $usuario->municipios->pluck('id')->toArray();
+            $this->roleIdOriginal = $usuario->role_id; // Guardar rol original
+
+            $municipiosIds = $usuario->municipios->pluck('id')->toArray();
+
+            // Asignar según el tipo de rol
+            if ($usuario->role->esMunicipal()) {
+                $this->municipioSeleccionado = $municipiosIds[0] ?? '';
+                $this->municipiosSeleccionados = [];
+            } else {
+                $this->municipiosSeleccionados = $municipiosIds;
+                $this->municipioSeleccionado = '';
+            }
         }
+    }
+
+    // Limpiar selección de municipios cuando cambia el rol
+    public function updatedRoleId()
+    {
+        // Si no puede cambiar el rol, revertir al original
+        if (!$this->puedesCambiarRol && $this->rolOriginal?->requiereMunicipios()) {
+            $nuevoRol = Role::find($this->roleId);
+            // Solo bloquear si intenta cambiar entre Municipal/Técnico
+            if ($nuevoRol?->requiereMunicipios() && $this->roleId != $this->roleIdOriginal) {
+                $this->roleId = $this->roleIdOriginal;
+                $this->dispatch('mostrar-mensaje', tipo: 'warning', mensaje: 'No se puede cambiar el rol porque el usuario ya tiene municipios asignados en su historial.');
+                return;
+            }
+        }
+
+        $this->municipiosSeleccionados = [];
+        $this->municipioSeleccionado = '';
+        $this->resetErrorBag('municipiosSeleccionados');
+        $this->resetErrorBag('municipioSeleccionado');
     }
 
     // Guardar
     public function guardar()
     {
-        // Validación
+        // Validación base
         $rules = [
             'nombres' => 'required|string|max:50',
             'apellidos' => 'required|string|max:50',
@@ -103,7 +219,7 @@ new class extends Component {
             $rules['password'] = 'nullable|string|min:8';
         }
 
-        // Validar datos
+        // Validar datos base
         $this->validate($rules, [
             'nombres.required' => 'Los nombres son requeridos.',
             'apellidos.required' => 'Los apellidos son requeridos.',
@@ -116,30 +232,41 @@ new class extends Component {
         ]);
 
         // Validar municipios según rol
-        // if (in_array($rolNombre, ['Técnico', 'Municipal'])) {
-        //     if (empty($this->municipiosSeleccionados)) {
-        //         $this->addError('municipiosSeleccionados', 'Debe seleccionar al menos un municipio.');
-        //         return;
-        //     }
+        if ($this->rolSeleccionado?->requiereMunicipios()) {
+            if ($this->rolSeleccionado->esMunicipal()) {
+                // Validar que se haya seleccionado un municipio
+                if (empty($this->municipioSeleccionado)) {
+                    $this->addError('municipioSeleccionado', 'Debe seleccionar un municipio.');
+                    return;
+                }
 
-        //     if ($rolNombre === 'Municipal' && count($this->municipiosSeleccionados) !== 1) {
-        //         $this->addError('municipiosSeleccionados', 'El rol Municipal solo puede tener un municipio asignado.');
-        //         return;
-        //     }
+                // Verificar que no exista otro usuario Municipal activo con el mismo municipio
+                $existeMunicipal = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::MUNICIPAL)->where('users.estado', true)->where('usuario_municipio.estado', true)->where('usuario_municipio.municipio_id', $this->municipioSeleccionado)->when($this->usuarioId, fn($q) => $q->where('users.id', '!=', $this->usuarioId))->exists();
 
-        //     // Verificar que no exista otro Municipal con el mismo municipio
-        //     if ($rolNombre === 'Municipal') {
-        //         $existe = User::where('id', '!=', $this->usuarioId ?? 0)
-        //             ->whjJereHas('municipios', fn($q) => $q->whereIn('municipio_id', $this->municipiosSeleccionados))
-        //             ->whereHas('role', fn($q) => $q->where('nombre', 'Municipal'))
-        //             ->exists();
+                if ($existeMunicipal) {
+                    $this->addError('municipioSeleccionado', 'Ya existe un usuario Municipal activo asignado a este municipio.');
+                    return;
+                }
 
-        //         if ($existe) {
-        //             $this->addError('municipiosSeleccionados', 'Ya existe un usuario Municipal asignado a este municipio.');
-        //             return;
-        //         }
-        //     }
-        // }
+                // Convertir a array para el sync
+                $this->municipiosSeleccionados = [(int) $this->municipioSeleccionado];
+            } elseif ($this->rolSeleccionado->esTecnico()) {
+                // Validar que se haya seleccionado al menos un municipio
+                if (empty($this->municipiosSeleccionados)) {
+                    $this->addError('municipiosSeleccionados', 'Debe seleccionar al menos un municipio.');
+                    return;
+                }
+
+                // Verificar que ningún municipio esté asignado a otro técnico activo
+                $municipiosOcupadosPorOtro = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::TECNICO)->where('users.estado', true)->where('usuario_municipio.estado', true)->whereIn('usuario_municipio.municipio_id', $this->municipiosSeleccionados)->when($this->usuarioId, fn($q) => $q->where('users.id', '!=', $this->usuarioId))->pluck('usuario_municipio.municipio_id')->toArray();
+
+                if (!empty($municipiosOcupadosPorOtro)) {
+                    $nombresMunicipios = Municipio::whereIn('id', $municipiosOcupadosPorOtro)->pluck('nombre')->join(', ');
+                    $this->addError('municipiosSeleccionados', "Los siguientes municipios ya están asignados a otro Técnico activo: {$nombresMunicipios}");
+                    return;
+                }
+            }
+        }
 
         try {
             // Si se esta editando
@@ -161,11 +288,11 @@ new class extends Component {
                 // Guardar
                 $usuario->save();
 
-                // Sync municipios
+                // Sync municipios con historial (soft delete)
                 if ($this->rolSeleccionado?->requiereMunicipios()) {
-                    $usuario->municipios()->sync($this->municipiosSeleccionados);
+                    $usuario->syncMunicipiosConHistorial($this->municipiosSeleccionados);
                 } else {
-                    $usuario->municipios()->detach();
+                    $usuario->desactivarTodosMunicipios();
                 }
 
                 $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: '¡Usuario actualizado correctamente!');
@@ -180,9 +307,9 @@ new class extends Component {
                     'role_id' => $this->roleId,
                 ]);
 
-                // Sync municipios
+                // Sync municipios con historial
                 if ($this->rolSeleccionado?->requiereMunicipios()) {
-                    $usuario->municipios()->sync($this->municipiosSeleccionados);
+                    $usuario->syncMunicipiosConHistorial($this->municipiosSeleccionados);
                 }
 
                 $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: '¡Usuario creado correctamente!');
@@ -324,10 +451,18 @@ new class extends Component {
                         Rol<span class="text-error">*</span>
                     </legend>
                     <select wire:model.live="roleId" wire:change="clearError('roleId')"
-                        class="select select-bordered w-full @error('roleId') select-error @enderror">
+                        class="select select-bordered w-full @error('roleId') select-error @enderror"
+                        @if ($usuarioId && $this->rolOriginal?->requiereMunicipios() && !$this->puedesCambiarRol) disabled @endif>
                         <option value="" disabled selected>Seleccione un rol</option>
                         @foreach ($this->roles as $rol)
-                            <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
+                            <option value="{{ $rol->id }}" @if (
+                                $usuarioId &&
+                                    $this->rolOriginal?->requiereMunicipios() &&
+                                    !$this->puedesCambiarRol &&
+                                    $rol->requiereMunicipios() &&
+                                    $rol->id != $this->roleIdOriginal) disabled @endif>
+                                {{ $rol->nombre }}
+                            </option>
                         @endforeach
                     </select>
                     @error('roleId')
@@ -335,6 +470,19 @@ new class extends Component {
                             <span class="label-text-alt text-error">{{ $message }}</span>
                         </label>
                     @enderror
+                    @if ($usuarioId && $this->rolOriginal?->requiereMunicipios() && !$this->puedesCambiarRol)
+                        <label class="label">
+                            <span class="label-text-alt text-warning">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                No se puede cambiar el rol porque este usuario tiene municipios asignados en su
+                                historial.
+                            </span>
+                        </label>
+                    @endif
                 </fieldset>
             @endif
 
@@ -343,35 +491,101 @@ new class extends Component {
         <!-- Municipios (solo para Técnico y Municipal) -->
         @if ($this->rolSeleccionado?->requiereMunicipios())
             <div class="form-control w-full mt-4">
-                <label class="label">
-                    <span class="label-text">
-                        {{ $this->rolSeleccionado->esMunicipal() ? 'Municipio' : 'Municipios Asignados' }}
-                        <span class="text-error">*</span>
-                    </span>
-                    <span class="label-text-alt text-base-content/50">
-                        {{ $this->rolSeleccionado->esMunicipal() ? 'Solo 1 municipio' : 'Puede seleccionar varios' }}
-                    </span>
-                </label>
-                <select wire:model="municipiosSeleccionados" {{ $this->rolSeleccionado->esTecnico() ? 'multiple' : '' }}
-                    class="select select-bordered w-full @error('municipiosSeleccionados') select-error @enderror"
-                    {{ $this->rolSeleccionado->esTecnico() ? 'size=4' : '' }}>
-                    @if (!$this->rolSeleccionado->esTecnico())
-                        <option value="" disabled selected>Seleccione un municipio</option>
-                    @endif
-                    @foreach ($this->municipios as $municipio)
-                        <option value="{{ $municipio->id }}">{{ $municipio->nombre }}</option>
-                    @endforeach
-                </select>
-                @error('municipiosSeleccionados')
+                @if ($this->rolSeleccionado->esMunicipal())
+                    {{-- Select simple para Municipal --}}
                     <label class="label">
-                        <span class="label-text-alt text-error">{{ $message }}</span>
+                        <span class="label-text">
+                            Municipio <span class="text-error">*</span>
+                        </span>
+                        <span class="label-text-alt text-base-content/50">Solo 1 municipio</span>
                     </label>
-                @enderror
-
-                @if ($this->rolSeleccionado->esTecnico())
+                    <select wire:model="municipioSeleccionado"
+                        class="select select-bordered w-full @error('municipioSeleccionado') select-error @enderror">
+                        <option value="">Seleccione un municipio</option>
+                        @foreach ($this->municipiosDisponiblesMunicipal as $municipio)
+                            <option value="{{ $municipio->id }}">{{ $municipio->nombre }}</option>
+                        @endforeach
+                    </select>
+                    @error('municipioSeleccionado')
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </label>
+                    @enderror
+                    @if ($this->municipiosDisponiblesMunicipal->isEmpty())
+                        <label class="label">
+                            <span class="label-text-alt text-warning">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                Todos los municipios ya tienen un usuario Municipal activo asignado.
+                            </span>
+                        </label>
+                    @endif
+                @else
+                    {{-- Checkboxes para Técnico --}}
                     <label class="label">
-                        <span class="label-text-alt">
-                            <kbd class="kbd kbd-sm">Ctrl</kbd> + Click para seleccionar varios
+                        <span class="label-text">
+                            Municipios Asignados <span class="text-error">*</span>
+                        </span>
+                        <span class="label-text-alt text-base-content/50">Seleccione uno o varios</span>
+                    </label>
+
+                    {{-- Badges de municipios seleccionados --}}
+                    @if (!empty($this->nombresMunicipiosSeleccionados))
+                        <div class="flex flex-wrap gap-2 mb-3 p-3 bg-base-200 rounded-lg">
+                            <span class="text-sm text-base-content/70 mr-2">Seleccionados:</span>
+                            @foreach ($this->nombresMunicipiosSeleccionados as $id => $nombre)
+                                <span class="badge badge-primary gap-1">
+                                    {{ $nombre }}
+                                    {{-- pendiente --}}
+                                    <button type="button" wire:click="quitarMunicipio({{ $id }})"
+                                        class="btn btn-ghost btn-xs p-0 h-auto min-h-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- Grid de checkboxes --}}
+                    <div
+                        class="border border-base-300 rounded-lg p-3 max-h-48 overflow-y-auto @error('municipiosSeleccionados') border-error @enderror">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            @foreach ($this->municipiosConEstadoTecnico as $municipio)
+                                <label
+                                    class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-base-200 transition-colors
+                                    {{ $municipio->ocupado ? 'opacity-50' : '' }}">
+                                    <input type="checkbox" wire:click="toggleMunicipio({{ $municipio->id }})"
+                                        {{ in_array($municipio->id, $this->municipiosSeleccionados) ? 'checked' : '' }}
+                                        {{ $municipio->ocupado ? 'disabled' : '' }}
+                                        class="checkbox checkbox-primary checkbox-sm" />
+                                    <span class="label-text text-sm {{ $municipio->ocupado ? 'line-through' : '' }}">
+                                        {{ $municipio->nombre }}
+                                        @if ($municipio->ocupado)
+                                            <span class="text-xs text-warning">(asignado)</span>
+                                        @endif
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @error('municipiosSeleccionados')
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </label>
+                    @enderror
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/50">
+                            {{ count($this->municipiosSeleccionados) }} municipio(s) seleccionado(s)
+                        </span>
+                        <span class="label-text-alt text-warning text-xs">
+                            Los municipios tachados ya están asignados a otro Técnico activo
                         </span>
                     </label>
                 @endif

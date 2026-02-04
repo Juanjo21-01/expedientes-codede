@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('municipio_id')->constrained('municipios')->onDelete('cascade');
+            $table->boolean('estado')->default(true)->after('municipio_id');
             $table->unique(['user_id', 'municipio_id']);
             $table->timestamps();
         });

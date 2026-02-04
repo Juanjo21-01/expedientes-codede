@@ -8,6 +8,8 @@ use Livewire\WithPagination;
 use Livewire\WithoutUrlPagination;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Municipio;
+use Illuminate\Support\Facades\DB;
 
 new class extends Component {
     use WithPagination, WithoutUrlPagination;
@@ -64,10 +66,7 @@ new class extends Component {
         if ($usuario->estaInactivo()) {
             // Director: solo puede haber 1 activo
             if ($usuario->isDirector()) {
-                $existeDirectorActivo = User::activos()
-                    ->deRol(Role::DIRECTOR)
-                    ->where('id', '!=', $usuario->id)
-                    ->exists();
+                $existeDirectorActivo = User::activos()->deRol(Role::DIRECTOR)->where('id', '!=', $usuario->id)->exists();
 
                 if ($existeDirectorActivo) {
                     $this->dispatch('mostrar-mensaje', tipo: 'warning', mensaje: 'Ya existe un Director General activo. Desactívalo primero.');
@@ -77,14 +76,41 @@ new class extends Component {
 
             // Jefe Financiero: solo puede haber 1 activo
             if ($usuario->isJefeFinanciero()) {
-                $existeJefeActivo = User::activos()
-                    ->deRol(Role::JEFE_FINANCIERO)
-                    ->where('id', '!=', $usuario->id)
-                    ->exists();
+                $existeJefeActivo = User::activos()->deRol(Role::JEFE_FINANCIERO)->where('id', '!=', $usuario->id)->exists();
 
                 if ($existeJefeActivo) {
                     $this->dispatch('mostrar-mensaje', tipo: 'warning', mensaje: 'Ya existe un Jefe Administrativo-Financiero activo. Desactívalo primero.');
                     return;
+                }
+            }
+
+            // Municipal: verificar que su municipio no esté asignado a otro Municipal activo
+            if ($usuario->isMunicipal()) {
+                $municipiosUsuario = $usuario->municipios()->pluck('municipios.id')->toArray();
+
+                if (!empty($municipiosUsuario)) {
+                    $municipioOcupado = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::MUNICIPAL)->where('users.estado', true)->where('usuario_municipio.estado', true)->where('users.id', '!=', $usuario->id)->whereIn('usuario_municipio.municipio_id', $municipiosUsuario)->first();
+
+                    if ($municipioOcupado) {
+                        $nombreMunicipio = Municipio::find($municipioOcupado->municipio_id)?->nombre ?? 'Desconocido';
+                        $this->dispatch('mostrar-mensaje', tipo: 'warning', mensaje: "El municipio '{$nombreMunicipio}' ya tiene otro usuario Municipal activo asignado.");
+                        return;
+                    }
+                }
+            }
+
+            // Técnico: verificar que sus municipios no estén asignados a otro Técnico activo
+            if ($usuario->isTecnico()) {
+                $municipiosUsuario = $usuario->municipios()->pluck('municipios.id')->toArray();
+
+                if (!empty($municipiosUsuario)) {
+                    $municipiosOcupados = \DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::TECNICO)->where('users.estado', true)->where('usuario_municipio.estado', true)->where('users.id', '!=', $usuario->id)->whereIn('usuario_municipio.municipio_id', $municipiosUsuario)->pluck('usuario_municipio.municipio_id')->toArray();
+
+                    if (!empty($municipiosOcupados)) {
+                        $nombresMunicipios = Municipio::whereIn('id', $municipiosOcupados)->pluck('nombre')->join(', ');
+                        $this->dispatch('mostrar-mensaje', tipo: 'warning', mensaje: "Los siguientes municipios ya están asignados a otro Técnico activo: {$nombresMunicipios}");
+                        return;
+                    }
                 }
             }
         }
@@ -137,7 +163,7 @@ new class extends Component {
                         <th>Usuario</th>
                         <th>Correo Electrónico</th>
                         <th class="text-center">Rol</th>
-                        <th class="text-center">Teléfono</th>
+                        <th class="text-center">Municipios</th>
                         <th class="text-center">Estado</th>
                         <th class="text-center">Acciones</th>
                     </tr>
@@ -177,8 +203,8 @@ new class extends Component {
                                 </span>
                             </td>
                             <td class="text-center">
-                                @if ($usuario->telefono)
-                                    <span class="font-mono text-sm">{{ $usuario->telefono }}</span>
+                                @if ($usuario->municipios->isNotEmpty())
+                                    <span class="text-xs">{{ $usuario->municipios->pluck('nombre')->join(', ') }}</span>
                                 @else
                                     <span class="text-base-content/40">—</span>
                                 @endif
