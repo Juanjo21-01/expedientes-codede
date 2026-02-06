@@ -99,13 +99,6 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         Route::livewire('/usuarios', 'pages::admin.usuarios.index')->name('usuarios.index');
         Route::livewire('/usuarios/{usuario}', 'pages::admin.usuarios.show')->name('usuarios.show');
 
-        // Gestión de Municipios
-        Route::prefix('municipios')->name('municipios.')->group(function () {
-            Route::livewire('/', 'pages::admin.municipios.index')->name('index');
-            Route::livewire('/crear', 'pages::admin.municipios.create')->name('create');
-            Route::livewire('/{municipio}/editar', 'pages::admin.municipios.edit')->name('edit');
-        });
-
         // Gestión de Guías
         Route::prefix('guias')->name('guias.')->group(function () {
             Route::livewire('/', 'pages::admin.guias.index')->name('index');
@@ -116,6 +109,16 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         // Bitácora (solo lectura)
         Route::livewire('/bitacora', 'pages::admin.bitacora.index')->name('bitacora');
 
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | Municipios - Administrador (CRUD) y Director General (solo lectura)
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('admin/municipios')->name('admin.municipios.')->middleware('role:Administrador,Director General')->group(function () {
+        Route::livewire('/', 'pages::admin.municipios.index')->name('index');
+        Route::livewire('/{municipio}', 'pages::admin.municipios.show')->name('show');
     });
 
 });

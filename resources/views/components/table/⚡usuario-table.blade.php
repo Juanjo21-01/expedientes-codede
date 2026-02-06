@@ -171,7 +171,7 @@ new class extends Component {
                 <tbody>
                     @forelse ($this->usuarios as $index => $usuario)
                         <tr class="hover">
-                            <td class="text-center font-medium">{{ $loop->iteration }}</td>
+                            <td class="text-center font-medium">{{ $this->usuarios->firstItem() + $index }}</td>
                             <td>
                                 <div class="flex items-center gap-3">
                                     <div class="avatar placeholder">
