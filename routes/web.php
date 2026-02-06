@@ -97,6 +97,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
         // Gestión de Usuarios
         Route::livewire('/usuarios', 'pages::admin.usuarios.index')->name('usuarios.index');
+        Route::livewire('/usuarios/{usuario}', 'pages::admin.usuarios.show')->name('usuarios.show');
 
         // Gestión de Municipios
         Route::prefix('municipios')->name('municipios.')->group(function () {

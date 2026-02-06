@@ -48,8 +48,7 @@ new #[Title('- Usuarios')] class extends Component {
 <div>
     <!-- Mensajes Flash -->
     @if ($mensajeTexto)
-        {{-- validar si es tipo warning tambien --}}
-        <div role="alert" class="alert alert-{{ $mensajeTipo }} mb-6">
+        <div role="alert" class="alert alert-{{ $mensajeTipo }} shadow-lg mb-6">
             @if ($mensajeTipo === 'success')
                 <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
                     viewBox="0 0 24 24">
@@ -70,7 +69,7 @@ new #[Title('- Usuarios')] class extends Component {
                 </svg>
             @endif
             <span>{{ $mensajeTexto }}</span>
-            <button type="button" wire:click="cerrarMensaje" class="btn btn-sm btn-ghost">
+            <button type="button" wire:click="cerrarMensaje" class="btn btn-sm btn-circle btn-ghost">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -82,11 +81,20 @@ new #[Title('- Usuarios')] class extends Component {
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-            <h1 class="text-2xl font-bold">Gestión de Usuarios</h1>
+            <h1 class="text-2xl font-bold flex items-center gap-3">
+                <div class="bg-primary/10 text-primary rounded-btn p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                    </svg>
+                </div>
+                Gestión de Usuarios
+            </h1>
             <p class="text-base-content/60 text-sm mt-1">Administra los usuarios del sistema</p>
         </div>
 
-        <button wire:click="crear" class="btn btn-primary gap-2">
+        <button wire:click="crear" class="btn btn-primary gap-2 shadow-md hover:shadow-lg transition-shadow">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                 stroke="currentColor" class="w-5 h-5">
                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -101,7 +109,8 @@ new #[Title('- Usuarios')] class extends Component {
         <div class="card-body p-4">
             <div class="flex flex-col sm:flex-row gap-4">
                 <div class="flex-1">
-                    <label class="input input-bordered flex items-center gap-2">
+                    <label
+                        class="input input-bordered flex items-center gap-2 focus-within:input-primary transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
                             class="w-4 h-4 opacity-70">
                             <path fill-rule="evenodd"
@@ -110,10 +119,19 @@ new #[Title('- Usuarios')] class extends Component {
                         </svg>
                         <input type="text" wire:model.live.debounce.300ms="search" class="grow"
                             placeholder="Buscar por nombre o correo..." />
+                        @if ($search)
+                            <button wire:click="$set('search', '')" class="btn btn-ghost btn-xs btn-circle">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        @endif
                     </label>
                 </div>
                 <div class="w-full sm:w-56">
-                    <select wire:model.live="rolFiltro" class="select select-bordered w-full">
+                    <select wire:model.live="rolFiltro"
+                        class="select select-bordered w-full focus:select-primary transition-colors">
                         <option value="">Todos los roles</option>
                         @foreach ($this->roles as $rol)
                             <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
