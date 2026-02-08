@@ -1,78 +1,22 @@
 <?php
 
 use Livewire\Attributes\Title;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 new #[Title('- Municipios')] class extends Component {
     // Variables de filtro
     public $search = '';
     public $estadoFiltro = '';
-
-    // Mensaje flash
-    public $mensajeTipo = '';
-    public $mensajeTexto = '';
-
-    // Escuchar mensaje para mostrar
-    #[On('mostrar-mensaje')]
-    public function mostrarMensaje($tipo, $mensaje)
-    {
-        $this->mensajeTipo = $tipo;
-        $this->mensajeTexto = $mensaje;
-    }
-
-    // Cerrar mensaje
-    public function cerrarMensaje()
-    {
-        $this->mensajeTipo = '';
-        $this->mensajeTexto = '';
-    }
 };
 ?>
 
 <div>
-    <!-- Mensajes Flash -->
-    @if ($mensajeTexto)
-        <div role="alert" class="alert alert-{{ $mensajeTipo }} shadow-lg mb-6">
-            @if ($mensajeTipo === 'success')
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            @elseif ($mensajeTipo === 'warning')
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            @else
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            @endif
-            <span>{{ $mensajeTexto }}</span>
-            <button type="button" wire:click="cerrarMensaje" class="btn btn-sm btn-circle btn-ghost">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-    @endif
-
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold flex items-center gap-3">
                 <div class="bg-primary/10 text-primary rounded-btn p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 21h19.5M3.75 3v18m16.5-18v18M5.25 3h13.5M5.25 21h13.5M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                    </svg>
+                    <x-heroicon-o-building-library class="w-6 h-6" />
                 </div>
                 Gestión de Municipios
             </h1>
@@ -107,10 +51,7 @@ new #[Title('- Municipios')] class extends Component {
                             placeholder="Buscar municipio por nombre..." />
                         @if ($search)
                             <button wire:click="$set('search', '')" class="btn btn-ghost btn-xs btn-circle">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
+                                <x-heroicon-o-x-mark class="w-4 h-4" />
                             </button>
                         @endif
                     </label>
@@ -132,6 +73,6 @@ new #[Title('- Municipios')] class extends Component {
 
     <!-- Modal Editar (solo Admin) -->
     @if (auth()->user()->isAdmin())
-    <livewire:modals.municipio-modal />
+        <livewire:modals.municipio-modal />
     @endif
 </div>

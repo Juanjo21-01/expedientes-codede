@@ -12,10 +12,6 @@ use Carbon\Carbon;
 new #[Title('- Detalle Municipio')] class extends Component {
     public Municipio $municipio;
 
-    // Variables para mensajes
-    public string $mensajeTipo = '';
-    public string $mensajeTexto = '';
-
     // Filtro de año para expedientes
     public string $anioFiltro = '';
 
@@ -24,21 +20,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
     {
         $this->municipio = $municipio->load(['expedientes.tipoSolicitud', 'expedientes.responsable']);
         $this->anioFiltro = (string) now()->year;
-    }
-
-    // Escuchar mensaje para mostrar
-    #[On('mostrar-mensaje')]
-    public function mostrarMensaje($tipo, $mensaje)
-    {
-        $this->mensajeTipo = $tipo;
-        $this->mensajeTexto = $mensaje;
-    }
-
-    // Cerrar mensaje
-    public function cerrarMensaje()
-    {
-        $this->mensajeTipo = '';
-        $this->mensajeTexto = '';
     }
 
     // Refrescar cuando se edita el municipio
@@ -201,70 +182,24 @@ new #[Title('- Detalle Municipio')] class extends Component {
 ?>
 
 <div class="space-y-6">
-    {{-- Mensajes Flash --}}
-    @if ($mensajeTexto)
-        <div role="alert" class="alert alert-{{ $mensajeTipo }} shadow-lg">
-            @if ($mensajeTipo === 'success')
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            @elseif ($mensajeTipo === 'warning')
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-            @else
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            @endif
-            <span>{{ $mensajeTexto }}</span>
-            <button type="button" wire:click="cerrarMensaje" class="btn btn-sm btn-circle btn-ghost">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-    @endif
-
-    {{-- Breadcrumbs --}}
+    {{-- Breadcrumbs --}}}
     <div class="breadcrumbs text-sm">
         <ul>
             <li>
                 <a href="{{ route('dashboard') }}" wire:navigate class="gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                    </svg>
+                    <x-heroicon-o-home class="w-4 h-4" />
                     Inicio
                 </a>
             </li>
             <li>
                 <a href="{{ route('admin.municipios.index') }}" wire:navigate class="gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 21h19.5M3.75 3v18m16.5-18v18M5.25 3h13.5M5.25 21h13.5M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                    </svg>
+                    <x-heroicon-o-building-library class="w-4 h-4" />
                     Municipios
                 </a>
             </li>
             <li>
                 <span class="inline-flex items-center gap-1 font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                    </svg>
+                    <x-heroicon-o-map-pin class="w-4 h-4" />
                     {{ $municipio->nombre }}
                 </span>
             </li>
@@ -284,11 +219,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                         class="indicator-item indicator-bottom indicator-end badge {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }} badge-sm"></span>
                     <div
                         class="bg-primary text-primary-content rounded-full w-24 h-24 ring-4 ring-base-100 shadow-lg flex justify-center items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-12 h-12">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 21h19.5M3.75 3v18m16.5-18v18M5.25 3h13.5M5.25 21h13.5M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                        </svg>
+                        <x-heroicon-o-building-office-2 class="w-12 h-12" />
                     </div>
                 </div>
 
@@ -307,10 +238,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                         </div>
                         @if ($municipio->tieneContactoCompleto())
                             <div class="badge badge-lg badge-outline badge-info gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                </svg>
+                                <x-heroicon-o-check class="w-3 h-3" />
                                 Contacto completo
                             </div>
                         @endif
@@ -323,27 +251,15 @@ new #[Title('- Detalle Municipio')] class extends Component {
                         <button wire:click="cambiarEstado"
                             class="btn {{ $municipio->estaActivo() ? 'btn-outline btn-error' : 'btn-success' }} btn-sm gap-2">
                             @if ($municipio->estaActivo())
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                </svg>
+                                <x-heroicon-o-no-symbol class="w-4 h-4" />
                                 Desactivar
                             @else
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <x-heroicon-o-check-circle class="w-4 h-4" />
                                 Activar
                             @endif
                         </button>
                         <button wire:click="editar" class="btn btn-primary btn-sm gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                            </svg>
+                            <x-heroicon-o-pencil-square class="w-4 h-4" />
                             Editar contacto
                         </button>
                     </div>
@@ -358,11 +274,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-primary/10 text-primary rounded-btn p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                            </svg>
+                            <x-heroicon-o-user class="w-5 h-5" />
                         </div>
                         <div>
                             <p class="text-xs text-base-content/60 uppercase tracking-wider">Contacto</p>
@@ -375,11 +287,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-info/10 text-info rounded-btn p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                            </svg>
+                            <x-heroicon-o-envelope class="w-5 h-5" />
                         </div>
                         <div>
                             <p class="text-xs text-base-content/60 uppercase tracking-wider">Email</p>
@@ -392,11 +300,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-success/10 text-success rounded-btn p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                            </svg>
+                            <x-heroicon-o-phone class="w-5 h-5" />
                         </div>
                         <div>
                             <p class="text-xs text-base-content/60 uppercase tracking-wider">Teléfono</p>
@@ -409,11 +313,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-warning/10 text-warning rounded-btn p-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
+                            <x-heroicon-o-document-text class="w-5 h-5" />
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-xs text-base-content/60 uppercase tracking-wider">Observaciones</p>
@@ -431,11 +331,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         <div class="card-body">
             <h2 class="card-title text-lg gap-3">
                 <div class="bg-accent/10 text-accent rounded-btn p-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-                    </svg>
+                    <x-heroicon-o-users class="w-5 h-5" />
                 </div>
                 Usuarios Asignados
             </h2>
@@ -464,23 +360,15 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                 @endif
                             </div>
                             @if (auth()->user()->isAdmin())
-                                <a href="{{ route('admin.usuarios.show', $this->usuarioMunicipal->id) }}"
-                                    wire:navigate class="btn btn-ghost btn-sm btn-circle" title="Ver perfil">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                    </svg>
+                                <a href="{{ route('admin.usuarios.show', $this->usuarioMunicipal->id) }}" wire:navigate
+                                    class="btn btn-ghost btn-sm btn-circle" title="Ver perfil">
+                                    <x-heroicon-o-arrow-top-right-on-square class="w-4 h-4" />
                                 </a>
                             @endif
                         </div>
                     @else
                         <div class="text-base-content/40 text-sm italic flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
-                            </svg>
+                            <x-heroicon-o-no-symbol class="w-5 h-5" />
                             Sin usuario municipal asignado
                         </div>
                     @endif
@@ -509,12 +397,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                     @if (auth()->user()->isAdmin())
                                         <a href="{{ route('admin.usuarios.show', $tecnico->id) }}" wire:navigate
                                             class="btn btn-ghost btn-sm btn-circle" title="Ver perfil">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-4 h-4">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                            </svg>
+                                            <x-heroicon-o-arrow-top-right-on-square class="w-4 h-4" />
                                         </a>
                                     @endif
                                 </div>
@@ -522,11 +405,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                         </div>
                     @else
                         <div class="text-base-content/40 text-sm italic flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
-                            </svg>
+                            <x-heroicon-o-no-symbol class="w-5 h-5" />
                             Sin técnicos asignados
                         </div>
                     @endif
@@ -541,11 +420,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         <div
             class="stat bg-gradient-to-br from-primary/5 to-primary/10 rounded-box shadow border border-primary/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-primary opacity-80">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-10 h-10">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                </svg>
+                <x-heroicon-o-folder-open class="w-10 h-10" />
             </div>
             <div class="stat-title text-primary/70">Total Expedientes</div>
             <div class="stat-value text-primary">{{ $this->estadisticas['total'] }}</div>
@@ -556,11 +431,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         <div
             class="stat bg-gradient-to-br from-success/5 to-success/10 rounded-box shadow border border-success/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-success opacity-80">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-10 h-10">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
+                <x-heroicon-o-check-circle class="w-10 h-10" />
             </div>
             <div class="stat-title text-success/70">Aprobados</div>
             <div class="stat-value text-success">{{ $this->estadisticas['aprobados'] }}</div>
@@ -571,11 +442,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         <div
             class="stat bg-gradient-to-br from-warning/5 to-warning/10 rounded-box shadow border border-warning/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-warning opacity-80">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-10 h-10">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
+                <x-heroicon-o-clock class="w-10 h-10" />
             </div>
             <div class="stat-title text-warning/70">En Proceso</div>
             <div class="stat-value text-warning">
@@ -588,11 +455,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         <div
             class="stat bg-gradient-to-br from-error/5 to-error/10 rounded-box shadow border border-error/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-error opacity-80">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-10 h-10">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
+                <x-heroicon-o-x-circle class="w-10 h-10" />
             </div>
             <div class="stat-title text-error/70">Rechazados</div>
             <div class="stat-value text-error">{{ $this->estadisticas['rechazados'] }}</div>
@@ -606,11 +469,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <h2 class="card-title text-lg gap-3">
                     <div class="bg-secondary/10 text-secondary rounded-btn p-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                        </svg>
+                        <x-heroicon-o-calendar class="w-5 h-5" />
                     </div>
                     Expedientes por Año
                 </h2>
@@ -680,11 +539,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <h2 class="card-title text-lg gap-3">
                         <div class="bg-info/10 text-info rounded-btn p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                            </svg>
+                            <x-heroicon-o-document-text class="w-5 h-5" />
                         </div>
                         Expedientes {{ $anioFiltro }}
                         <span class="badge badge-neutral badge-sm">{{ $this->expedientesAnio->count() }}</span>
@@ -740,19 +595,9 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                             @elseif($expediente->estado === 'Archivado') badge-ghost
                                             @else badge-ghost @endif">
                                             @if ($expediente->estado === 'Aprobado')
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                    class="w-3 h-3">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="m4.5 12.75 6 6 9-13.5" />
-                                                </svg>
+                                                <x-heroicon-o-check class="w-3 h-3" />
                                             @elseif($expediente->estado === 'Rechazado')
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                    class="w-3 h-3">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M6 18 18 6M6 6l12 12" />
-                                                </svg>
+                                                <x-heroicon-o-x-mark class="w-3 h-3" />
                                             @endif
                                             {{ $expediente->estado }}
                                         </span>
@@ -780,11 +625,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         <div class="card bg-base-100 shadow-lg border border-base-300">
             <div class="card-body">
                 <div class="flex flex-col items-center justify-center py-8 gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-16 h-16 text-base-content/20">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                    </svg>
+                    <x-heroicon-o-folder-open class="w-16 h-16 text-base-content/20" />
                     <p class="text-base-content/50 text-lg">No hay expedientes para el año {{ $anioFiltro }}</p>
                     <p class="text-base-content/40 text-sm">Selecciona otro año o verifica que existan expedientes
                         registrados.</p>

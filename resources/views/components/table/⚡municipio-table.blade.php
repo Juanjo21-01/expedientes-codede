@@ -152,24 +152,14 @@ new class extends Component {
                                         @if ($municipal)
                                             <span class="badge badge-xs badge-ghost"
                                                 title="Municipal: {{ $municipal->nombre_completo }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="w-3 h-3 mr-0.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                                </svg>
+                                                <x-heroicon-o-user class="w-3 h-3 mr-0.5" />
                                                 {{ Str::limit($municipal->nombre_completo, 15) }}
                                             </span>
                                         @endif
                                         @if ($tecnicos->isNotEmpty())
                                             <span class="badge badge-xs badge-info badge-outline"
                                                 title="Técnico(s): {{ $tecnicos->pluck('nombre_completo')->join(', ') }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="w-3 h-3 mr-0.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M11.42 15.17l-5.646 3.013a1.724 1.724 0 01-2.573-1.066l-.29-1.16a1.723 1.723 0 00-1.334-1.334l-1.16-.29a1.724 1.724 0 01-1.066-2.573l3.014-5.647a1.14 1.14 0 011.272-.503l3.693.738a1.14 1.14 0 00.95-.228l2.672-2.229a1.14 1.14 0 011.272-.042l.582.332a1.14 1.14 0 01.482.53l.738 1.846a1.14 1.14 0 00.665.665l1.846.738a1.14 1.14 0 01.53.482l.332.582a1.14 1.14 0 01-.042 1.272L16.4 12.928a1.14 1.14 0 00-.228.95l.738 3.693a1.14 1.14 0 01-.503 1.272l-5.647 3.014" />
-                                                </svg>
+                                                <x-heroicon-o-wrench class="w-3 h-3 mr-0.5" />
                                                 {{ $tecnicos->count() }} técnico(s)
                                             </span>
                                         @endif
@@ -201,20 +191,10 @@ new class extends Component {
                                         <button wire:click="cambiarEstado({{ $municipio->id }})"
                                             class="badge badge-sm cursor-pointer transition-all hover:scale-105 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
                                             @if ($municipio->estaActivo())
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                    class="w-3 h-3 mr-1">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                                <x-heroicon-o-check-circle class="w-3 h-3 mr-1" />
                                                 Activo
                                             @else
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                                    class="w-3 h-3 mr-1">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                                </svg>
+                                                <x-heroicon-o-no-symbol class="w-3 h-3 mr-1" />
                                                 Inactivo
                                             @endif
                                         </button>
@@ -232,13 +212,7 @@ new class extends Component {
                                     <div class="tooltip" data-tip="Ver detalles">
                                         <a href="{{ route('admin.municipios.show', $municipio->id) }}"
                                             class="btn btn-ghost btn-sm btn-square text-info" wire:navigate>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                            </svg>
+                                            <x-heroicon-o-eye class="w-5 h-5" />
                                         </a>
                                     </div>
 
@@ -247,12 +221,7 @@ new class extends Component {
                                         <div class="tooltip" data-tip="Editar contacto">
                                             <button wire:click="editar({{ $municipio->id }})"
                                                 class="btn btn-ghost btn-sm btn-square text-warning">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="w-5 h-5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                                </svg>
+                                                <x-heroicon-o-pencil-square class="w-5 h-5" />
                                             </button>
                                         </div>
                                     @endif
@@ -263,12 +232,7 @@ new class extends Component {
                         <tr>
                             <td colspan="8" class="text-center py-12">
                                 <div class="flex flex-col items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-12 h-12 text-base-content/30">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M2.25 21h19.5M3.75 3v18m16.5-18v18M5.25 3h13.5M5.25 21h13.5M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                                    </svg>
+                                    <x-heroicon-o-building-office-2 class="w-12 h-12 text-base-content/30" />
                                     <span class="text-base-content/50">No se encontraron municipios</span>
                                 </div>
                             </td>

@@ -93,11 +93,7 @@ new class extends Component {
     <div class="bg-base-200 rounded-lg p-4 mb-4">
         <div class="flex items-center gap-3">
             <div class="bg-primary/10 text-primary rounded-btn p-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M2.25 21h19.5M3.75 3v18m16.5-18v18M5.25 3h13.5M5.25 21h13.5M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-                </svg>
+                <x-heroicon-o-building-office-2 class="w-5 h-5" />
             </div>
             <div>
                 <div class="font-bold text-lg">{{ $nombre }}</div>
@@ -107,11 +103,7 @@ new class extends Component {
     </div>
 
     <p class="text-sm text-base-content/60 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-            stroke="currentColor" class="w-4 h-4 inline-block mr-1">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-        </svg>
+        <x-heroicon-o-information-circle class="w-4 h-4 inline-block mr-1" />
         Edita la información de contacto y observaciones del municipio.
     </p>
 
@@ -188,11 +180,7 @@ new class extends Component {
             </button>
             <button type="submit" class="btn btn-primary gap-2" wire:loading.attr="disabled">
                 <span wire:loading.remove wire:target="guardar">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-5 h-5">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
+                    <x-heroicon-o-check-circle class="w-5 h-5" />
                 </span>
                 <span wire:loading wire:target="guardar" class="loading loading-spinner loading-sm"></span>
                 Guardar Cambios

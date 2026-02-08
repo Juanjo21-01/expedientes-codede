@@ -473,11 +473,7 @@ new class extends Component {
                     @if ($usuarioId && $this->rolOriginal?->requiereMunicipios() && !$this->puedesCambiarRol)
                         <label class="label">
                             <span class="label-text-alt text-warning">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
+                                <x-heroicon-o-exclamation-triangle class="h-4 w-4 inline mr-1" />
                                 No se puede cambiar el rol porque este usuario tiene municipios asignados en su
                                 historial.
                             </span>
@@ -514,11 +510,7 @@ new class extends Component {
                     @if ($this->municipiosDisponiblesMunicipal->isEmpty())
                         <label class="label">
                             <span class="label-text-alt text-warning">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-1" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
+                                <x-heroicon-o-exclamation-triangle class="h-4 w-4 inline mr-1" />
                                 Todos los municipios ya tienen un usuario Municipal activo asignado.
                             </span>
                         </label>
@@ -542,11 +534,7 @@ new class extends Component {
                                     {{-- pendiente --}}
                                     <button type="button" wire:click="quitarMunicipio({{ $id }})"
                                         class="btn btn-ghost btn-xs p-0 h-auto min-h-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
+                                        <x-heroicon-o-x-mark class="h-3 w-3" />
                                     </button>
                                 </span>
                             @endforeach
@@ -602,21 +590,13 @@ new class extends Component {
                 wire:loading.attr="disabled">
                 @if ($usuarioId)
                     <span wire:loading.remove wire:target="guardar">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                        </svg>
+                        <x-heroicon-o-pencil-square class="w-5 h-5" />
                     </span>
                     <span wire:loading wire:target="guardar" class="loading loading-spinner loading-sm"></span>
                     Actualizar
                 @else
                     <span wire:loading.remove wire:target="guardar">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
+                        <x-heroicon-o-check-circle class="w-5 h-5" />
                     </span>
                     <span wire:loading wire:target="guardar" class="loading loading-spinner loading-sm"></span>
                     Guardar
