@@ -53,6 +53,29 @@
                 'dark' : 'light');
             document.documentElement.setAttribute('data-theme', theme);
             syncThemeToggles();
+            initSidebarState();
+        });
+
+        // Sidebar: recordar estado expandido/colapsado en desktop
+        function initSidebarState() {
+            if (window.innerWidth >= 1024) {
+                const toggle = document.getElementById('sidebar-drawer');
+                if (toggle && localStorage.getItem('sidebar-open') === 'true') {
+                    toggle.checked = true;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initSidebarState();
+            const toggle = document.getElementById('sidebar-drawer');
+            if (toggle) {
+                toggle.addEventListener('change', function() {
+                    if (window.innerWidth >= 1024) {
+                        localStorage.setItem('sidebar-open', this.checked);
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -73,14 +96,8 @@
                     </label>
                 </div>
 
-                <!-- Logo/Title -->
-                <div class="flex-1 px-2 mx-2">
-                    <a href="{{ route('dashboard') }}" class="btn btn-ghost text-xl gap-2">
-                        <x-heroicon-o-building-office-2 class="w-6 h-6 text-primary" />
-                        <span class="hidden sm:inline">CODEDE San Marcos</span>
-                        <span class="sm:hidden">CODEDE</span>
-                    </a>
-                </div>
+                {{-- Spacer / Breadcrumbs area --}}
+                <div class="flex-1 px-2"></div>
 
                 <div class="flex-none gap-2">
                     <!-- Dark mode toggle -->
@@ -122,9 +139,9 @@
                             </li>
                             <div class="divider my-1"></div>
                             <li>
-                                <form method="POST" action="{{ route('logout') }}" class="p-0">
+                                <form method="POST" action="{{ route('logout') }}" class="flex items-center gap-2 w-full p-0">
                                     @csrf
-                                    <button type="submit" class="flex items-center gap-2 w-full text-error">
+                                    <button type="submit" class="text-error flex items-center gap-2 w-full cursor-pointer p-2">
                                         <x-heroicon-o-arrow-left-start-on-rectangle class="w-5 h-5" />
                                         Cerrar Sesión
                                     </button>
@@ -145,136 +162,12 @@
                 </div>
             </main>
 
-            <!-- Footer -->
-            <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t border-base-300">
-                <aside>
-                    <p class="text-sm">© {{ date('Y') }} CODEDE San Marcos - Sistema de Gestión de Expedientes</p>
-                </aside>
-            </footer>
+            {{-- Footer --}}
+            @include('layouts.footer')
         </div>
 
-        <!-- Sidebar -->
-        <div class="drawer-side z-40">
-            <label for="sidebar-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-            <aside class="bg-base-100 w-72 min-h-full border-r border-base-300">
-                <!-- Sidebar Header -->
-                <div class="p-4 border-b border-base-300">
-                    <div class="flex items-center gap-3">
-                        <div class="avatar placeholder">
-                            <div
-                                class="bg-primary text-primary-content rounded-lg w-12 h-12 flex items-center justify-center">
-                                <x-heroicon-o-building-office-2 class="w-6 h-6" />
-                            </div>
-                        </div>
-                        <div>
-                            <h2 class="font-bold text-lg">CODEDE</h2>
-                            <p class="text-xs text-base-content/70">San Marcos</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Navigation Menu -->
-                <ul class="menu p-4 text-base-content">
-                    <!-- Main Menu -->
-                    <li class="menu-title">
-                        <span class="flex items-center gap-2">
-                            <x-heroicon-o-bars-3 class="w-4 h-4" />
-                            Menú Principal
-                        </span>
-                    </li>
-                    <li>
-                        <a href="{{ route('dashboard') }}" wire:navigate
-                            class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                            <x-heroicon-o-home class="w-5 h-5" />
-                            Dashboard
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="{{ request()->routeIs('expedientes.*') ? 'active' : '' }}">
-                            <x-heroicon-o-folder-open class="w-5 h-5" />
-                            Expedientes
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
-                            <x-heroicon-o-clipboard-document-list class="w-5 h-5" />
-                            Guía / Checklist
-                        </a>
-                    </li>
-
-                    @if (auth()->user()->isAdmin() || auth()->user()->isDirector())
-                        <!-- Admin Menu -->
-                        <li class="menu-title mt-4">
-                            <span class="flex items-center gap-2">
-                                <x-heroicon-o-cog-6-tooth class="w-4 h-4" />
-                                Administración
-                            </span>
-                        </li>
-                        @if (auth()->user()->isAdmin())
-                            <li>
-                                <a href="{{ route('admin.usuarios.index') }}" wire:navigate
-                                    class="{{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
-                                    <x-heroicon-o-users class="w-5 h-5" />
-                                    Usuarios
-                                </a>
-                            </li>
-                        @endif
-                        <li>
-                            <a href="{{ route('admin.municipios.index') }}" wire:navigate
-                                class="{{ request()->routeIs('admin.municipios.*') ? 'active' : '' }}">
-                                <x-heroicon-o-building-library class="w-5 h-5" />
-                                Municipalidades
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="{{ request()->routeIs('admin.guias.*') ? 'active' : '' }}">
-                                <x-heroicon-o-document-check class="w-5 h-5" />
-                                Gestión Guías
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="{{ request()->routeIs('bitacora') ? 'active' : '' }}">
-                                <x-heroicon-o-clock class="w-5 h-5" />
-                                Bitácora
-                            </a>
-                        </li>
-                    @endif
-
-                    @if (in_array(auth()->user()->role->nombre, ['Administrador', 'Director', 'Jefe Administrativo-Financiero']))
-                        <!-- Reports -->
-                        <li class="menu-title mt-4">
-                            <span class="flex items-center gap-2">
-                                <x-heroicon-o-chart-bar class="w-4 h-4" />
-                                Reportes
-                            </span>
-                        </li>
-                        <li>
-                            <a href="#" class="{{ request()->routeIs('reportes') ? 'active' : '' }}">
-                                <x-heroicon-o-document-text class="w-5 h-5" />
-                                Ver Reportes
-                            </a>
-                        </li>
-                    @endif
-                </ul>
-
-                <!-- Sidebar Footer -->
-                <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-base-300 bg-base-100">
-                    <div class="flex items-center gap-3">
-                        <div class="avatar placeholder">
-                            <div
-                                class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-                                <span class="text-sm">{{ auth()->user()->iniciales ?? 'U' }}</span>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium truncate">{{ auth()->user()->nombres ?? 'Usuario' }}</p>
-                            <p class="text-xs text-base-content/60 truncate">
-                                {{ auth()->user()->role->nombre ?? 'Sin rol' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-        </div>
+        {{-- Sidebar Navigation --}}
+        @include('layouts.navigation')
     </div>
 
     {{-- Chart.js CDN --}}

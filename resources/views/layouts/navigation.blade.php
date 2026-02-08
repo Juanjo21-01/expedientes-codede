@@ -1,68 +1,145 @@
-<!-- Navbar -->
-<nav class="navbar bg-base-100 shadow-md sticky top-0 z-30">
-    <!-- Mobile menu button -->
-    <div class="flex-none lg:hidden">
-        <label for="sidebar-drawer" class="btn btn-square btn-ghost drawer-button">
-            <x-heroicon-o-bars-3 class="w-6 h-6" />
-        </label>
-    </div>
+{{-- Sidebar Navigation (drawer-side) --}}
+{{-- Colapsable: en desktop muestra solo iconos cuando está cerrado, texto + iconos cuando está abierto --}}
+{{-- En mobile: overlay completo con hamburger menu --}}
 
-    <!-- Logo/Title -->
-    <div class="flex-1">
-        <a href="{{ route('dashboard') }}" class="btn btn-ghost text-xl gap-2">
-            <x-heroicon-o-building-office-2 class="w-6 h-6 text-primary" />
-            <span class="hidden sm:inline">CODEDE San Marcos</span>
-            <span class="sm:hidden">CODEDE</span>
-        </a>
-    </div>
+<div class="drawer-side max-lg:z-40 is-drawer-close:overflow-visible">
+    <label for="sidebar-drawer" aria-label="cerrar sidebar" class="drawer-overlay"></label>
 
-    <div class="flex-none gap-2">
-        <!-- Dark mode toggle -->
-        <label class="swap swap-rotate btn btn-ghost btn-circle">
-            <input type="checkbox" class="theme-toggle-checkbox" onclick="toggleTheme()" />
-            <!-- Sun icon -->
-            <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                    d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
-            </svg>
-            <!-- Moon icon -->
-            <svg class="swap-on fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path
-                    d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
-            </svg>
-        </label>
+    <aside
+        class="flex min-h-full flex-col bg-base-100 border-r border-base-300 is-drawer-close:w-18 is-drawer-open:w-72">
 
-        <!-- User dropdown -->
-        <div class="dropdown dropdown-end">
-            <label tabindex="0" class="btn btn-ghost btn-circle avatar placeholder">
-                <div class="bg-primary text-primary-content rounded-full w-10">
-                    <span
-                        class="text-lg font-semibold">{{ strtoupper(substr(auth()->user()->nombres ?? 'U', 0, 1)) }}</span>
+        {{-- Sidebar Header: CODEDE branding (clickable para toggle) --}}
+        <label for="sidebar-drawer"
+            class="flex items-center gap-3 p-3 pl-4 border-b border-base-300 cursor-pointer hover:bg-base-200/50 transition-colors is-drawer-close:justify-center">
+            <div class="avatar placeholder shrink-0">
+                <div class="bg-primary text-primary-content rounded-lg w-10 h-10 flex items-center justify-center">
+                    <img src="{{ asset('img/logo.png') }}" alt="CODEDE Logo" class="w-6 h-6">
                 </div>
-            </label>
-            <ul tabindex="0"
-                class="menu dropdown-content bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow-lg border border-base-300">
-                <li class="menu-title">
-                    <span class="text-xs">{{ auth()->user()->nombres ?? 'Usuario' }}</span>
+            </div>
+            <div class="is-drawer-close:hidden overflow-hidden whitespace-nowrap">
+                <h2 class="font-bold text-lg leading-tight">CODEDE</h2>
+                <p class="text-xs text-base-content/60">San Marcos</p>
+            </div>
+        </label>
+
+        {{-- Navigation Menu --}}
+        <ul class="menu p-2 flex-1 w-full [&_li>a]:gap-4">
+            {{-- Main --}}
+            <li class="menu-title is-drawer-close:hidden">
+                <span>Menú Principal</span>
+            </li>
+            <li>
+                <a href="{{ route('dashboard') }}" wire:navigate
+                    class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('dashboard') ? 'active' : '' }}"
+                    data-tip="Dashboard">
+                    <x-heroicon-o-home class="w-5 h-5 shrink-0" />
+                    <span class="is-drawer-close:hidden">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#"
+                    class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('expedientes.*') ? 'active' : '' }}"
+                    data-tip="Expedientes">
+                    <x-heroicon-o-folder-open class="w-5 h-5 shrink-0" />
+                    <span class="is-drawer-close:hidden">Expedientes</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center    "
+                    data-tip="Guía / Checklist">
+                    <x-heroicon-o-clipboard-document-list class="w-5 h-5 shrink-0" />
+                    <span class="is-drawer-close:hidden">Guía / Checklist</span>
+                </a>
+            </li>
+
+            @if (auth()->user()->isAdmin() || auth()->user()->isDirector())
+                {{-- Admin Section --}}
+                <li class="menu-title mt-4 is-drawer-close:hidden">
+                    <span>Administración</span>
                 </li>
+                {{-- Separador visual en modo colapsado --}}
+                <div class="divider my-0 is-drawer-open:hidden"></div>
+
+                @if (auth()->user()->isAdmin())
+                    <li>
+                        <a href="{{ route('admin.usuarios.index') }}" wire:navigate
+                            class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}"
+                            data-tip="Usuarios">
+                            <x-heroicon-o-users class="w-5 h-5 shrink-0" />
+                            <span class="is-drawer-close:hidden">Usuarios</span>
+                        </a>
+                    </li>
+                @endif
                 <li>
-                    <a class="flex items-center gap-2">
-                        <x-heroicon-o-user class="w-5 h-5" />
-                        Perfil
-                        <span class="badge badge-sm badge-ghost">Próximamente</span>
+                    <a href="{{ route('admin.municipios.index') }}" wire:navigate
+                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.municipios.*') ? 'active' : '' }}"
+                        data-tip="Municipalidades">
+                        <x-heroicon-o-building-library class="w-5 h-5 shrink-0" />
+                        <span class="is-drawer-close:hidden">Municipalidades</span>
                     </a>
                 </li>
-                <div class="divider my-1"></div>
                 <li>
-                    <form method="POST" action="{{ route('logout') }}" class="p-0">
-                        @csrf
-                        <button type="submit" class="flex items-center gap-2 w-full text-error">
-                            <x-heroicon-o-arrow-left-start-on-rectangle class="w-5 h-5" />
-                            Cerrar Sesión
-                        </button>
-                    </form>
+                    <a href="#"
+                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.guias.*') ? 'active' : '' }}"
+                        data-tip="Gestión Guías">
+                        <x-heroicon-o-document-check class="w-5 h-5 shrink-0" />
+                        <span class="is-drawer-close:hidden">Gestión Guías</span>
+                    </a>
                 </li>
-            </ul>
+                <li>
+                    <a href="#"
+                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('bitacora') ? 'active' : '' }}"
+                        data-tip="Bitácora">
+                        <x-heroicon-o-clock class="w-5 h-5 shrink-0" />
+                        <span class="is-drawer-close:hidden">Bitácora</span>
+                    </a>
+                </li>
+            @endif
+
+            @if (in_array(auth()->user()->role->nombre, ['Administrador', 'Director', 'Jefe Administrativo-Financiero']))
+                {{-- Reports Section --}}
+                <li class="menu-title mt-4 is-drawer-close:hidden">
+                    <span>Reportes</span>
+                </li>
+                <div class="divider my-0 is-drawer-open:hidden"></div>
+                <li>
+                    <a href="#"
+                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('reportes') ? 'active' : '' }}"
+                        data-tip="Ver Reportes">
+                        <x-heroicon-o-document-text class="w-5 h-5 shrink-0" />
+                        <span class="is-drawer-close:hidden">Ver Reportes</span>
+                    </a>
+                </li>
+            @endif
+        </ul>
+
+        {{-- Toggle expand/collapse (solo desktop) --}}
+        <div class="hidden lg:block border-t border-base-300 p-2">
+            <div class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center" data-tip="Expandir menú">
+                <label for="sidebar-drawer" class="btn btn-ghost btn-sm w-full justify-center gap-3">
+                    <x-heroicon-o-chevron-double-right
+                        class="w-4 h-4 shrink-0 is-drawer-open:rotate-180 transition-transform duration-300" />
+                    <span class="is-drawer-close:hidden">Colapsar</span>
+                </label>
+            </div>
         </div>
-    </div>
-</nav>
+
+        {{-- Sidebar Footer --}}
+        <div class="border-t border-base-300 p-2">
+
+            {{-- User Info --}}
+            <div class="flex items-center gap-3 px-2 pb-1 is-drawer-close:justify-center is-drawer-close:p-2">
+                <div class="avatar placeholder shrink-0">
+                    <div class="bg-neutral text-neutral-content rounded-full w-8 h-8 flex items-center justify-center">
+                        <span class="text-xs font-semibold">{{ auth()->user()->iniciales ?? 'U' }}</span>
+                    </div>
+                </div>
+                <div class="flex-1 min-w-0 is-drawer-close:hidden p-1">
+                    <p class="text-sm font-medium truncate">{{ auth()->user()->nombres ?? 'Usuario' }}</p>
+                    <p class="text-xs text-base-content/60 truncate">
+                        {{ auth()->user()->role->nombre ?? 'Sin rol' }}</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+</div>

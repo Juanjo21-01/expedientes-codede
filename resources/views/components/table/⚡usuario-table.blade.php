@@ -154,18 +154,17 @@ new class extends Component {
 
 <div>
     <!-- Tabla -->
-    <div class="card bg-base-100 shadow-sm border border-base-300">
-        <div class="overflow-x-auto">
-            <table class="table table-zebra table-pin-rows">
+    <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+        <table class="table table-zebra table-sm">
                 <thead>
                     <tr class="bg-base-200">
-                        <th class="text-center">No.</th>
-                        <th>Usuario</th>
-                        <th>Correo Electrónico</th>
-                        <th class="text-center">Rol</th>
-                        <th class="text-center">Municipios</th>
-                        <th class="text-center">Estado</th>
-                        <th class="text-center">Acciones</th>
+                        <th class="text-center w-12">No.</th>
+                        <th class="min-w-48">Usuario</th>
+                        <th class="min-w-40">Correo Electrónico</th>
+                        <th class="text-center whitespace-nowrap">Rol</th>
+                        <th class="text-center min-w-32">Municipios</th>
+                        <th class="text-center whitespace-nowrap">Estado</th>
+                        <th class="text-center whitespace-nowrap">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -188,7 +187,7 @@ new class extends Component {
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            <td class="whitespace-nowrap">
                                 <span class="text-sm">{{ $usuario->email }}</span>
                             </td>
                             <td class="text-center">
@@ -204,7 +203,7 @@ new class extends Component {
                             </td>
                             <td class="text-center">
                                 @if ($usuario->municipios->isNotEmpty())
-                                    <span class="text-xs">{{ $usuario->municipios->pluck('nombre')->join(', ') }}</span>
+                                    <span class="text-xs max-w-40 truncate inline-block">{{ $usuario->municipios->pluck('nombre')->join(', ') }}</span>
                                 @else
                                     <span class="text-base-content/40">—</span>
                                 @endif
@@ -213,19 +212,16 @@ new class extends Component {
                                 <div class="tooltip" data-tip="Cambiar estado">
                                     @if ($usuario->isAdmin())
                                         <span class="badge badge-success badge-sm gap-1">
-                                            <x-heroicon-o-check-circle class="w-3 h-3" />
+                                            <div class="status status-success status-xs"></div>
                                             Activo
                                         </span>
                                     @else
                                         <button wire:click="cambiarEstado({{ $usuario->id }})"
-                                            class="badge badge-sm cursor-pointer transition-all hover:scale-105 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
-                                            @if ($usuario->estaActivo())
-                                                <x-heroicon-o-check-circle class="w-3 h-3 mr-1" />
-                                                Activo
-                                            @else
-                                                <x-heroicon-o-no-symbol class="w-3 h-3 mr-1" />
-                                                Inactivo
-                                            @endif
+                                            class="badge badge-sm cursor-pointer transition-all hover:scale-105 gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                                            <div
+                                                class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
+                                            </div>
+                                            {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
                                         </button>
                                     @endif
                                 </div>
@@ -272,12 +268,11 @@ new class extends Component {
                     @endforelse
                 </tbody>
             </table>
-        </div>
-
-        <!-- Paginación -->
-        @if ($this->usuarios->hasPages())
-            <div class="border-t border-base-300 px-4 py-3 bg-base-200/50">
-                {{ $this->usuarios->links() }}
-            </div>
-        @endif
     </div>
+
+    <!-- Paginación -->
+    @if ($this->usuarios->hasPages())
+        <div class="px-4 py-3">
+            {{ $this->usuarios->links() }}
+        </div>
+    @endif

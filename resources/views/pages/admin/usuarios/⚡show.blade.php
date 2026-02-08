@@ -111,22 +111,24 @@ new #[Title('- Detalle Usuario')] class extends Component {
 
 <div class="space-y-6">
     {{-- Breadcrumbs de navegación --}}
-    <div class="breadcrumbs text-sm">
+    <div class="breadcrumbs text-sm font-medium">
         <ul>
             <li>
-                <a href="{{ route('dashboard') }}" wire:navigate class="gap-1">
+                <a href="{{ route('dashboard') }}" wire:navigate
+                    class="gap-1 text-base-content/60 hover:text-primary transition-colors">
                     <x-heroicon-o-home class="w-4 h-4" />
                     Inicio
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.usuarios.index') }}" wire:navigate class="gap-1">
+                <a href="{{ route('admin.usuarios.index') }}" wire:navigate
+                    class="gap-1 text-base-content/60 hover:text-primary transition-colors">
                     <x-heroicon-o-users class="w-4 h-4" />
                     Usuarios
                 </a>
             </li>
             <li>
-                <span class="inline-flex items-center gap-1 font-medium">
+                <span class="inline-flex items-center gap-1 text-primary">
                     <x-heroicon-o-user class="w-4 h-4" />
                     {{ $usuario->nombre_completo }}
                 </span>
@@ -144,8 +146,16 @@ new #[Title('- Detalle Usuario')] class extends Component {
             <div class="flex flex-col sm:flex-row items-center gap-6">
                 {{-- Avatar con indicador de estado --}}
                 <div class="indicator">
-                    <span
-                        class="indicator-item indicator-bottom indicator-end badge {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }} badge-sm"></span>
+                    <span class="indicator-item indicator-bottom indicator-end">
+                        <div class="inline-grid *:[grid-area:1/1]">
+                            @if ($usuario->estaActivo())
+                                <div class="status status-success animate-ping"></div>
+                                <div class="status status-success"></div>
+                            @else
+                                <div class="status status-error"></div>
+                            @endif
+                        </div>
+                    </span>
                     <div class="avatar placeholder">
                         <div
                             class="bg-primary text-primary-content rounded-full w-28 h-28 ring-4 ring-base-100 shadow-lg flex justify-center items-center">
@@ -178,10 +188,15 @@ new #[Title('- Detalle Usuario')] class extends Component {
                             {{ $usuario->role->nombre }}
                         </div>
                         <div
-                            class="badge badge-lg gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
-                            @if ($usuario->estaActivo())
-                                <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
-                            @endif
+                            class="badge badge-lg gap-2 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                            <div class="inline-grid *:[grid-area:1/1]">
+                                @if ($usuario->estaActivo())
+                                    <div class="status status-success animate-ping"></div>
+                                    <div class="status status-success"></div>
+                                @else
+                                    <div class="status status-error"></div>
+                                @endif
+                            </div>
                             {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
                         </div>
                     </div>
@@ -284,14 +299,14 @@ new #[Title('- Detalle Usuario')] class extends Component {
                 </h2>
                 <div class="flex flex-wrap gap-2 mt-3">
                     @foreach ($usuario->municipios as $municipio)
-                        <span
-                            class="badge badge-outline badge-lg gap-4 hover:badge-primary transition-colors cursor-default">
-                            <a href="{{ route('admin.municipios.show', $municipio->id) }}" wire:navigate
-                                class="flex w-full justify-between align-content-center" title="Ver perfil">
-                                <x-heroicon-o-map-pin class="w-3 h-3" />
+                        <a href="{{ route('admin.municipios.show', $municipio->id) }}" wire:navigate
+                            class="badge badge-outline badge-lg gap-4 hover:badge-primary transition-colors cursor-pointer flex justify-between align-content-center"
+                            title="Ver Municipio">
+                            <x-heroicon-o-map-pin class="w-4 h-4" />
+                            <span class="">
                                 {{ $municipio->nombre }}
-                            </a>
-                        </span>
+                            </span>
+                        </a>
                     @endforeach
                 </div>
             </div>

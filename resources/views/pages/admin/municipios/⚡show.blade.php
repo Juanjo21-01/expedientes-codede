@@ -182,23 +182,25 @@ new #[Title('- Detalle Municipio')] class extends Component {
 ?>
 
 <div class="space-y-6">
-    {{-- Breadcrumbs --}}}
-    <div class="breadcrumbs text-sm">
+    {{-- Breadcrumbs --}}
+    <div class="breadcrumbs text-sm font-medium">
         <ul>
             <li>
-                <a href="{{ route('dashboard') }}" wire:navigate class="gap-1">
+                <a href="{{ route('dashboard') }}" wire:navigate
+                    class="gap-1 text-base-content/60 hover:text-primary transition-colors">
                     <x-heroicon-o-home class="w-4 h-4" />
                     Inicio
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.municipios.index') }}" wire:navigate class="gap-1">
+                <a href="{{ route('admin.municipios.index') }}" wire:navigate
+                    class="gap-1 text-base-content/60 hover:text-primary transition-colors">
                     <x-heroicon-o-building-library class="w-4 h-4" />
                     Municipios
                 </a>
             </li>
             <li>
-                <span class="inline-flex items-center gap-1 font-medium">
+                <span class="inline-flex items-center gap-1 text-primary">
                     <x-heroicon-o-map-pin class="w-4 h-4" />
                     {{ $municipio->nombre }}
                 </span>
@@ -215,8 +217,16 @@ new #[Title('- Detalle Municipio')] class extends Component {
             <div class="flex flex-col sm:flex-row items-center gap-6">
                 {{-- Ícono del municipio --}}
                 <div class="indicator">
-                    <span
-                        class="indicator-item indicator-bottom indicator-end badge {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }} badge-sm"></span>
+                    <span class="indicator-item indicator-bottom indicator-end">
+                        <div class="inline-grid *:[grid-area:1/1]">
+                            @if ($municipio->estaActivo())
+                                <div class="status status-success animate-ping"></div>
+                                <div class="status status-success"></div>
+                            @else
+                                <div class="status status-error"></div>
+                            @endif
+                        </div>
+                    </span>
                     <div
                         class="bg-primary text-primary-content rounded-full w-24 h-24 ring-4 ring-base-100 shadow-lg flex justify-center items-center">
                         <x-heroicon-o-building-office-2 class="w-12 h-12" />
@@ -230,10 +240,15 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
                     <div class="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
                         <div
-                            class="badge badge-lg gap-1 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
-                            @if ($municipio->estaActivo())
-                                <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
-                            @endif
+                            class="badge badge-lg gap-2 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                            <div class="inline-grid *:[grid-area:1/1]">
+                                @if ($municipio->estaActivo())
+                                    <div class="status status-success animate-ping"></div>
+                                    <div class="status status-success"></div>
+                                @else
+                                    <div class="status status-error"></div>
+                                @endif
+                            </div>
                             {{ $municipio->estaActivo() ? 'Activo' : 'Inactivo' }}
                         </div>
                         @if ($municipio->tieneContactoCompleto())
@@ -474,8 +489,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                     Expedientes por Año
                 </h2>
 
-                <select wire:model.live="anioFiltro"
-                    class="select select-bordered select-sm focus:select-primary w-32">
+                <select wire:model.live="anioFiltro" class="select select-sm w-32">
                     @foreach ($this->aniosDisponibles as $anio)
                         <option value="{{ $anio }}">{{ $anio }}</option>
                     @endforeach

@@ -72,17 +72,18 @@
         <div class="w-full max-w-md">
             <!-- Logo/Brand -->
             <div class="text-center mb-8">
-                <div class="flex justify-center mb-4">
-                    <img src="{{ asset('img/logo.png') }}" alt="CODEDE Logo"
-                        class="w-16 h-16 object-contain rounded-full">
+                <div class="avatar placeholder shrink-0 mb-4">
+                    <div class="bg-primary text-primary-content rounded-lg w-16 h-16 flex items-center justify-center">
+                        <img src="{{ asset('img/logo.png') }}" alt="CODEDE Logo" class="w-16 h-16">
+                    </div>
                 </div>
                 <h1 class="text-2xl font-bold text-base-content">CODEDE San Marcos</h1>
                 <p class="text-base-content/60 text-sm mt-1">Sistema de Gestión de Expedientes</p>
             </div>
 
             <!-- Card -->
-            <div class="card bg-base-100 shadow-xl border border-base-300">
-                <div class="card-body">
+            <div class="card bg-base-200 shadow-xl border border-base-300">
+                <div class="card-body border-b border-base-300">
                     {{ $slot }}
                 </div>
             </div>

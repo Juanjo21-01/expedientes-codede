@@ -106,19 +106,15 @@ new class extends Component {
                     </div>
 
                     <form wire:submit.prevent="eliminar">
-                        <div class="form-control mb-4">
-                            <label class="label">
-                                <span class="label-text">Ingresa tu contraseña para confirmar</span>
-                            </label>
+                        <fieldset class="fieldset mb-4">
+                            <legend class="fieldset-legend">Ingresa tu contraseña para confirmar</legend>
                             <input type="password" wire:model="passwordConfirm"
                                 wire:keydown="clearError('passwordConfirm')" placeholder="Tu contraseña"
-                                class="input input-bordered w-full @error('passwordConfirm') input-error @enderror" />
+                                class="input w-full @error('passwordConfirm') input-error @enderror" />
                             @error('passwordConfirm')
-                                <label class="label">
-                                    <span class="label-text-alt text-error">{{ $message }}</span>
-                                </label>
+                                <p class="label text-error">{{ $message }}</p>
                             @enderror
-                        </div>
+                        </fieldset>
 
                         <div class="modal-action">
                             <button type="button" wire:click="cerrarModal" class="btn btn-ghost">

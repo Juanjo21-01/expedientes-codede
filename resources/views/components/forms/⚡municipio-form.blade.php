@@ -12,9 +12,9 @@ new class extends Component {
     public $departamento = '';
 
     // Campos editables
-    public $contacto_nombre = '';
-    public $contacto_email = '';
-    public $contacto_telefono = '';
+    public $contactoNombre = '';
+    public $contactoEmail = '';
+    public $contactoTelefono = '';
     public $observaciones = '';
 
     // Mount: cargar municipio
@@ -35,9 +35,9 @@ new class extends Component {
         if ($municipio) {
             $this->nombre = $municipio->nombre;
             $this->departamento = $municipio->departamento;
-            $this->contacto_nombre = $municipio->contacto_nombre ?? '';
-            $this->contacto_email = $municipio->contacto_email ?? '';
-            $this->contacto_telefono = $municipio->contacto_telefono ?? '';
+            $this->contactoNombre = $municipio->contacto_nombre ?? '';
+            $this->contactoEmail = $municipio->contacto_email ?? '';
+            $this->contactoTelefono = $municipio->contacto_telefono ?? '';
             $this->observaciones = $municipio->observaciones ?? '';
         }
     }
@@ -47,15 +47,15 @@ new class extends Component {
     {
         $this->validate(
             [
-                'contacto_nombre' => 'nullable|string|max:100',
-                'contacto_email' => 'nullable|email|max:255',
-                'contacto_telefono' => 'nullable|string|max:8',
+                'contactoNombre' => 'nullable|string|max:100',
+                'contactoEmail' => 'nullable|email|max:255',
+                'contactoTelefono' => 'nullable|string|max:8',
                 'observaciones' => 'nullable|string|max:1000',
             ],
             [
-                'contacto_email.email' => 'El correo de contacto debe ser válido.',
-                'contacto_nombre.max' => 'El nombre de contacto no debe exceder 100 caracteres.',
-                'contacto_telefono.max' => 'El teléfono debe tener máximo 8 dígitos.',
+                'contactoEmail.email' => 'El correo de contacto debe ser válido.',
+                'contactoNombre.max' => 'El nombre de contacto no debe exceder 100 caracteres.',
+                'contactoTelefono.max' => 'El teléfono debe tener máximo 8 dígitos.',
                 'observaciones.max' => 'Las observaciones no deben exceder 1000 caracteres.',
             ],
         );
@@ -69,9 +69,9 @@ new class extends Component {
         }
 
         $municipio->update([
-            'contacto_nombre' => $this->contacto_nombre ?: null,
-            'contacto_email' => $this->contacto_email ?: null,
-            'contacto_telefono' => $this->contacto_telefono ?: null,
+            'contacto_nombre' => $this->contactoNombre ?: null,
+            'contacto_email' => $this->contactoEmail ?: null,
+            'contacto_telefono' => $this->contactoTelefono ?: null,
             'observaciones' => $this->observaciones ?: null,
         ]);
 
@@ -110,67 +110,51 @@ new class extends Component {
     <!-- Formulario -->
     <form wire:submit="guardar" class="space-y-4">
         <!-- Nombre de contacto -->
-        <div class="form-control w-full">
-            <label class="label">
-                <span class="label-text font-medium">Nombre de Contacto</span>
-            </label>
-            <input type="text" wire:model="contacto_nombre"
-                class="input input-bordered w-full focus:input-primary transition-colors @error('contacto_nombre') input-error @enderror"
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">Nombre de Contacto</legend>
+            <input type="text" wire:model="contactoNombre"
+                class="input w-full @error('contactoNombre') input-error @enderror"
                 placeholder="Nombre del contacto municipal" maxlength="100" />
-            @error('contacto_nombre')
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ $message }}</span>
-                </label>
+            @error('contactoNombre')
+                <p class="label text-error">{{ $message }}</p>
             @enderror
-        </div>
+        </fieldset>
 
         <!-- Email de contacto -->
-        <div class="form-control w-full">
-            <label class="label">
-                <span class="label-text font-medium">Correo Electrónico</span>
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">Correo Electrónico</legend>
+            <label class="input w-full @error('contactoEmail') input-error @enderror">
+                <x-heroicon-o-envelope class="h-[1em] opacity-50" />
+                <input type="email" wire:model="contactoEmail" class="grow" placeholder="correo@ejemplo.com" />
             </label>
-            <input type="email" wire:model="contacto_email"
-                class="input input-bordered w-full focus:input-primary transition-colors @error('contacto_email') input-error @enderror"
-                placeholder="correo@ejemplo.com" />
-            @error('contacto_email')
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ $message }}</span>
-                </label>
+            @error('contactoEmail')
+                <p class="label text-error">{{ $message }}</p>
             @enderror
-        </div>
+        </fieldset>
 
         <!-- Teléfono de contacto -->
-        <div class="form-control w-full">
-            <label class="label">
-                <span class="label-text font-medium">Teléfono</span>
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">Teléfono</legend>
+            <label class="input w-full @error('contactoTelefono') input-error @enderror">
+                <x-heroicon-o-phone class="h-[1em] opacity-50" />
+                <input type="text" wire:model="contactoTelefono" class="grow" placeholder="12345678"
+                    maxlength="8" />
             </label>
-            <input type="text" wire:model="contacto_telefono"
-                class="input input-bordered w-full focus:input-primary transition-colors @error('contacto_telefono') input-error @enderror"
-                placeholder="12345678" maxlength="8" />
-            @error('contacto_telefono')
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ $message }}</span>
-                </label>
+            @error('contactoTelefono')
+                <p class="label text-error">{{ $message }}</p>
             @enderror
-        </div>
+        </fieldset>
 
         <!-- Observaciones -->
-        <div class="form-control w-full">
-            <label class="label">
-                <span class="label-text font-medium">Observaciones</span>
-            </label>
-            <textarea wire:model="observaciones"
-                class="textarea textarea-bordered w-full focus:textarea-primary transition-colors @error('observaciones') textarea-error @enderror"
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend">Observaciones</legend>
+            <textarea wire:model="observaciones" class="textarea w-full h-24 @error('observaciones') textarea-error @enderror"
                 placeholder="Observaciones adicionales sobre el municipio..." rows="3" maxlength="1000"></textarea>
             @error('observaciones')
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ $message }}</span>
-                </label>
+                <p class="label text-error">{{ $message }}</p>
             @enderror
-            <label class="label">
-                <span class="label-text-alt text-base-content/50">{{ strlen($observaciones) }}/1000 caracteres</span>
-            </label>
-        </div>
+            <p class="label text-base-content/50">{{ strlen($observaciones) }}/1000 caracteres</p>
+        </fieldset>
 
         <!-- Botones -->
         <div class="divider my-2"></div>

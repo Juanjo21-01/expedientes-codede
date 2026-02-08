@@ -341,109 +341,76 @@ new class extends Component {
     <form wire:submit="guardar" class="p-4 pt-2">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Nombres -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text">Nombres <span class="text-error">*</span></span>
-                </label>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Nombres <span class="text-error">*</span></legend>
                 <input type="text" wire:model="nombres" wire:keydown="clearError('nombres')"
-                    placeholder="Ingrese los nombres"
-                    class="input input-bordered w-full @error('nombres') input-error @enderror" />
+                    placeholder="Ingrese los nombres" class="input w-full @error('nombres') input-error @enderror" />
                 @error('nombres')
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ $message }}</span>
-                    </label>
+                    <p class="label text-error">{{ $message }}</p>
                 @enderror
-            </div>
+            </fieldset>
 
             <!-- Apellidos -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text">Apellidos <span class="text-error">*</span></span>
-                </label>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Apellidos <span class="text-error">*</span></legend>
                 <input type="text" wire:model="apellidos" wire:keydown="clearError('apellidos')"
                     placeholder="Ingrese los apellidos"
-                    class="input input-bordered w-full @error('apellidos') input-error @enderror" />
+                    class="input w-full @error('apellidos') input-error @enderror" />
                 @error('apellidos')
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ $message }}</span>
-                    </label>
+                    <p class="label text-error">{{ $message }}</p>
                 @enderror
-            </div>
+            </fieldset>
 
             <!-- Cargo -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text">Cargo</span>
-                    <span class="label-text-alt text-base-content/50">Opcional</span>
-                </label>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Cargo</legend>
                 <input type="text" wire:model="cargo" placeholder="Ej: Coordinador de Proyectos"
-                    class="input input-bordered w-full" />
-            </div>
+                    class="input w-full" />
+                <p class="label text-base-content/50">Opcional</p>
+            </fieldset>
 
             <!-- Teléfono -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text">Teléfono</span>
-                    <span class="label-text-alt text-base-content/50">8 dígitos</span>
-                </label>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Teléfono</legend>
                 <input type="text" wire:model="telefono" maxlength="8" placeholder="12345678"
-                    class="input input-bordered w-full" />
-            </div>
+                    class="input w-full" />
+                <p class="label text-base-content/50">8 dígitos</p>
+            </fieldset>
 
             <!-- Email -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text">Correo Electrónico <span class="text-error">*</span></span>
-                </label>
-                <label class="input input-bordered flex items-center gap-2 @error('email') input-error @enderror">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                        class="w-4 h-4 opacity-70">
-                        <path
-                            d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
-                        <path
-                            d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
-                    </svg>
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Correo Electrónico <span class="text-error">*</span></legend>
+                <label class="input w-full @error('email') input-error @enderror">
+                    <x-heroicon-o-envelope class="h-[1em] opacity-50" />
                     <input type="email" wire:model="email" wire:keydown="clearError('email')" class="grow"
                         placeholder="correo@ejemplo.com" />
                 </label>
                 @error('email')
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ $message }}</span>
-                    </label>
+                    <p class="label text-error">{{ $message }}</p>
                 @enderror
-            </div>
+            </fieldset>
 
             @if (!$this->rolSeleccionado?->esAdmin())
                 <!-- Contraseña -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text">
-                            Contraseña
-                            @if (!$usuarioId)
-                                <span class="text-error">*</span>
-                            @endif
-                        </span>
-                        @if ($usuarioId)
-                            <span class="label-text-alt text-base-content/50">Dejar vacío para mantener</span>
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">
+                        Contraseña
+                        @if (!$usuarioId)
+                            <span class="text-error">*</span>
                         @endif
-                    </label>
-                    <label
-                        class="input input-bordered flex items-center gap-2 @error('password') input-error @enderror">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor"
-                            class="w-4 h-4 opacity-70">
-                            <path fill-rule="evenodd"
-                                d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
-                                clip-rule="evenodd" />
-                        </svg>
+                    </legend>
+                    <label class="input w-full @error('password') input-error @enderror">
+                        <x-heroicon-o-key class="h-[1em] opacity-50" />
                         <input type="password" wire:model="password" wire:keydown="clearError('password')"
                             class="grow" placeholder="Mínimo 8 caracteres" />
                     </label>
+                    @if ($usuarioId)
+                        <p class="label text-base-content/50">Dejar vacío para mantener</p>
+                    @endif
                     @error('password')
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </label>
+                        <p class="label text-error">{{ $message }}</p>
                     @enderror
-                </div>
+                </fieldset>
 
                 <!-- Rol -->
                 <fieldset class="fieldset">
@@ -451,7 +418,7 @@ new class extends Component {
                         Rol<span class="text-error">*</span>
                     </legend>
                     <select wire:model.live="roleId" wire:change="clearError('roleId')"
-                        class="select select-bordered w-full @error('roleId') select-error @enderror"
+                        class="select w-full @error('roleId') select-error @enderror"
                         @if ($usuarioId && $this->rolOriginal?->requiereMunicipios() && !$this->puedesCambiarRol) disabled @endif>
                         <option value="" disabled selected>Seleccione un rol</option>
                         @foreach ($this->roles as $rol)
@@ -466,18 +433,14 @@ new class extends Component {
                         @endforeach
                     </select>
                     @error('roleId')
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </label>
+                        <p class="label text-error">{{ $message }}</p>
                     @enderror
                     @if ($usuarioId && $this->rolOriginal?->requiereMunicipios() && !$this->puedesCambiarRol)
-                        <label class="label">
-                            <span class="label-text-alt text-warning">
-                                <x-heroicon-o-exclamation-triangle class="h-4 w-4 inline mr-1" />
-                                No se puede cambiar el rol porque este usuario tiene municipios asignados en su
-                                historial.
-                            </span>
-                        </label>
+                        <p class="label text-warning">
+                            <x-heroicon-o-exclamation-triangle class="h-4 w-4 inline mr-1" />
+                            No se puede cambiar el rol porque este usuario tiene municipios asignados en su
+                            historial.
+                        </p>
                     @endif
                 </fieldset>
             @endif
@@ -486,43 +449,34 @@ new class extends Component {
 
         <!-- Municipios (solo para Técnico y Municipal) -->
         @if ($this->rolSeleccionado?->requiereMunicipios())
-            <div class="form-control w-full mt-4">
+            <fieldset class="fieldset mt-4">
                 @if ($this->rolSeleccionado->esMunicipal())
                     {{-- Select simple para Municipal --}}
-                    <label class="label">
-                        <span class="label-text">
-                            Municipio <span class="text-error">*</span>
-                        </span>
-                        <span class="label-text-alt text-base-content/50">Solo 1 municipio</span>
-                    </label>
+                    <legend class="fieldset-legend">
+                        Municipio <span class="text-error">*</span>
+                    </legend>
                     <select wire:model="municipioSeleccionado"
-                        class="select select-bordered w-full @error('municipioSeleccionado') select-error @enderror">
+                        class="select w-full @error('municipioSeleccionado') select-error @enderror">
                         <option value="">Seleccione un municipio</option>
                         @foreach ($this->municipiosDisponiblesMunicipal as $municipio)
                             <option value="{{ $municipio->id }}">{{ $municipio->nombre }}</option>
                         @endforeach
                     </select>
+                    <p class="label text-base-content/50">Solo 1 municipio</p>
                     @error('municipioSeleccionado')
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </label>
+                        <p class="label text-error">{{ $message }}</p>
                     @enderror
                     @if ($this->municipiosDisponiblesMunicipal->isEmpty())
-                        <label class="label">
-                            <span class="label-text-alt text-warning">
-                                <x-heroicon-o-exclamation-triangle class="h-4 w-4 inline mr-1" />
-                                Todos los municipios ya tienen un usuario Municipal activo asignado.
-                            </span>
-                        </label>
+                        <p class="label text-warning">
+                            <x-heroicon-o-exclamation-triangle class="h-4 w-4 inline mr-1" />
+                            Todos los municipios ya tienen un usuario Municipal activo asignado.
+                        </p>
                     @endif
                 @else
                     {{-- Checkboxes para Técnico --}}
-                    <label class="label">
-                        <span class="label-text">
-                            Municipios Asignados <span class="text-error">*</span>
-                        </span>
-                        <span class="label-text-alt text-base-content/50">Seleccione uno o varios</span>
-                    </label>
+                    <legend class="fieldset-legend">
+                        Municipios Asignados <span class="text-error">*</span>
+                    </legend>
 
                     {{-- Badges de municipios seleccionados --}}
                     @if (!empty($this->nombresMunicipiosSeleccionados))
@@ -564,20 +518,15 @@ new class extends Component {
                         </div>
                     </div>
                     @error('municipiosSeleccionados')
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ $message }}</span>
-                        </label>
+                        <p class="label text-error">{{ $message }}</p>
                     @enderror
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/50">
-                            {{ count($this->municipiosSeleccionados) }} municipio(s) seleccionado(s)
-                        </span>
-                        <span class="label-text-alt text-warning text-xs">
-                            Los municipios tachados ya están asignados a otro Técnico activo
-                        </span>
-                    </label>
+                    <p class="label text-base-content/50">
+                        {{ count($this->municipiosSeleccionados) }} municipio(s) seleccionado(s)
+                        — <span class="text-warning text-xs">Los municipios tachados ya están asignados a otro Técnico
+                            activo</span>
+                    </p>
                 @endif
-            </div>
+            </fieldset>
         @endif
 
         <!-- Botones -->

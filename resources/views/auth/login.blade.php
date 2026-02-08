@@ -1,6 +1,5 @@
-
 <x-layouts::guest :title="__('Login')">
-    <div class="card w-96 bg-base-100 shadow-xl">
+    <div class="card w-96 bg-base-100 shadow-xl border border-base-300">
         <div class="card-body">
             <h2 class="card-title justify-center mb-6">CODEDE - Iniciar Sesión</h2>
 
@@ -14,35 +13,31 @@
             <form method="POST" action="{{ route('login.store') }}">
                 @csrf
 
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Email</span>
-                    </label>
-                    <input type="email" name="email" value="{{ old('email') }}" class="input input-bordered" required
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Email</legend>
+                    <input type="email" name="email" value="{{ old('email') }}" class="input w-full" required
                         autofocus />
                     @error('email')
-                        <span class="text-error text-sm mt-1">{{ $message }}</span>
+                        <p class="label text-error">{{ $message }}</p>
                     @enderror
-                </div>
+                </fieldset>
 
-                <div class="form-control mt-4">
-                    <label class="label">
-                        <span class="label-text">Contraseña</span>
-                    </label>
-                    <input type="password" name="password" class="input input-bordered" required />
+                <fieldset class="fieldset mt-4">
+                    <legend class="fieldset-legend">Contraseña</legend>
+                    <input type="password" name="password" class="input w-full" required />
                     @error('password')
-                        <span class="text-error text-sm mt-1">{{ $message }}</span>
+                        <p class="label text-error">{{ $message }}</p>
                     @enderror
-                </div>
+                </fieldset>
 
-                <div class="form-control mt-4">
-                    <label class="cursor-pointer label justify-start">
+                <div class="mt-4">
+                    <label class="cursor-pointer flex items-center gap-2">
                         <input type="checkbox" name="remember" class="checkbox checkbox-primary" />
-                        <span class="label-text ml-2">Recordarme</span>
+                        <span class="label">Recordarme</span>
                     </label>
                 </div>
 
-                <div class="form-control mt-6">
+                <div class="mt-6">
                     <button type="submit" class="btn btn-primary w-full">Iniciar Sesión</button>
                 </div>
 
