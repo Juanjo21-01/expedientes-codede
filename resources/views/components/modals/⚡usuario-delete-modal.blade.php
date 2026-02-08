@@ -12,8 +12,7 @@ new class extends Component {
     public $usuarioEliminar = null;
     public $passwordConfirm = '';
 
-    // Escuchar evento para abrir modal
-    #[On('abrir-modal-eliminar')]
+    // Abrir modal (llamado desde Alpine.js x-on)
     public function abrirModal($usuarioId)
     {
         $this->usuarioEliminar = User::find($usuarioId);
@@ -75,7 +74,7 @@ new class extends Component {
 };
 ?>
 
-<div>
+<div x-on:abrir-modal-eliminar.window="$wire.abrirModal($event.detail.usuarioId)">
     @if ($show && $usuarioEliminar)
         <div class="modal modal-open">
             <div class="modal-box" wire:click.stop>

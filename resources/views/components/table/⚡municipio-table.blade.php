@@ -76,12 +76,8 @@ new class extends Component {
         $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: "Estado de '{$municipio->nombre}' actualizado correctamente.");
     }
 
-    // Emitir evento para editar (solo Admin)
-    public function editar($id)
-    {
-        abort_unless(auth()->user()->isAdmin(), 403);
-        $this->dispatch('abrir-modal-municipio', municipioId: $id);
-    }
+    // El evento para abrir modal se despacha directamente desde Alpine.js
+    // en el template con $dispatch(), para compatibilidad con wire:navigate
 
     // Reset página cuando cambian filtros
     public function updatedSearch()
@@ -216,7 +212,8 @@ new class extends Component {
                                 <!-- Editar -->
                                 @if (auth()->user()->isAdmin())
                                     <div class="tooltip" data-tip="Editar contacto">
-                                        <button wire:click="editar({{ $municipio->id }})"
+                                        <button
+                                            @click="$dispatch('abrir-modal-municipio', { municipioId: {{ $municipio->id }} })"
                                             class="btn btn-ghost btn-sm btn-square text-warning">
                                             <x-heroicon-o-pencil-square class="w-5 h-5" />
                                         </button>

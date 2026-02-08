@@ -16,12 +16,6 @@ new #[Title('- Usuarios')] class extends Component {
     {
         return Role::all();
     }
-
-    // Abrir modal para crear usuario
-    public function crear()
-    {
-        $this->dispatch('crear-usuario');
-    }
 };
 ?>
 
@@ -38,7 +32,8 @@ new #[Title('- Usuarios')] class extends Component {
             <p class="text-base-content/60 text-sm mt-1">Administra los usuarios del sistema</p>
         </div>
 
-        <button wire:click="crear" class="btn btn-primary gap-2 shadow-md hover:shadow-lg transition-shadow">
+        <button @click="$dispatch('crear-usuario')"
+            class="btn btn-primary gap-2 shadow-md hover:shadow-lg transition-shadow">
             <x-heroicon-o-user-plus class="w-5 h-5" />
             Nuevo Usuario
         </button>

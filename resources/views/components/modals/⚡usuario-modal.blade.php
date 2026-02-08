@@ -8,23 +8,21 @@ new class extends Component {
     public $show = false;
     public $usuarioId = null;
 
-    // Escuchar evento para crear (sin ID)
-    #[On('crear-usuario')]
+    // Crear usuario (sin ID)
     public function crearUsuario()
     {
         $this->usuarioId = null;
         $this->show = true;
     }
 
-    // Escuchar evento para abrir modal con ID (editar)
-    #[On('abrir-modal-usuario')]
+    // Abrir modal con ID (editar)
     public function abrirModal($usuarioId = null)
     {
         $this->usuarioId = $usuarioId;
         $this->show = true;
     }
 
-    // Escuchar evento para cerrar modal
+    // Cerrar modal (escucha evento Livewire del formulario hijo)
     #[On('cerrar-modal-usuario')]
     public function cerrarModal()
     {
@@ -34,7 +32,8 @@ new class extends Component {
 };
 ?>
 
-<div>
+<div x-on:crear-usuario.window="$wire.crearUsuario()"
+    x-on:abrir-modal-usuario.window="$wire.abrirModal($event.detail.usuarioId)">
     @if ($show)
         <div class="modal modal-open">
             <div class="modal-box w-11/12 max-w-2xl" wire:click.stop>

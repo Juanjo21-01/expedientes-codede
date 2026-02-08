@@ -8,15 +8,14 @@ new class extends Component {
     public $show = false;
     public $municipioId = null;
 
-    // Escuchar evento para abrir modal con ID (editar)
-    #[On('abrir-modal-municipio')]
+    // Abrir modal con ID (editar)
     public function abrirModal($municipioId)
     {
         $this->municipioId = $municipioId;
         $this->show = true;
     }
 
-    // Escuchar evento para cerrar modal
+    // Cerrar modal (escucha evento Livewire del formulario hijo)
     #[On('cerrar-modal-municipio')]
     public function cerrarModal()
     {
@@ -26,7 +25,7 @@ new class extends Component {
 };
 ?>
 
-<div>
+<div x-on:abrir-modal-municipio.window="$wire.abrirModal($event.detail.municipioId)">
     @if ($show)
         <div class="modal modal-open">
             <div class="modal-box w-11/12 max-w-xl" wire:click.stop>

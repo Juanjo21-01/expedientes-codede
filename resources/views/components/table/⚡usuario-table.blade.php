@@ -127,17 +127,8 @@ new class extends Component {
         $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: 'Estado actualizado correctamente.');
     }
 
-    // Emitir evento para editar
-    public function editar($id)
-    {
-        $this->dispatch('abrir-modal-usuario', usuarioId: $id);
-    }
-
-    // Emitir evento para eliminar
-    public function confirmarEliminar($id)
-    {
-        $this->dispatch('abrir-modal-eliminar', usuarioId: $id);
-    }
+    // Los eventos para abrir modales se despachan directamente desde Alpine.js
+    // en el template con $dispatch(), para compatibilidad con wire:navigate
 
     // Reset página cuando cambian filtros
     public function updatedSearch()
@@ -156,118 +147,121 @@ new class extends Component {
     <!-- Tabla -->
     <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
         <table class="table table-zebra table-sm">
-                <thead>
-                    <tr class="bg-base-200">
-                        <th class="text-center w-12">No.</th>
-                        <th class="min-w-48">Usuario</th>
-                        <th class="min-w-40">Correo Electrónico</th>
-                        <th class="text-center whitespace-nowrap">Rol</th>
-                        <th class="text-center min-w-32">Municipios</th>
-                        <th class="text-center whitespace-nowrap">Estado</th>
-                        <th class="text-center whitespace-nowrap">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($this->usuarios as $index => $usuario)
-                        <tr class="hover">
-                            <td class="text-center font-medium">{{ $this->usuarios->firstItem() + $index }}</td>
-                            <td>
-                                <div class="flex items-center gap-3">
-                                    <div class="avatar placeholder">
-                                        <div
-                                            class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-                                            <span class="text-sm">{{ $usuario->iniciales }}</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="font-bold">{{ $usuario->nombre_completo }}</div>
-                                        @if ($usuario->cargo)
-                                            <div class="text-sm opacity-60">{{ $usuario->cargo }}</div>
-                                        @endif
+            <thead>
+                <tr class="bg-base-200">
+                    <th class="text-center w-12">No.</th>
+                    <th class="min-w-48">Usuario</th>
+                    <th class="min-w-40">Correo Electrónico</th>
+                    <th class="text-center whitespace-nowrap">Rol</th>
+                    <th class="text-center min-w-32">Municipios</th>
+                    <th class="text-center whitespace-nowrap">Estado</th>
+                    <th class="text-center whitespace-nowrap">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($this->usuarios as $index => $usuario)
+                    <tr class="hover">
+                        <td class="text-center font-medium">{{ $this->usuarios->firstItem() + $index }}</td>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="avatar placeholder">
+                                    <div
+                                        class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
+                                        <span class="text-sm">{{ $usuario->iniciales }}</span>
                                     </div>
                                 </div>
-                            </td>
-                            <td class="whitespace-nowrap">
-                                <span class="text-sm">{{ $usuario->email }}</span>
-                            </td>
-                            <td class="text-center">
-                                <span
-                                    class="badge badge-sm badge-soft badge-outline 
+                                <div>
+                                    <div class="font-bold">{{ $usuario->nombre_completo }}</div>
+                                    @if ($usuario->cargo)
+                                        <div class="text-sm opacity-60">{{ $usuario->cargo }}</div>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                        <td class="whitespace-nowrap">
+                            <span class="text-sm">{{ $usuario->email }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span
+                                class="badge badge-sm badge-soft badge-outline 
                                     @if ($usuario->isAdmin()) badge-secondary
                                     @elseif($usuario->isDirector()) badge-primary
                                     @elseif($usuario->isJefeFinanciero()) badge-warning
                                     @elseif($usuario->isTecnico()) badge-info
                                     @else badge-ghost @endif">
-                                    {{ $usuario->role->nombre }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                @if ($usuario->municipios->isNotEmpty())
-                                    <span class="text-xs max-w-40 truncate inline-block">{{ $usuario->municipios->pluck('nombre')->join(', ') }}</span>
+                                {{ $usuario->role->nombre }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            @if ($usuario->municipios->isNotEmpty())
+                                <span
+                                    class="text-xs max-w-40 truncate inline-block">{{ $usuario->municipios->pluck('nombre')->join(', ') }}</span>
+                            @else
+                                <span class="text-base-content/40">—</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <div class="tooltip" data-tip="Cambiar estado">
+                                @if ($usuario->isAdmin())
+                                    <span class="badge badge-success badge-sm gap-1">
+                                        <div class="status status-success status-xs"></div>
+                                        Activo
+                                    </span>
                                 @else
-                                    <span class="text-base-content/40">—</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <div class="tooltip" data-tip="Cambiar estado">
-                                    @if ($usuario->isAdmin())
-                                        <span class="badge badge-success badge-sm gap-1">
-                                            <div class="status status-success status-xs"></div>
-                                            Activo
-                                        </span>
-                                    @else
-                                        <button wire:click="cambiarEstado({{ $usuario->id }})"
-                                            class="badge badge-sm cursor-pointer transition-all hover:scale-105 gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
-                                            <div
-                                                class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
-                                            </div>
-                                            {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
-                                        </button>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>
-                                <div class="flex justify-center items-center gap-1">
-                                    <!-- Ver -->
-                                    <div class="tooltip" data-tip="Ver detalles">
-                                        <a href="{{ route('admin.usuarios.show', $usuario->id) }}"
-                                            class="btn btn-ghost btn-sm btn-square text-info" wire:navigate>
-                                            <x-heroicon-o-eye class="w-5 h-5" />
-                                        </a>
-                                    </div>
-
-                                    <!-- Editar -->
-                                    <div class="tooltip" data-tip="Editar">
-                                        <button wire:click="editar({{ $usuario->id }})"
-                                            class="btn btn-ghost btn-sm btn-square text-warning">
-                                            <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    <!-- Eliminar (solo si no es Admin) -->
-                                    @if (!$usuario->isAdmin())
-                                        <div class="tooltip" data-tip="Eliminar">
-                                            <button wire:click="confirmarEliminar({{ $usuario->id }})"
-                                                class="btn btn-ghost btn-sm btn-square text-error">
-                                                <x-heroicon-o-trash class="w-5 h-5" />
-                                            </button>
+                                    <button wire:click="cambiarEstado({{ $usuario->id }})"
+                                        class="badge badge-sm cursor-pointer transition-all hover:scale-105 gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                                        <div
+                                            class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
                                         </div>
-                                    @endif
+                                        {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
+                                    </button>
+                                @endif
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex justify-center items-center gap-1">
+                                <!-- Ver -->
+                                <div class="tooltip" data-tip="Ver detalles">
+                                    <a href="{{ route('admin.usuarios.show', $usuario->id) }}"
+                                        class="btn btn-ghost btn-sm btn-square text-info" wire:navigate>
+                                        <x-heroicon-o-eye class="w-5 h-5" />
+                                    </a>
                                 </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-12">
-                                <div class="flex flex-col items-center gap-2">
-                                    <x-heroicon-o-users class="w-12 h-12 text-base-content/30" />
-                                    <span class="text-base-content/50">No se encontraron usuarios</span>
+
+                                <!-- Editar -->
+                                <div class="tooltip" data-tip="Editar">
+                                    <button
+                                        @click="$dispatch('abrir-modal-usuario', { usuarioId: {{ $usuario->id }} })"
+                                        class="btn btn-ghost btn-sm btn-square text-warning">
+                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                    </button>
                                 </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+
+                                <!-- Eliminar (solo si no es Admin) -->
+                                @if (!$usuario->isAdmin())
+                                    <div class="tooltip" data-tip="Eliminar">
+                                        <button
+                                            @click="$dispatch('abrir-modal-eliminar', { usuarioId: {{ $usuario->id }} })"
+                                            class="btn btn-ghost btn-sm btn-square text-error">
+                                            <x-heroicon-o-trash class="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-12">
+                            <div class="flex flex-col items-center gap-2">
+                                <x-heroicon-o-users class="w-12 h-12 text-base-content/30" />
+                                <span class="text-base-content/50">No se encontraron usuarios</span>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 
     <!-- Paginación -->
