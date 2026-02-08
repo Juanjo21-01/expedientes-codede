@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light" id="html">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" id="html">
 
 <head>
     <meta charset="UTF-8">
@@ -11,38 +11,49 @@
     {{-- Icon --}}
     <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
 
+    {{-- Aplicar tema ANTES de cualquier renderizado para evitar flash --}}
+    <script>
+        (function() {
+            const theme = localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' :
+                'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
     {{-- Scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
     <script>
-        // Dark mode (localStorage)
-        document.addEventListener('DOMContentLoaded', () => {
-            const html = document.getElementById('html');
-            const themeToggle = document.getElementById('theme-toggle');
+        // Función para sincronizar todos los toggles de tema con el estado actual
+        function syncThemeToggles() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.querySelectorAll('.theme-toggle-checkbox').forEach(function(toggle) {
+                toggle.checked = isDark;
+            });
+        }
 
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia(
-                    '(prefers-color-scheme: dark)').matches)) {
-                html.setAttribute('data-theme', 'dark');
-                if (themeToggle) themeToggle.checked = true;
-            } else {
-                html.setAttribute('data-theme', 'light');
-                if (themeToggle) themeToggle.checked = false;
-            }
+        // Función para cambiar el tema
+        function toggleTheme() {
+            const html = document.documentElement;
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.theme = newTheme;
+            syncThemeToggles();
+        }
+
+        // Sincronizar toggles en carga inicial
+        document.addEventListener('DOMContentLoaded', function() {
+            syncThemeToggles();
         });
 
-        function toggleTheme() {
-            const html = document.getElementById('html');
-            const themeToggle = document.getElementById('theme-toggle');
-
-            if (html.getAttribute('data-theme') === 'dark') {
-                html.setAttribute('data-theme', 'light');
-                localStorage.theme = 'light';
-            } else {
-                html.setAttribute('data-theme', 'dark');
-                localStorage.theme = 'dark';
-            }
-        }
+        // Re-aplicar tema y sincronizar toggles después de cada navegación con wire:navigate
+        document.addEventListener('livewire:navigated', function() {
+            const theme = localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ?
+                'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            syncThemeToggles();
+        });
     </script>
 </head>
 
@@ -82,7 +93,7 @@
                 <div class="flex-none gap-2">
                     <!-- Dark mode toggle -->
                     <label class="swap swap-rotate btn btn-ghost btn-circle">
-                        <input type="checkbox" id="theme-toggle" onclick="toggleTheme()" />
+                        <input type="checkbox" class="theme-toggle-checkbox" onclick="toggleTheme()" />
                         <!-- Sun icon -->
                         <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24">
@@ -193,7 +204,7 @@
                         </span>
                     </li>
                     <li>
-                        <a href="{{ route('dashboard') }}"
+                        <a href="{{ route('dashboard') }}" wire:navigate
                             class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -240,7 +251,7 @@
                         </li>
                         @if (auth()->user()->isAdmin())
                             <li>
-                                <a href="{{ route('admin.usuarios.index') }}"
+                                <a href="{{ route('admin.usuarios.index') }}" wire:navigate
                                     class="{{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -252,7 +263,7 @@
                             </li>
                         @endif
                         <li>
-                            <a href="{{ route('admin.municipios.index') }}"
+                            <a href="{{ route('admin.municipios.index') }}" wire:navigate
                                 class="{{ request()->routeIs('admin.municipios.*') ? 'active' : '' }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

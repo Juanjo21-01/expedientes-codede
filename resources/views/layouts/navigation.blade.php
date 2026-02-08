@@ -26,7 +26,7 @@
     <div class="flex-none gap-2">
         <!-- Dark mode toggle -->
         <label class="swap swap-rotate btn btn-ghost btn-circle">
-            <input type="checkbox" id="theme-toggle-nav" onclick="toggleTheme()" />
+            <input type="checkbox" class="theme-toggle-checkbox" onclick="toggleTheme()" />
             <!-- Sun icon -->
             <svg class="swap-off fill-current w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path
