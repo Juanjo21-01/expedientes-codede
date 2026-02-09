@@ -57,7 +57,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         // Listado de expedientes
         Route::livewire('/', 'pages::expedientes.index')->name('index');
 
-        // Crear expediente (solo Técnico)
+        // Crear expediente (Técnico / Admin)
         Route::livewire('/crear', 'pages::expedientes.create')
             ->can('create', Expediente::class)
             ->name('create');
@@ -72,7 +72,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
             ->can('update', 'expediente')
             ->name('edit');
 
-        // Revisión financiera (solo Jefe Financiero)
+        // Revisión financiera (Jefe Financiero / Admin)
         Route::livewire('/{expediente}/revision', 'pages::expedientes.revision-financiera')
             ->can('revisarFinanciera', 'expediente')
             ->name('revision');

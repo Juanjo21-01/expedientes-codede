@@ -57,7 +57,6 @@ class Expediente extends Model
         'adjudicatario',
         'observaciones',
         'etiquetas',
-        'fecha_ultima_actualizacion',
     ];
 
     // Atributos que deben ser casteados
@@ -67,7 +66,6 @@ class Expediente extends Model
             'etiquetas' => 'array',
             'fecha_recibido' => 'date',
             'fecha_aprobacion' => 'date',
-            'fecha_ultima_actualizacion' => 'datetime',
             'monto_contrato' => 'decimal:2',
         ];
     }
@@ -345,7 +343,6 @@ class Expediente extends Model
         }
 
         $this->estado = $nuevoEstado;
-        $this->fecha_ultima_actualizacion = now();
 
         if ($nuevoEstado === self::ESTADO_APROBADO) {
             $this->fecha_aprobacion = now();

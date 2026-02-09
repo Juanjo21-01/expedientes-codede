@@ -44,7 +44,6 @@ return new class extends Migration
             $table->string('adjudicatario', 100)->nullable();
             $table->string('observaciones')->nullable();
             $table->json('etiquetas')->nullable();
-            $table->timestamp('fecha_ultima_actualizacion')->useCurrent();
             
             $table->timestamps();
 

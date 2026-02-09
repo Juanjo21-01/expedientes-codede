@@ -37,7 +37,7 @@
                 </a>
             </li>
             <li>
-                <a href="#"
+                <a href="{{ route('expedientes.index') }}" wire:navigate
                     class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('expedientes.*') ? 'active' : '' }}"
                     data-tip="Expedientes">
                     <x-heroicon-o-folder-open class="w-5 h-5 shrink-0" />
@@ -45,7 +45,8 @@
                 </a>
             </li>
             <li>
-                <a href="#" class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center    "
+                <a href="#"
+                    class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center    "
                     data-tip="Guía / Checklist">
                     <x-heroicon-o-clipboard-document-list class="w-5 h-5 shrink-0" />
                     <span class="is-drawer-close:hidden">Guía / Checklist</span>
@@ -115,7 +116,8 @@
 
         {{-- Toggle expand/collapse (solo desktop) --}}
         <div class="hidden lg:block border-t border-base-300 p-2">
-            <div class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center" data-tip="Expandir menú">
+            <div class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center"
+                data-tip="Expandir menú">
                 <label for="sidebar-drawer" class="btn btn-ghost btn-sm w-full justify-center gap-3">
                     <x-heroicon-o-chevron-double-right
                         class="w-4 h-4 shrink-0 is-drawer-open:rotate-180 transition-transform duration-300" />

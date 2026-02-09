@@ -374,7 +374,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                         {{ $this->usuarioMunicipal->telefono }}</p>
                                 @endif
                             </div>
-                            @if (auth()->user()->isAdmin())
+                            @if (auth()->user()->isAdmin() || auth()->user()->isDirector())
                                 <a href="{{ route('admin.usuarios.show', $this->usuarioMunicipal->id) }}" wire:navigate
                                     class="btn btn-ghost btn-sm btn-circle" title="Ver perfil">
                                     <x-heroicon-o-arrow-top-right-on-square class="w-4 h-4" />
@@ -409,7 +409,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                         <p class="font-bold truncate">{{ $tecnico->nombre_completo }}</p>
                                         <p class="text-sm text-base-content/60 truncate">{{ $tecnico->email }}</p>
                                     </div>
-                                    @if (auth()->user()->isAdmin())
+                                    @if (auth()->user()->isAdmin() || auth()->user()->isDirector())
                                         <a href="{{ route('admin.usuarios.show', $tecnico->id) }}" wire:navigate
                                             class="btn btn-ghost btn-sm btn-circle" title="Ver perfil">
                                             <x-heroicon-o-arrow-top-right-on-square class="w-4 h-4" />
