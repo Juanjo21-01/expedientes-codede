@@ -167,15 +167,15 @@ new class extends Component {
             // Si se sube un nuevo PDF, reemplazar
             if ($this->archivo_pdf) {
                 $guia->eliminarArchivo();
-                $nombreArchivo = Guia::generarNombreArchivo($guia->categoria, $guia->version);
-                $this->archivo_pdf->move(public_path('guia'), $nombreArchivo);
+                $nombreArchivo = Guia::generarNombreArchivo($guia->categoria);
+                $this->archivo_pdf->storeAs('guia', $nombreArchivo, 'public');
                 $guia->archivo_pdf = $nombreArchivo;
             }
 
             $guia->save();
 
-            session()->flash('success', 'Guía actualizada exitosamente.');
             $this->redirectRoute('admin.guias.index', navigate: true);
+            $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: "Guía '{$guia->titulo}' actualizada correctamente.");
         } else {
             // --- CREAR ---
             // Validar límite de versiones
@@ -185,10 +185,10 @@ new class extends Component {
             }
 
             $version = Guia::siguienteVersion($categoria);
-            $nombreArchivo = Guia::generarNombreArchivo($categoria, $version);
+            $nombreArchivo = Guia::generarNombreArchivo($categoria);
 
-            // Mover archivo a public/guia/
-            $this->archivo_pdf->move(public_path('guia'), $nombreArchivo);
+            // Guardar archivo en storage/app/public/guia/
+            $this->archivo_pdf->storeAs('guia', $nombreArchivo, 'public');
 
             // Desactivar versiones anteriores de esta categoría
             Guia::desactivarCategoria($categoria);
@@ -203,8 +203,8 @@ new class extends Component {
                 'fecha_publicacion' => $this->fecha_publicacion,
             ]);
 
-            session()->flash('success', 'Guía subida exitosamente. Versión ' . $version . ' de "' . $categoria . '".');
             $this->redirectRoute('admin.guias.index', navigate: true);
+            $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: 'Guía subida exitosamente. Versión ' . $version . " de \"" . $categoria . "\".");
         }
     }
 
@@ -223,7 +223,7 @@ new class extends Component {
                 <legend class="fieldset-legend">Categoría <span class="text-error">*</span></legend>
                 <select wire:model.live="categoriaSeleccionada" id="categoriaSeleccionada"
                     class="select w-full @error('categoriaSeleccionada') select-error @enderror">
-                    <option value="">Seleccionar categoría...</option>
+                    <option value="" selected disabled>Seleccionar categoría...</option>
                     @foreach ($this->categorias as $cat)
                         <option value="{{ $cat }}">{{ $cat }}</option>
                     @endforeach
@@ -319,13 +319,13 @@ new class extends Component {
                 </div>
 
                 {{-- Preview del archivo seleccionado --}}
-                {{-- @if ($archivo_pdf)
+                @if ($archivo_pdf)
                     <div class="mt-3 flex items-center justify-center gap-2 text-sm text-success">
                         <x-heroicon-o-check-circle class="w-5 h-5" />
                         <span>{{ $archivo_pdf->getClientOriginalName() }}
                             ({{ number_format($archivo_pdf->getSize() / 1024 / 1024, 2) }} MB)</span>
                     </div>
-                @endif --}}
+                @endif
 
                 {{-- Spinner de carga --}}
                 <div wire:loading wire:target="archivo_pdf" class="mt-3">
@@ -354,7 +354,7 @@ new class extends Component {
 
     {{-- Modal de confirmación (Director / Jefe Financiero) --}}
     @if ($mostrarConfirmacion)
-        <dialog class="modal modal-open">
+        <div class="modal modal-open">
             <div class="modal-box max-w-md">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
@@ -413,6 +413,6 @@ new class extends Component {
             <form method="dialog" class="modal-backdrop">
                 <button type="button" wire:click="cancelarConfirmacion">close</button>
             </form>
-        </dialog>
+        </div>
     @endif
 </div>

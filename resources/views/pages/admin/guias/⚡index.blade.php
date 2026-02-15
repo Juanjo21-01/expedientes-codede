@@ -35,20 +35,6 @@ new #[Title('- Gestión de Guías')] class extends Component {
 ?>
 
 <div>
-    {{-- Flash messages --}}
-    @if (session()->has('success'))
-        <div role="alert" class="alert alert-success shadow-lg mb-6">
-            <x-heroicon-o-check-circle class="stroke-current shrink-0 h-6 w-6" />
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-    @if (session()->has('error'))
-        <div role="alert" class="alert alert-error shadow-lg mb-6">
-            <x-heroicon-o-x-circle class="stroke-current shrink-0 h-6 w-6" />
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
-
     {{-- Header --}}
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div class="flex items-center gap-3">
@@ -63,7 +49,7 @@ new #[Title('- Gestión de Guías')] class extends Component {
             </div>
         </div>
 
-        @can('create', App\Models\Guia::class)
+        @can('create', Guia::class)
             <a href="{{ route('admin.guias.create') }}" wire:navigate class="btn btn-primary gap-2">
                 <x-heroicon-o-arrow-up-tray class="w-5 h-5" />
                 Subir Guía
@@ -134,8 +120,11 @@ new #[Title('- Gestión de Guías')] class extends Component {
     {{-- Tabla --}}
     <livewire:table.guia-table :search="$search" :categoriaFiltro="$categoriaFiltro" :estadoFiltro="$estadoFiltro" />
 
-    {{-- Modal de eliminación --}}
+    {{-- Modales --}}
+    <livewire:modals.guia-pdf-modal />
+
     @if (auth()->user()->isAdmin())
+        <livewire:modals.guia-estado-modal />
         <livewire:modals.guia-delete-modal />
     @endif
 </div>

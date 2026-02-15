@@ -88,7 +88,7 @@ new class extends Component {
 
 <div x-on:abrir-modal-estado.window="$wire.abrir($event.detail.expedienteId)">
     @if ($abierto)
-        <dialog class="modal modal-open">
+        <div class="modal modal-open">
             <div class="modal-box max-w-lg">
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-4">
@@ -166,6 +166,6 @@ new class extends Component {
             <form method="dialog" class="modal-backdrop">
                 <button type="button" wire:click="cerrar">close</button>
             </form>
-        </dialog>
+        </div>
     @endif
 </div>

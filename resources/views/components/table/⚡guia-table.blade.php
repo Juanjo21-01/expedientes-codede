@@ -48,7 +48,7 @@ new class extends Component {
             $query->deCategoria($this->categoriaFiltro);
         }
 
-        if ($this->estadoFiltro === 'estado') {
+        if ($this->estadoFiltro === 'activo') {
             $query->activas();
         } elseif ($this->estadoFiltro === 'inactivo') {
             $query->inactivas();
@@ -57,21 +57,14 @@ new class extends Component {
         return $query->paginate(10);
     }
 
-    public function toggleEstado(int $id)
+    public function abrirPdfModal(int $id)
     {
-        $guia = Guia::findOrFail($id);
-        $this->authorize('toggleEstado', $guia);
+        $this->dispatch('abrir-pdf-modal', guiaId: $id);
+    }
 
-        if (!$guia->estado) {
-            // Al activar, desactivar las demás de la misma categoría
-            Guia::desactivarCategoria($guia->categoria);
-        }
-
-        $guia->estado = !$guia->estado;
-        $guia->save();
-
-        session()->flash('success', $guia->estado ? 'Guía activada.' : 'Guía desactivada.');
-        $this->redirectRoute('admin.guias.index', navigate: true);
+    public function abrirEstadoModal(int $id)
+    {
+        $this->dispatch('abrir-estado-modal', guiaId: $id);
     }
 
     public function abrirDeleteModal(int $id)
@@ -80,6 +73,7 @@ new class extends Component {
     }
 
     #[On('guia-eliminada')]
+    #[On('guia-estado-cambiado')]
     public function refrescar()
     {
         unset($this->guias);
@@ -132,10 +126,10 @@ new class extends Component {
                         <td>
                             <div class="flex items-center justify-center gap-1">
                                 {{-- Ver PDF --}}
-                                <a href="{{ $guia->url_pdf }}" target="_blank" class="btn btn-ghost btn-xs tooltip"
-                                    data-tip="Ver PDF">
+                                <button wire:click="abrirPdfModal({{ $guia->id }})"
+                                    class="btn btn-ghost btn-xs tooltip" data-tip="Ver PDF">
                                     <x-heroicon-o-eye class="w-4 h-4" />
-                                </a>
+                                </button>
 
                                 {{-- Editar (solo Admin) --}}
                                 @can('update', $guia)
@@ -147,8 +141,7 @@ new class extends Component {
 
                                 {{-- Toggle Estado (solo Admin) --}}
                                 @can('toggleEstado', $guia)
-                                    <button wire:click="toggleEstado({{ $guia->id }})"
-                                        wire:confirm="{{ $guia->estado ? '¿Desactivar esta guía?' : '¿Activar esta guía? La versión activa actual de esta categoría será desactivada.' }}"
+                                    <button wire:click="abrirEstadoModal({{ $guia->id }})"
                                         class="btn btn-ghost btn-xs tooltip"
                                         data-tip="{{ $guia->estado ? 'Desactivar' : 'Activar' }}">
                                         @if ($guia->estado)

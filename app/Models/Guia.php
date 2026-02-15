@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Guia extends Model
@@ -101,19 +102,19 @@ class Guia extends Model
     // ---- Accesores ----
 
     /**
-     * URL pública del PDF
+     * URL pública del PDF (a través del symlink storage)
      */
     public function getUrlPdfAttribute(): string
     {
-        return asset("guia/{$this->archivo_pdf}");
+        return asset("storage/guia/{$this->archivo_pdf}");
     }
 
     /**
-     * Ruta completa del archivo
+     * Ruta completa del archivo en disco
      */
     public function getRutaArchivoAttribute(): string
     {
-        return public_path("guia/{$this->archivo_pdf}");
+        return Storage::disk('public')->path("guia/{$this->archivo_pdf}");
     }
 
     /**
@@ -129,7 +130,7 @@ class Guia extends Model
      */
     public function archivoExiste(): bool
     {
-        return file_exists($this->ruta_archivo);
+        return Storage::disk('public')->exists("guia/{$this->archivo_pdf}");
     }
 
     /**
@@ -141,7 +142,7 @@ class Guia extends Model
             return 'N/A';
         }
 
-        $bytes = filesize($this->ruta_archivo);
+        $bytes = Storage::disk('public')->size("guia/{$this->archivo_pdf}");
         $units = ['B', 'KB', 'MB', 'GB'];
         $i = 0;
 
@@ -205,12 +206,14 @@ class Guia extends Model
 
     /**
      * Generar nombre de archivo único para el PDF
+     * Formato: {slug-categoria}_{fecha}_{id-corto}.pdf
      */
-    public static function generarNombreArchivo(string $categoria, int $version): string
+    public static function generarNombreArchivo(string $categoria): string
     {
         $slug = Str::slug($categoria);
-        $timestamp = now()->timestamp;
-        return "{$slug}_v{$version}_{$timestamp}.pdf";
+        $fecha = now()->format('Ymd_His');
+        $id = substr(uniqid(), -6);
+        return "{$slug}_{$fecha}_{$id}.pdf";
     }
 
     /**
@@ -219,9 +222,25 @@ class Guia extends Model
     public function eliminarArchivo(): bool
     {
         if ($this->archivoExiste()) {
-            return unlink($this->ruta_archivo);
+            return Storage::disk('public')->delete("guia/{$this->archivo_pdf}");
         }
         return false;
+    }
+
+    /**
+     * Reordenar versiones de una categoría para mantener secuencia continua.
+     * Útil después de eliminar una guía para evitar huecos (v1, v3 → v1, v2).
+     */
+    public static function reordenarVersiones(string $categoria): void
+    {
+        $guias = self::deCategoria($categoria)->orderBy('version')->get();
+
+        foreach ($guias as $index => $guia) {
+            $nuevaVersion = $index + 1;
+            if ($guia->version !== $nuevaVersion) {
+                $guia->update(['version' => $nuevaVersion]);
+            }
+        }
     }
 
     // ---- Métodos estáticos ----

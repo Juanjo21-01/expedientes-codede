@@ -35,7 +35,7 @@ new class extends Component {
         // Verificar autorización
         $user = auth()->user();
         if (!$user->can('revisarFinanciera', $expediente)) {
-            session()->flash('error', 'No tienes permiso para registrar revisiones financieras.');
+            $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'No tienes permiso para registrar revisiones financieras.');
             return;
         }
 

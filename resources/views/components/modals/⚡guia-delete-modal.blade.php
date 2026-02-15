@@ -55,28 +55,33 @@ new class extends Component {
         $guia = Guia::findOrFail($this->guiaId);
         $this->authorize('delete', $guia);
 
+        $categoria = $guia->categoria;
+
         // Eliminar archivo físico
         $guia->eliminarArchivo();
 
         // Eliminar registro
         $guia->delete();
 
+        // Reordenar versiones de la categoría para mantener secuencia continua
+        Guia::reordenarVersiones($categoria);
+
         $this->cerrar();
         $this->dispatch('guia-eliminada');
-        session()->flash('success', 'Guía eliminada exitosamente.');
         $this->redirectRoute('admin.guias.index', navigate: true);
+        $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: 'Guía eliminada exitosamente.');
     }
 };
 ?>
 
 <div>
     @if ($mostrar)
-        <dialog class="modal modal-open">
-            <div class="modal-box max-w-md">
+        <div class="modal modal-open">
+            <div class="modal-box max-w-md" wire:click.stop>
                 {{-- Encabezado --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
-                        <div class="bg-error/10 text-error rounded-lg w-10 h-10">
+                        <div class="bg-error/10 text-error rounded-lg w-10 h-10 flex items-center justify-center">
                             <x-heroicon-o-exclamation-triangle class="w-5 h-5" />
                         </div>
                     </div>
@@ -108,30 +113,31 @@ new class extends Component {
                 </div>
 
                 {{-- Campo de contraseña --}}
-                <fieldset class="fieldset w-full">
-                    <legend class="fieldset-legend">Ingrese su contraseña para confirmar</legend>
-                    <input type="password" wire:model="password" id="deletePassword"
-                        class="input w-full @error('password') input-error @enderror"
-                        placeholder="Su contraseña actual" autocomplete="off" />
-                    @error('password')
-                        <p class="label text-error">{{ $message }}</p>
-                    @enderror
-                </fieldset>
+                <form wire:submit.prevent="eliminar">
+                    <fieldset class="fieldset w-full mb-4">
+                        <legend class="fieldset-legend">Ingrese su contraseña para confirmar</legend>
+                        <input type="password" wire:model="password"
+                            class="input w-full @error('password') input-error @enderror"
+                            placeholder="Su contraseña actual" autocomplete="off" />
+                        @error('password')
+                            <p class="label text-error">{{ $message }}</p>
+                        @enderror
+                    </fieldset>
 
-                {{-- Botones --}}
-                <div class="modal-action">
-                    <button type="button" wire:click="cerrar" class="btn btn-ghost">Cancelar</button>
-                    <button type="button" wire:click="eliminar" class="btn btn-error gap-2"
-                        wire:loading.attr="disabled">
-                        <span wire:loading wire:target="eliminar" class="loading loading-spinner loading-sm"></span>
-                        <x-heroicon-o-trash class="w-4 h-4" wire:loading.remove wire:target="eliminar" />
-                        Eliminar Guía
-                    </button>
-                </div>
+                    {{-- Botones --}}
+                    <div class="modal-action">
+                        <button type="button" wire:click="cerrar" class="btn btn-ghost">Cancelar</button>
+                        <button type="submit" class="btn btn-error gap-2" wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="eliminar">
+                                <x-heroicon-o-trash class="w-4 h-4" />
+                            </span>
+                            <span wire:loading wire:target="eliminar" class="loading loading-spinner loading-sm"></span>
+                            Eliminar Guía
+                        </button>
+                    </div>
+                </form>
             </div>
-            <form method="dialog" class="modal-backdrop">
-                <button type="button" wire:click="cerrar">close</button>
-            </form>
-        </dialog>
+            <div class="modal-backdrop" wire:click="cerrar"></div>
+        </div>
     @endif
 </div>
