@@ -20,7 +20,11 @@ class NotificacionEnviada extends Model
     protected $fillable = [
         'tipo_notificacion_id',
         'expediente_id',
+        'municipio_id',
+        'remitente_id',
         'destinatario_email',
+        'destinatario_nombre',
+        'asunto',
         'mensaje',
         'enviado_at',
         'estado',
@@ -44,6 +48,16 @@ class NotificacionEnviada extends Model
     public function expediente(): BelongsTo
     {
         return $this->belongsTo(Expediente::class, 'expediente_id');
+    }
+
+    public function municipio(): BelongsTo
+    {
+        return $this->belongsTo(Municipio::class, 'municipio_id');
+    }
+
+    public function remitente(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'remitente_id');
     }
 
     // ---- Scopes ----
@@ -81,11 +95,35 @@ class NotificacionEnviada extends Model
     }
 
     /**
+     * Filtrar por municipio
+     */
+    public function scopeDeMunicipio(Builder $query, int $municipioId): Builder
+    {
+        return $query->where('municipio_id', $municipioId);
+    }
+
+    /**
+     * Filtrar por remitente
+     */
+    public function scopeDeRemitente(Builder $query, int $userId): Builder
+    {
+        return $query->where('remitente_id', $userId);
+    }
+
+    /**
      * Filtrar por destinatario
      */
     public function scopeParaDestinatario(Builder $query, string $email): Builder
     {
         return $query->where('destinatario_email', $email);
+    }
+
+    /**
+     * Filtrar por tipo de notificación
+     */
+    public function scopeDeTipo(Builder $query, int $tipoId): Builder
+    {
+        return $query->where('tipo_notificacion_id', $tipoId);
     }
 
     /**
@@ -102,6 +140,48 @@ class NotificacionEnviada extends Model
     public function scopeRecientes(Builder $query): Builder
     {
         return $query->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Buscar por asunto, destinatario o mensaje
+     */
+    public function scopeBuscar(Builder $query, string $termino): Builder
+    {
+        return $query->where(function ($q) use ($termino) {
+            $q->where('asunto', 'like', "%{$termino}%")
+              ->orWhere('destinatario_email', 'like', "%{$termino}%")
+              ->orWhere('destinatario_nombre', 'like', "%{$termino}%")
+              ->orWhere('mensaje', 'like', "%{$termino}%");
+        });
+    }
+
+    /**
+     * Accesibles por un usuario (según rol)
+     * Admin y Director ven todas, los demás solo las suyas o relacionadas
+     */
+    public function scopeAccesiblesPor(Builder $query, User $user): Builder
+    {
+        if ($user->isAdmin() || $user->isDirector()) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($user) {
+            // Las que envió
+            $q->where('remitente_id', $user->id);
+
+            // Las relacionadas con sus expedientes
+            if ($user->isTecnico() || $user->isJefeFinanciero()) {
+                $q->orWhereHas('expediente', function ($eq) use ($user) {
+                    $eq->accesiblesPor($user);
+                });
+            }
+
+            // Las relacionadas con sus municipios
+            if ($user->isMunicipal()) {
+                $municipioIds = $user->municipios->pluck('id')->toArray();
+                $q->orWhereIn('municipio_id', $municipioIds);
+            }
+        });
     }
 
     // ---- Helpers de Estado ----
@@ -165,6 +245,35 @@ class NotificacionEnviada extends Model
             self::ESTADO_FALLIDO => 'badge-error',
             default => 'badge-ghost',
         };
+    }
+
+    /**
+     * Ícono del estado
+     */
+    public function getEstadoIconoAttribute(): string
+    {
+        return match ($this->estado) {
+            self::ESTADO_PENDIENTE => 'clock',
+            self::ESTADO_ENVIADO => 'check-circle',
+            self::ESTADO_FALLIDO => 'x-circle',
+            default => 'question-mark-circle',
+        };
+    }
+
+    /**
+     * Contexto de la notificación (expediente o municipio)
+     */
+    public function getContextoAttribute(): string
+    {
+        if ($this->expediente_id && $this->expediente) {
+            return "Expediente {$this->expediente->codigo_snip}";
+        }
+
+        if ($this->municipio_id && $this->municipio) {
+            return "Municipio {$this->municipio->nombre}";
+        }
+
+        return 'General';
     }
 
     // ---- Métodos estáticos ----

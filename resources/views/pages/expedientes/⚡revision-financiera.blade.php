@@ -11,6 +11,12 @@ new #[Title('- Revisión Financiera')] class extends Component {
     {
         $this->expediente = $expediente->load(['municipio', 'responsable', 'tipoSolicitud', 'revisionesFinancieras.revisor']);
     }
+
+    // Abrir modal de notificación
+    public function notificar()
+    {
+        $this->dispatch('abrir-notificacion-modal', expedienteId: $this->expediente->id);
+    }
 };
 ?>
 
@@ -36,19 +42,25 @@ new #[Title('- Revisión Financiera')] class extends Component {
     </div>
 
     {{-- Header --}}
-    <div class="flex items-center gap-3 mb-6">
-        <div class="avatar placeholder">
-            <div class="bg-accent/10 text-accent rounded-lg w-12 h-12 flex items-center justify-center">
-                <x-heroicon-o-clipboard-document-list class="w-6 h-6" />
+    <div class="flex items-center justify-between gap-3 mb-6">
+        <div class="flex items-center gap-3">
+            <div class="avatar placeholder">
+                <div class="bg-accent/10 text-accent rounded-lg w-12 h-12 flex items-center justify-center">
+                    <x-heroicon-o-clipboard-document-list class="w-6 h-6" />
+                </div>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold">Revisión Financiera</h1>
+                <p class="text-base-content/60 text-sm">
+                    <span class="font-mono">{{ $expediente->codigo_snip }}</span> ·
+                    {{ $expediente->nombre_proyecto }}
+                </p>
             </div>
         </div>
-        <div>
-            <h1 class="text-2xl font-bold">Revisión Financiera</h1>
-            <p class="text-base-content/60 text-sm">
-                <span class="font-mono">{{ $expediente->codigo_snip }}</span> ·
-                {{ $expediente->nombre_proyecto }}
-            </p>
-        </div>
+        <button wire:click="notificar" class="btn btn-info btn-sm gap-2">
+            <x-heroicon-o-envelope class="w-4 h-4" />
+            Notificar
+        </button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -157,4 +169,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
             </div>
         </div>
     </div>
+
+    {{-- Modal de notificación --}}
+    <livewire:modals.notificacion-modal />
 </div>

@@ -130,6 +130,11 @@ class User extends Authenticatable
         return $this->hasMany(Bitacora::class, 'user_id');
     }
 
+    public function notificacionesEnviadas(): HasMany
+    {
+        return $this->hasMany(NotificacionEnviada::class, 'remitente_id');
+    }
+
     // ---- Scopes ----
 
     /**

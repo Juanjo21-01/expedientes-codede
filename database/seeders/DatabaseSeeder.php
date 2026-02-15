@@ -23,5 +23,8 @@ class DatabaseSeeder extends Seeder
 
         // Tipos de Solicitud
         $this->call(TipoSolicitudesSeeder::class);
+
+        // Tipos de Notificación
+        $this->call(TipoNotificacionesSeeder::class);
     }
 }

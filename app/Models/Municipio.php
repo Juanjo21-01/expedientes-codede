@@ -43,6 +43,11 @@ class Municipio extends Model
         return $this->hasMany(Expediente::class, 'municipio_id');
     }
 
+    public function notificacionesEnviadas(): HasMany
+    {
+        return $this->hasMany(NotificacionEnviada::class, 'municipio_id');
+    }
+
     // ---- Scopes ----
 
     /**

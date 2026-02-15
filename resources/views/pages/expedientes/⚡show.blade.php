@@ -5,6 +5,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use App\Models\Expediente;
+use App\Models\NotificacionEnviada;
 use App\Models\Role;
 
 new #[Title('- Detalle Expediente')] class extends Component {
@@ -17,9 +18,11 @@ new #[Title('- Detalle Expediente')] class extends Component {
 
     #[On('expediente-estado-cambiado')]
     #[On('expediente-guardado')]
+    #[On('notificacion-enviada')]
     public function refrescar()
     {
         $this->expediente = $this->expediente->fresh(['municipio', 'responsable.role', 'tipoSolicitud', 'revisionesFinancieras.revisor']);
+        unset($this->notificaciones);
     }
 
     // Enviar a revisión (Técnico)
@@ -56,6 +59,23 @@ new #[Title('- Detalle Expediente')] class extends Component {
         $fechaRecibido = $this->expediente->fecha_recibido->startOfDay();
         $fechaActual = now()->startOfDay();
         return $fechaRecibido->diffInDays($fechaActual);
+    }
+
+    // Notificaciones enviadas de este expediente
+    #[Computed]
+    public function notificaciones()
+    {
+        return NotificacionEnviada::deExpediente($this->expediente->id)
+            ->with(['remitente', 'tipoNotificacion'])
+            ->recientes()
+            ->limit(10)
+            ->get();
+    }
+
+    // Abrir modal de notificación
+    public function notificar()
+    {
+        $this->dispatch('abrir-notificacion-modal', expedienteId: $this->expediente->id);
     }
 };
 ?>
@@ -151,6 +171,17 @@ new #[Title('- Detalle Expediente')] class extends Component {
                             Editar
                         </a>
                     @endcan
+
+                    {{-- Notificar (Admin, Director, Jefe Financiero, Técnico) --}}
+                    @if (auth()->user()->isAdmin() ||
+                            auth()->user()->isDirector() ||
+                            auth()->user()->isJefeFinanciero() ||
+                            auth()->user()->isTecnico())
+                        <button wire:click="notificar" class="btn btn-info btn-sm gap-2">
+                            <x-heroicon-o-envelope class="w-4 h-4" />
+                            Notificar
+                        </button>
+                    @endif
 
                     {{-- Volver al listado --}}
                     <a href="{{ route('expedientes.index') }}" wire:navigate class="btn btn-ghost btn-sm gap-2">
@@ -294,6 +325,69 @@ new #[Title('- Detalle Expediente')] class extends Component {
                     @endif
                 </div>
             </div>
+
+            {{-- Notificaciones Enviadas --}}
+            @if (auth()->user()->isAdmin() ||
+                    auth()->user()->isDirector() ||
+                    auth()->user()->isJefeFinanciero() ||
+                    auth()->user()->isTecnico())
+                <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between">
+                            <h3 class="card-title text-base gap-2">
+                                <x-heroicon-o-envelope class="w-5 h-5 text-primary" />
+                                Notificaciones Enviadas
+                                @if ($this->notificaciones->isNotEmpty())
+                                    <span
+                                        class="badge badge-sm badge-primary">{{ $this->notificaciones->count() }}</span>
+                                @endif
+                            </h3>
+                            <button wire:click="notificar" class="btn btn-info btn-xs gap-1">
+                                <x-heroicon-o-plus class="w-3 h-3" />
+                                Nueva
+                            </button>
+                        </div>
+                        <div class="divider my-1"></div>
+
+                        @if ($this->notificaciones->isNotEmpty())
+                            <div class="space-y-3">
+                                @foreach ($this->notificaciones as $noti)
+                                    <div
+                                        class="border border-base-content/5 rounded-lg p-3 {{ $loop->first ? 'bg-base-200/50' : '' }}">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span
+                                                    class="badge badge-sm {{ $noti->estado_badge_class }}">{{ $noti->estado }}</span>
+                                                @if ($noti->tipoNotificacion)
+                                                    <span
+                                                        class="badge badge-sm badge-outline">{{ $noti->tipoNotificacion->nombre }}</span>
+                                                @endif
+                                            </div>
+                                            <span
+                                                class="text-xs text-base-content/50 shrink-0">{{ $noti->created_at->format('d/m/Y H:i') }}</span>
+                                        </div>
+                                        <p class="text-sm font-medium mt-1 truncate">{{ $noti->asunto }}</p>
+                                        <div class="flex items-center gap-2 mt-1 text-xs text-base-content/60">
+                                            <span>Para:
+                                                {{ $noti->destinatario_nombre ?: $noti->destinatario_email }}</span>
+                                        </div>
+                                        @if ($noti->remitente)
+                                            <div class="text-xs text-base-content/50 mt-1">
+                                                Enviado por: {{ $noti->remitente->nombre_completo }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-8">
+                                <x-heroicon-o-envelope class="w-10 h-10 text-base-content/20 mx-auto mb-2" />
+                                <p class="text-base-content/40 text-sm">No se han enviado notificaciones</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- Columna derecha: Sidebar --}}
@@ -443,5 +537,13 @@ new #[Title('- Detalle Expediente')] class extends Component {
     @if (auth()->user()->isAdmin())
         <livewire:modals.expediente-estado-modal />
         <livewire:modals.expediente-delete-modal />
+    @endif
+
+    {{-- Modal de notificación --}}
+    @if (auth()->user()->isAdmin() ||
+            auth()->user()->isDirector() ||
+            auth()->user()->isJefeFinanciero() ||
+            auth()->user()->isTecnico())
+        <livewire:modals.notificacion-modal />
     @endif
 </div>

@@ -129,6 +129,15 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
             ->name('edit');
     });
 
+    /*
+    |----------------------------------------------------------------------
+    | Notificaciones - Historial de correos enviados
+    |----------------------------------------------------------------------
+    */
+    Route::livewire('/admin/notificaciones', 'pages::admin.notificaciones.index')
+        ->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero,Técnico')
+        ->name('admin.notificaciones.index');
+
 });
 
 /*

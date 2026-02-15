@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('tipo_notificacion_id')->nullable()->constrained('tipo_notificaciones');
             $table->foreignId('expediente_id')->nullable()->constrained('expedientes');
+            $table->foreignId('municipio_id')->nullable()->constrained('municipios');
+            $table->foreignId('remitente_id')->nullable()->constrained('users');
             $table->string('destinatario_email');
+            $table->string('destinatario_nombre', 100);
+            $table->string('asunto', 255);
             $table->text('mensaje');
             $table->timestamp('enviado_at')->nullable();
             $table->enum('estado', ['Pendiente', 'Enviado', 'Fallido'])->default('Pendiente');

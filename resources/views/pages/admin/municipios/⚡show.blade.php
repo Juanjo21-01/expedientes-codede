@@ -51,6 +51,12 @@ new #[Title('- Detalle Municipio')] class extends Component {
         $this->municipio = $this->municipio->fresh();
     }
 
+    // Abrir modal de notificación
+    public function notificar()
+    {
+        $this->dispatch('abrir-notificacion-modal', municipioId: $this->municipio->id);
+    }
+
     // Años disponibles para filtro
     #[Computed]
     public function aniosDisponibles()
@@ -277,7 +283,23 @@ new #[Title('- Detalle Municipio')] class extends Component {
                             <x-heroicon-o-pencil-square class="w-4 h-4" />
                             Editar contacto
                         </button>
+                        @if ($municipio->tieneEmailContacto())
+                            <button wire:click="notificar" class="btn btn-info btn-sm gap-2">
+                                <x-heroicon-o-envelope class="w-4 h-4" />
+                                Notificar
+                            </button>
+                        @endif
                     </div>
+                @else
+                    {{-- Notificar para Director/Jefe/Técnico --}}
+                    @if ($municipio->tieneEmailContacto())
+                        <div class="flex gap-2">
+                            <button wire:click="notificar" class="btn btn-info btn-sm gap-2">
+                                <x-heroicon-o-envelope class="w-4 h-4" />
+                                Notificar
+                            </button>
+                        </div>
+                    @endif
                 @endif
             </div>
 
@@ -652,6 +674,9 @@ new #[Title('- Detalle Municipio')] class extends Component {
     @if (auth()->user()->isAdmin())
         <livewire:modals.municipio-modal />
     @endif
+
+    {{-- Modal de notificación --}}
+    <livewire:modals.notificacion-modal />
 </div>
 
 {{-- Scripts para Chart.js --}}
