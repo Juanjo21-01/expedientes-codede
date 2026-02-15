@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NotificacionExpedienteMail extends Mailable implements ShouldQueue
+class NotificacionMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -42,7 +42,7 @@ class NotificacionExpedienteMail extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            view: 'emails.notificacion-expediente',
+            view: 'emails.notificacion',
             with: [
                 'notificacion' => $this->notificacion,
                 'remitente' => $this->notificacion->remitente,

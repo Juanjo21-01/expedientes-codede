@@ -8,7 +8,7 @@ use App\Models\NotificacionEnviada;
 use App\Models\TipoNotificacion;
 use App\Models\Expediente;
 use App\Models\Municipio;
-use App\Mail\NotificacionExpedienteMail;
+use App\Mail\NotificacionMail;
 use Illuminate\Support\Facades\Mail;
 
 new class extends Component {
@@ -135,7 +135,7 @@ new class extends Component {
             $notificacion->load(['remitente', 'expediente.municipio', 'municipio', 'tipoNotificacion']);
 
             // Enviar correo
-            Mail::to($this->destinatario_email)->send(new NotificacionExpedienteMail($notificacion));
+            Mail::to($this->destinatario_email)->send(new NotificacionMail($notificacion));
 
             // Marcar como enviada
             $notificacion->marcarEnviada();
@@ -205,20 +205,20 @@ new class extends Component {
                     </div>
                 @endif
 
-                <form wire:submit.prevent="enviar">
+                <form wire:submit="enviar">
                     <div class="space-y-4">
                         {{-- Tipo de notificación --}}
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Tipo de notificación <span class="text-error">*</span>
                             </legend>
-                            <select wire:model.live="tipo_notificacion_id" class="select select-bordered w-full">
-                                <option value="">Seleccione un tipo...</option>
+                            <select wire:model.live="tipo_notificacion_id" class="select w-full">
+                                <option value="" selected disabled>Seleccione un tipo...</option>
                                 @foreach ($this->tiposNotificacion as $tipo)
                                     <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
                                 @endforeach
                             </select>
                             @error('tipo_notificacion_id')
-                                <p class="fieldset-label text-error text-xs">{{ $message }}</p>
+                                <p class="label text-error text-xs">{{ $message }}</p>
                             @enderror
                         </fieldset>
 
@@ -227,39 +227,38 @@ new class extends Component {
                             <fieldset class="fieldset">
                                 <legend class="fieldset-legend">Email destinatario <span class="text-error">*</span>
                                 </legend>
-                                <input type="email" wire:model="destinatario_email"
-                                    class="input input-bordered w-full" placeholder="correo@ejemplo.com" />
+                                <input type="email" wire:model="destinatario_email" class="input w-full"
+                                    placeholder="correo@ejemplo.com" />
                                 @error('destinatario_email')
-                                    <p class="fieldset-label text-error text-xs">{{ $message }}</p>
+                                    <p class="label text-error text-xs">{{ $message }}</p>
                                 @enderror
                             </fieldset>
 
                             <fieldset class="fieldset">
                                 <legend class="fieldset-legend">Nombre destinatario</legend>
-                                <input type="text" wire:model="destinatario_nombre"
-                                    class="input input-bordered w-full" placeholder="Nombre del destinatario" />
+                                <input type="text" wire:model="destinatario_nombre" class="input w-full"
+                                    placeholder="Nombre del destinatario" />
                             </fieldset>
                         </div>
 
                         {{-- Asunto --}}
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Asunto <span class="text-error">*</span></legend>
-                            <input type="text" wire:model="asunto" class="input input-bordered w-full"
+                            <input type="text" wire:model="asunto" class="input w-full"
                                 placeholder="Asunto del correo" />
                             @error('asunto')
-                                <p class="fieldset-label text-error text-xs">{{ $message }}</p>
+                                <p class="label text-error text-xs">{{ $message }}</p>
                             @enderror
                         </fieldset>
 
                         {{-- Mensaje --}}
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Mensaje <span class="text-error">*</span></legend>
-                            <textarea wire:model="mensaje" class="textarea textarea-bordered w-full h-32"
-                                placeholder="Escriba el mensaje de la notificación..."></textarea>
+                            <textarea wire:model="mensaje" class="textarea w-full h-32" placeholder="Escriba el mensaje de la notificación..."></textarea>
                             @error('mensaje')
-                                <p class="fieldset-label text-error text-xs">{{ $message }}</p>
+                                <p class="label text-error text-xs">{{ $message }}</p>
                             @enderror
-                            <p class="fieldset-label text-xs text-base-content/50">Mínimo 10 caracteres</p>
+                            <p class="label text-xs text-base-content/50">Mínimo 10 caracteres</p>
                         </fieldset>
                     </div>
 

@@ -71,12 +71,6 @@ new #[Title('- Detalle Expediente')] class extends Component {
             ->limit(10)
             ->get();
     }
-
-    // Abrir modal de notificación
-    public function notificar()
-    {
-        $this->dispatch('abrir-notificacion-modal', expedienteId: $this->expediente->id);
-    }
 };
 ?>
 
@@ -177,7 +171,8 @@ new #[Title('- Detalle Expediente')] class extends Component {
                             auth()->user()->isDirector() ||
                             auth()->user()->isJefeFinanciero() ||
                             auth()->user()->isTecnico())
-                        <button wire:click="notificar" class="btn btn-info btn-sm gap-2">
+                        <button @click="$dispatch('abrir-notificacion-modal', { expedienteId: {{ $expediente->id }} })"
+                            class="btn btn-info btn-sm gap-2">
                             <x-heroicon-o-envelope class="w-4 h-4" />
                             Notificar
                         </button>
@@ -342,7 +337,9 @@ new #[Title('- Detalle Expediente')] class extends Component {
                                         class="badge badge-sm badge-primary">{{ $this->notificaciones->count() }}</span>
                                 @endif
                             </h3>
-                            <button wire:click="notificar" class="btn btn-info btn-xs gap-1">
+                            <button
+                                @click="$dispatch('abrir-notificacion-modal', { expedienteId: {{ $expediente->id }} })"
+                                class="btn btn-info btn-xs gap-1">
                                 <x-heroicon-o-plus class="w-3 h-3" />
                                 Nueva
                             </button>

@@ -51,12 +51,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
         $this->municipio = $this->municipio->fresh();
     }
 
-    // Abrir modal de notificación
-    public function notificar()
-    {
-        $this->dispatch('abrir-notificacion-modal', municipioId: $this->municipio->id);
-    }
-
     // Años disponibles para filtro
     #[Computed]
     public function aniosDisponibles()
@@ -284,7 +278,9 @@ new #[Title('- Detalle Municipio')] class extends Component {
                             Editar contacto
                         </button>
                         @if ($municipio->tieneEmailContacto())
-                            <button wire:click="notificar" class="btn btn-info btn-sm gap-2">
+                            <button
+                                @click="$dispatch('abrir-notificacion-modal', { municipioId: {{ $municipio->id }} })"
+                                class="btn btn-info btn-sm gap-2">
                                 <x-heroicon-o-envelope class="w-4 h-4" />
                                 Notificar
                             </button>
@@ -294,7 +290,9 @@ new #[Title('- Detalle Municipio')] class extends Component {
                     {{-- Notificar para Director/Jefe/Técnico --}}
                     @if ($municipio->tieneEmailContacto())
                         <div class="flex gap-2">
-                            <button wire:click="notificar" class="btn btn-info btn-sm gap-2">
+                            <button
+                                @click="$dispatch('abrir-notificacion-modal', { municipioId: {{ $municipio->id }} })"
+                                class="btn btn-info btn-sm gap-2">
                                 <x-heroicon-o-envelope class="w-4 h-4" />
                                 Notificar
                             </button>
