@@ -71,9 +71,10 @@
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-md">
             <!-- Logo/Brand -->
-            <div class="text-center mb-8">
-                <div class="avatar placeholder shrink-0 mb-4">
-                    <div class="bg-primary text-primary-content rounded-lg w-16 h-16 flex items-center justify-center">
+            <div class="text-center mb-4">
+                <div class="avatar placeholder shrink-0 mb-2">
+                    <div
+                        class="bg-primary text-primary-content rounded-full w-18 h-18 flex items-center justify-center">
                         <img src="{{ asset('img/logo.png') }}" alt="CODEDE Logo" class="w-16 h-16">
                     </div>
                 </div>
@@ -89,7 +90,7 @@
             </div>
 
             <!-- Footer -->
-            <div class="text-center mt-6">
+            <div class="text-center mt-4">
                 <p class="text-xs text-base-content/50">
                     © {{ date('Y') }} CODEDE San Marcos. Todos los derechos reservados.
                 </p>

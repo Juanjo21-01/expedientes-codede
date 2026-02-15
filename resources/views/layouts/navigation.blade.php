@@ -12,7 +12,7 @@
         <label for="sidebar-drawer"
             class="flex items-center gap-3 p-3 pl-4 border-b border-base-300 cursor-pointer hover:bg-base-200/50 transition-colors is-drawer-close:justify-center">
             <div class="avatar placeholder shrink-0">
-                <div class="bg-primary text-primary-content rounded-lg w-10 h-10 flex items-center justify-center">
+                <div class="bg-primary text-primary-content rounded-full w-10 h-10 flex items-center justify-center">
                     <img src="{{ asset('img/logo.png') }}" alt="CODEDE Logo" class="w-6 h-6">
                 </div>
             </div>
@@ -45,15 +45,15 @@
                 </a>
             </li>
             <li>
-                <a href="#"
-                    class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center    "
-                    data-tip="Guía / Checklist">
+                <a href="{{ route('guias') }}" wire:navigate
+                    class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('guias') ? 'active' : '' }}"
+                    data-tip="Guías">
                     <x-heroicon-o-clipboard-document-list class="w-5 h-5 shrink-0" />
-                    <span class="is-drawer-close:hidden">Guía / Checklist</span>
+                    <span class="is-drawer-close:hidden">Guías</span>
                 </a>
             </li>
 
-            @if (auth()->user()->isAdmin() || auth()->user()->isDirector())
+            @if (auth()->user()->isAdmin() || auth()->user()->isDirector() || auth()->user()->isJefeFinanciero())
                 {{-- Admin Section --}}
                 <li class="menu-title mt-4 is-drawer-close:hidden">
                     <span>Administración</span>
@@ -80,7 +80,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#"
+                    <a href="{{ route('admin.guias.index') }}" wire:navigate
                         class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.guias.*') ? 'active' : '' }}"
                         data-tip="Gestión Guías">
                         <x-heroicon-o-document-check class="w-5 h-5 shrink-0" />

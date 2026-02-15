@@ -4,46 +4,66 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Guia;
+use App\Models\Role;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
 class GuiaPolicy
 {
     use HandlesAuthorization;
 
-    public function view(User $user, Guia $guia)
+    /**
+     * Ver guías (todos los usuarios autenticados)
+     */
+    public function viewAny(User $user): bool
     {
-        return true; // Todos ven la guía actual
-    }
-
-    public function create(User $user)
-    {
-        return $user->role->nombre === 'Administrador';
-    }
-
-    public function update(User $user, Guia $guia)
-    {
-        return $user->role->nombre === 'Administrador';
-    }
-
-    public function delete(User $user, Guia $guia)
-    {
-        return false; // No borrar versiones
+        return true;
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Ver una guía individual (todos)
      */
-    public function restore(User $user, Guia $guia): bool
+    public function view(User $user, Guia $guia): bool
     {
-        return false;
+        return true;
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Acceder al panel admin de guías (Admin, Director, Jefe Financiero)
      */
-    public function forceDelete(User $user, Guia $guia): bool
+    public function adminAccess(User $user): bool
     {
-        return false;
+        return $user->isAdmin() || $user->isDirector() || $user->isJefeFinanciero();
+    }
+
+    /**
+     * Crear/subir guías (Admin, Director, Jefe Financiero)
+     */
+    public function create(User $user): bool
+    {
+        return $user->isAdmin() || $user->isDirector() || $user->isJefeFinanciero();
+    }
+
+    /**
+     * Editar guías (solo Admin)
+     */
+    public function update(User $user, Guia $guia): bool
+    {
+        return $user->isAdmin();
+    }
+
+    /**
+     * Eliminar guías (solo Admin)
+     */
+    public function delete(User $user, Guia $guia): bool
+    {
+        return $user->isAdmin();
+    }
+
+    /**
+     * Activar/desactivar guías (solo Admin)
+     */
+    public function toggleEstado(User $user, Guia $guia): bool
+    {
+        return $user->isAdmin();
     }
 }

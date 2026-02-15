@@ -155,7 +155,7 @@ new class extends Component {
                             <div class="text-xs opacity-60">{{ $expediente->municipio->departamento }}</div>
                         </td>
                         <td class="text-center">
-                            <span class="badge badge-sm {{ $expediente->estado_badge_class }}">
+                            <span class="badge badge-sm {{ $expediente->estado_badge_class }} text-nowrap">
                                 {{ $expediente->estado }}
                             </span>
                         </td>

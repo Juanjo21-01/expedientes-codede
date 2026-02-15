@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('titulo', 100);
             $table->string('archivo_pdf');
             $table->string('version');
+            $table->string('categoria', 100);
+            $table->boolean('estado')->default(true);
             $table->date('fecha_publicacion');
             $table->timestamps();
         });

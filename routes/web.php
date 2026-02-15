@@ -35,10 +35,10 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | Guía - Todos pueden ver la guía actual
+    | Guías - Todos pueden ver las guías activas
     |----------------------------------------------------------------------
     */
-    Route::livewire('/guia', 'pages::guia.show')->name('guia');
+    Route::livewire('/guias', 'pages::guia.index')->name('guias');
 
     /*
     |----------------------------------------------------------------------
@@ -99,13 +99,6 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         Route::livewire('/usuarios', 'pages::admin.usuarios.index')->name('usuarios.index');
         Route::livewire('/usuarios/{usuario}', 'pages::admin.usuarios.show')->name('usuarios.show');
 
-        // Gestión de Guías
-        Route::prefix('guias')->name('guias.')->group(function () {
-            Route::livewire('/', 'pages::admin.guias.index')->name('index');
-            Route::livewire('/crear', 'pages::admin.guias.create')->name('create');
-            Route::livewire('/{guia}/editar', 'pages::admin.guias.edit')->name('edit');
-        });
-
         // Bitácora (solo lectura)
         Route::livewire('/bitacora', 'pages::admin.bitacora.index')->name('bitacora');
 
@@ -119,6 +112,21 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     Route::prefix('admin/municipios')->name('admin.municipios.')->middleware('role:Administrador,Director General')->group(function () {
         Route::livewire('/', 'pages::admin.municipios.index')->name('index');
         Route::livewire('/{municipio}', 'pages::admin.municipios.show')->name('show');
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | Gestión de Guías - Admin (CRUD), Director y Jefe Financiero (solo crear)
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('admin/guias')->name('admin.guias.')->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero')->group(function () {
+        Route::livewire('/', 'pages::admin.guias.index')->name('index');
+        Route::livewire('/crear', 'pages::admin.guias.create')
+            ->can('create', Guia::class)
+            ->name('create');
+        Route::livewire('/{guia}/editar', 'pages::admin.guias.edit')
+            ->can('update', 'guia')
+            ->name('edit');
     });
 
 });
