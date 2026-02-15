@@ -27,10 +27,8 @@ new #[Title('- Subir Guía')] class extends Component {
 
     {{-- Header --}}
     <div class="flex items-center gap-3 mb-6">
-        <div class="avatar placeholder">
-            <div class="bg-primary/10 text-primary rounded-lg w-12 h-12 flex items-center justify-center">
-                <x-heroicon-o-arrow-up-tray class="w-6 h-6" />
-            </div>
+        <div class="bg-primary/10 text-primary rounded-btn p-2">
+            <x-heroicon-o-arrow-up-tray class="w-6 h-6" />
         </div>
         <div>
             <h1 class="text-2xl font-bold">Subir Nueva Guía</h1>

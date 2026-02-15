@@ -217,127 +217,167 @@ new class extends Component {
 
 <div>
     <form wire:submit="intentarGuardar" class="space-y-6">
-        {{-- Categoría (solo en modo crear) --}}
-        @if (!$modoEdicion)
-            <fieldset class="fieldset w-full">
-                <legend class="fieldset-legend">Categoría <span class="text-error">*</span></legend>
-                <select wire:model.live="categoriaSeleccionada" id="categoriaSeleccionada"
-                    class="select w-full @error('categoriaSeleccionada') select-error @enderror">
-                    <option value="" selected disabled>Seleccionar categoría...</option>
-                    @foreach ($this->categorias as $cat)
-                        <option value="{{ $cat }}">{{ $cat }}</option>
-                    @endforeach
-                    <option value="__nueva__">+ Nueva categoría</option>
-                </select>
-                @error('categoriaSeleccionada')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-                <p class="label text-base-content/50">
-                    Agrupar guías del mismo tipo bajo una categoría
-                </p>
-            </fieldset>
+        {{-- Sección: Categoría y Versión --}}
+        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+            <div class="card-body">
+                <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
+                    <x-heroicon-o-tag class="w-5 h-5 text-primary" />
+                    Categoría y Versión
+                </h3>
 
-            {{-- Input nueva categoría --}}
-            @if ($esNuevaCategoria)
-                <fieldset class="fieldset w-full">
-                    <legend class="fieldset-legend">Nombre de la nueva categoría <span class="text-error">*</span>
-                    </legend>
-                    <input type="text" wire:model.live.debounce.300ms="nuevaCategoria" id="nuevaCategoria"
-                        class="input w-full @error('nuevaCategoria') input-error @enderror"
-                        placeholder="Ej: GUÍA DE LLENADO DE EXPEDIENTES" maxlength="100" />
-                    @error('nuevaCategoria')
-                        <p class="label text-error">{{ $message }}</p>
-                    @enderror
-                    <p class="label text-base-content/50">
-                        Se guardará en mayúsculas automáticamente
-                    </p>
-                </fieldset>
-            @endif
-        @else
-            {{-- En edición, categoría es de solo lectura --}}
-            <fieldset class="fieldset w-full">
-                <legend class="fieldset-legend">Categoría</legend>
-                <input type="text" value="{{ $categoriaActual }}" class="input w-full" disabled />
-                <p class="label text-base-content/50">La categoría no se puede cambiar</p>
-            </fieldset>
-        @endif
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{-- Categoría (solo en modo crear) --}}
+                    @if (!$modoEdicion)
+                        <fieldset class="fieldset w-full">
+                            <legend class="fieldset-legend">Categoría <span class="text-error">*</span></legend>
+                            <select wire:model.live="categoriaSeleccionada" id="categoriaSeleccionada"
+                                class="select w-full @error('categoriaSeleccionada') select-error @enderror">
+                                <option value="" selected disabled>Seleccionar categoría...</option>
+                                @foreach ($this->categorias as $cat)
+                                    <option value="{{ $cat }}">{{ $cat }}</option>
+                                @endforeach
+                                <option value="__nueva__">+ Nueva categoría</option>
+                            </select>
+                            @error('categoriaSeleccionada')
+                                <p class="label text-error">{{ $message }}</p>
+                            @enderror
+                            <p class="label text-base-content/50">
+                                Agrupar guías del mismo tipo bajo una categoría
+                            </p>
+                        </fieldset>
+                    @else
+                        {{-- En edición, categoría es de solo lectura --}}
+                        <fieldset class="fieldset w-full">
+                            <legend class="fieldset-legend">Categoría</legend>
+                            <input type="text" value="{{ $categoriaActual }}" class="input w-full" disabled />
+                            <p class="label text-base-content/50">La categoría no se puede cambiar</p>
+                        </fieldset>
+                    @endif
 
-        {{-- Versión auto-calculada --}}
-        <fieldset class="fieldset w-full max-w-xs">
-            <legend class="fieldset-legend">Versión</legend>
-            <input type="text" value="v{{ $versionCalculada }}" class="input w-full font-mono" disabled />
-            <p class="label text-base-content/50">
-                @if ($modoEdicion)
-                    Versión actual
-                @else
-                    Se calcula automáticamente según la categoría
-                @endif
-            </p>
-        </fieldset>
+                    {{-- Versión auto-calculada --}}
+                    <fieldset class="fieldset w-full">
+                        <legend class="fieldset-legend">Versión</legend>
+                        <input type="text" value="v{{ $versionCalculada }}" class="input w-full font-mono"
+                            disabled />
+                        <p class="label text-base-content/50">
+                            @if ($modoEdicion)
+                                Versión actual
+                            @else
+                                Se calcula automáticamente según la categoría
+                            @endif
+                        </p>
+                    </fieldset>
 
-        {{-- Título y Fecha --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <fieldset class="fieldset w-full">
-                <legend class="fieldset-legend">Título <span class="text-error">*</span></legend>
-                <input type="text" wire:model="titulo" id="titulo"
-                    class="input w-full @error('titulo') input-error @enderror"
-                    placeholder="Ej: Guía de Llenado de Expedientes" maxlength="100" />
-                @error('titulo')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
-
-            <fieldset class="fieldset w-full">
-                <legend class="fieldset-legend">Fecha de Publicación <span class="text-error">*</span></legend>
-                <input type="date" wire:model="fecha_publicacion" id="fecha_publicacion"
-                    class="input w-full @error('fecha_publicacion') input-error @enderror" />
-                @error('fecha_publicacion')
-                    <p class="label text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
-        </div>
-
-        {{-- Upload PDF --}}
-        <fieldset class="fieldset w-full">
-            <legend class="fieldset-legend">
-                Archivo PDF
-                @if (!$modoEdicion)
-                    <span class="text-error">*</span>
-                @endif
-            </legend>
-
-            <div
-                class="border-2 border-dashed border-base-content/5 rounded-lg p-6 text-center hover:border-primary/50 transition-colors @error('archivo_pdf') border-error @enderror">
-                <input type="file" wire:model="archivo_pdf" accept=".pdf"
-                    class="file-input file-input-bordered file-input-sm w-full max-w-sm" />
-
-                <div class="mt-3 text-xs text-base-content/50 space-y-1">
-                    <p>Solo archivos PDF, máximo 10 MB</p>
-                    @if ($modoEdicion)
-                        <p class="text-warning">Si sube un nuevo archivo, se reemplazará el actual</p>
+                    {{-- Input nueva categoría (ocupa toda la fila) --}}
+                    @if (!$modoEdicion && $esNuevaCategoria)
+                        <fieldset class="fieldset w-full md:col-span-2">
+                            <legend class="fieldset-legend">Nombre de la nueva categoría <span
+                                    class="text-error">*</span></legend>
+                            <input type="text" wire:model.live.debounce.300ms="nuevaCategoria" id="nuevaCategoria"
+                                class="input w-full @error('nuevaCategoria') input-error @enderror"
+                                placeholder="Ej: GUÍA DE LLENADO DE EXPEDIENTES" maxlength="100" />
+                            @error('nuevaCategoria')
+                                <p class="label text-error">{{ $message }}</p>
+                            @enderror
+                            <p class="label text-base-content/50">
+                                Se guardará en mayúsculas automáticamente
+                            </p>
+                        </fieldset>
                     @endif
                 </div>
+            </div>
+        </div>
 
-                {{-- Preview del archivo seleccionado --}}
-                @if ($archivo_pdf)
-                    <div class="mt-3 flex items-center justify-center gap-2 text-sm text-success">
-                        <x-heroicon-o-check-circle class="w-5 h-5" />
-                        <span>{{ $archivo_pdf->getClientOriginalName() }}
-                            ({{ number_format($archivo_pdf->getSize() / 1024 / 1024, 2) }} MB)</span>
-                    </div>
-                @endif
+        <div class="divider"></div>
 
-                {{-- Spinner de carga --}}
-                <div wire:loading wire:target="archivo_pdf" class="mt-3">
-                    <span class="loading loading-spinner loading-sm text-primary"></span>
-                    <span class="text-sm text-primary ml-2">Cargando archivo...</span>
+        {{-- Sección: Información de la Guía --}}
+        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+            <div class="card-body">
+                <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
+                    <x-heroicon-o-information-circle class="w-5 h-5 text-primary" />
+                    Información de la Guía
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <fieldset class="fieldset w-full">
+                        <legend class="fieldset-legend">Título <span class="text-error">*</span></legend>
+                        <input type="text" wire:model="titulo" id="titulo"
+                            class="input w-full @error('titulo') input-error @enderror"
+                            placeholder="Ej: Guía de Llenado de Expedientes" maxlength="100" />
+                        @error('titulo')
+                            <p class="label text-error">{{ $message }}</p>
+                        @enderror
+                    </fieldset>
+
+                    <fieldset class="fieldset w-full">
+                        <legend class="fieldset-legend">Fecha de Publicación <span class="text-error">*</span></legend>
+                        <input type="date" wire:model="fecha_publicacion" id="fecha_publicacion"
+                            class="input w-full @error('fecha_publicacion') input-error @enderror" />
+                        @error('fecha_publicacion')
+                            <p class="label text-error">{{ $message }}</p>
+                        @enderror
+                    </fieldset>
                 </div>
             </div>
+        </div>
 
-            @error('archivo_pdf')
-                <p class="label text-error">{{ $message }}</p>
-            @enderror
-        </fieldset>
+        <div class="divider"></div>
+
+        {{-- Sección: Archivo PDF --}}
+        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+            <div class="card-body">
+                <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
+                    <x-heroicon-o-document-arrow-up class="w-5 h-5 text-primary" />
+                    Archivo PDF
+                    @if ($modoEdicion)
+                        <span class="badge badge-sm badge-ghost">Opcional</span>
+                    @endif
+                </h3>
+
+                <fieldset class="fieldset w-full">
+                    <legend class="fieldset-legend">
+                        Documento PDF
+                        @if (!$modoEdicion)
+                            <span class="text-error">*</span>
+                        @endif
+                    </legend>
+
+                    <div
+                        class="border-2 border-dashed border-base-content/10 rounded-lg p-6 text-center hover:border-primary/50 transition-colors @error('archivo_pdf') border-error @enderror">
+                        <x-heroicon-o-cloud-arrow-up class="w-10 h-10 mx-auto text-base-content/30 mb-3" />
+
+                        <input type="file" wire:model="archivo_pdf" accept=".pdf"
+                            class="file-input file-input-sm w-full max-w-sm" />
+
+                        <div class="mt-3 text-xs text-base-content/50 space-y-1">
+                            <p>Solo archivos PDF, máximo 10 MB</p>
+                            @if ($modoEdicion)
+                                <p class="text-warning">Si sube un nuevo archivo, se reemplazará el actual</p>
+                            @endif
+                        </div>
+
+                        {{-- Preview del archivo seleccionado --}}
+                        @if ($archivo_pdf)
+                            <div class="mt-3 flex items-center justify-center gap-2 text-sm text-success">
+                                <x-heroicon-o-check-circle class="w-5 h-5" />
+                                <span>{{ $archivo_pdf->getClientOriginalName() }}
+                                    ({{ number_format($archivo_pdf->getSize() / 1024 / 1024, 2) }} MB)</span>
+                            </div>
+                        @endif
+
+                        {{-- Spinner de carga --}}
+                        <div wire:loading wire:target="archivo_pdf" class="mt-3">
+                            <span class="loading loading-spinner loading-sm text-primary"></span>
+                            <span class="text-sm text-primary ml-2">Cargando archivo...</span>
+                        </div>
+                    </div>
+
+                    @error('archivo_pdf')
+                        <p class="label text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
+            </div>
+        </div>
 
         {{-- Botones --}}
         <div class="divider"></div>

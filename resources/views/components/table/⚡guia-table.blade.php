@@ -85,7 +85,7 @@ new class extends Component {
     <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
         <table class="table table-zebra table-sm">
             <thead>
-                <tr>
+                <tr class="bg-base-200">
                     <th class="min-w-[200px]">Título</th>
                     <th class="min-w-[150px]">Categoría</th>
                     <th class="text-center whitespace-nowrap">Versión</th>
@@ -97,7 +97,7 @@ new class extends Component {
             </thead>
             <tbody>
                 @forelse ($this->guias as $guia)
-                    <tr wire:key="guia-{{ $guia->id }}">
+                    <tr wire:key="guia-{{ $guia->id }}" class="hover">
                         <td>
                             <div class="font-medium">{{ $guia->titulo }}</div>
                         </td>
@@ -124,50 +124,57 @@ new class extends Component {
                             @endif
                         </td>
                         <td>
-                            <div class="flex items-center justify-center gap-1">
+                            <div class="flex justify-center items-center gap-1">
                                 {{-- Ver PDF --}}
-                                <button wire:click="abrirPdfModal({{ $guia->id }})"
-                                    class="btn btn-ghost btn-xs tooltip" data-tip="Ver PDF">
-                                    <x-heroicon-o-eye class="w-4 h-4" />
-                                </button>
+                                <div class="tooltip" data-tip="Ver PDF">
+                                    <button wire:click="abrirPdfModal({{ $guia->id }})"
+                                        class="btn btn-ghost btn-sm btn-square text-info">
+                                        <x-heroicon-o-eye class="w-5 h-5" />
+                                    </button>
+                                </div>
 
                                 {{-- Editar (solo Admin) --}}
                                 @can('update', $guia)
-                                    <a href="{{ route('admin.guias.edit', $guia) }}" wire:navigate
-                                        class="btn btn-ghost btn-xs tooltip" data-tip="Editar">
-                                        <x-heroicon-o-pencil-square class="w-4 h-4" />
-                                    </a>
+                                    <div class="tooltip" data-tip="Editar">
+                                        <a href="{{ route('admin.guias.edit', $guia) }}" wire:navigate
+                                            class="btn btn-ghost btn-sm btn-square text-warning">
+                                            <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                        </a>
+                                    </div>
                                 @endcan
 
                                 {{-- Toggle Estado (solo Admin) --}}
                                 @can('toggleEstado', $guia)
-                                    <button wire:click="abrirEstadoModal({{ $guia->id }})"
-                                        class="btn btn-ghost btn-xs tooltip"
-                                        data-tip="{{ $guia->estado ? 'Desactivar' : 'Activar' }}">
-                                        @if ($guia->estado)
-                                            <x-heroicon-o-eye-slash class="w-4 h-4 text-warning" />
-                                        @else
-                                            <x-heroicon-o-check-circle class="w-4 h-4 text-success" />
-                                        @endif
-                                    </button>
+                                    <div class="tooltip" data-tip="{{ $guia->estado ? 'Desactivar' : 'Activar' }}">
+                                        <button wire:click="abrirEstadoModal({{ $guia->id }})"
+                                            class="btn btn-ghost btn-sm btn-square">
+                                            @if ($guia->estado)
+                                                <x-heroicon-o-eye-slash class="w-5 h-5 text-warning" />
+                                            @else
+                                                <x-heroicon-o-check-circle class="w-5 h-5 text-success" />
+                                            @endif
+                                        </button>
+                                    </div>
                                 @endcan
 
                                 {{-- Eliminar (solo Admin) --}}
                                 @can('delete', $guia)
-                                    <button wire:click="abrirDeleteModal({{ $guia->id }})"
-                                        class="btn btn-ghost btn-xs text-error tooltip" data-tip="Eliminar">
-                                        <x-heroicon-o-trash class="w-4 h-4" />
-                                    </button>
+                                    <div class="tooltip" data-tip="Eliminar">
+                                        <button wire:click="abrirDeleteModal({{ $guia->id }})"
+                                            class="btn btn-ghost btn-sm btn-square text-error">
+                                            <x-heroicon-o-trash class="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 @endcan
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-8">
-                            <div class="flex flex-col items-center gap-2 text-base-content/50">
-                                <x-heroicon-o-document class="w-10 h-10" />
-                                <span class="text-sm">No se encontraron guías</span>
+                        <td colspan="7" class="text-center py-12">
+                            <div class="flex flex-col items-center gap-2">
+                                <x-heroicon-o-document class="w-12 h-12 text-base-content/30" />
+                                <span class="text-base-content/50">No se encontraron guías</span>
                             </div>
                         </td>
                     </tr>
