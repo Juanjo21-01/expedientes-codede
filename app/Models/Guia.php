@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Observers\GuiaObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+#[ObservedBy([GuiaObserver::class])]
 class Guia extends Model
 {
     // Nombre de la tabla

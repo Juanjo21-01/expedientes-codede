@@ -4,6 +4,7 @@ use App\Models\Expediente;
 use App\Models\Municipio;
 use App\Models\RevisionFinanciera;
 use App\Models\TipoSolicitud;
+use App\Models\Bitacora;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -316,10 +317,10 @@ new #[Title(' - Reportes')] class extends Component {
     public function exportarPdf(): void
     {
         $vista = match ($this->tab) {
-            'resumen' => 'reportes.pdf.resumen-general',
-            'municipio' => 'reportes.pdf.por-municipio',
-            'tipo' => 'reportes.pdf.por-tipo',
-            'financiero' => 'reportes.pdf.financiero',
+            'resumen' => 'pdf.reportes.resumen-general',
+            'municipio' => 'pdf.reportes.por-municipio',
+            'tipo' => 'pdf.reportes.por-tipo',
+            'financiero' => 'pdf.reportes.financiero',
         };
 
         $nombreArchivo = match ($this->tab) {
@@ -360,7 +361,22 @@ new #[Title(' - Reportes')] class extends Component {
             'contenido' => base64_encode($pdf->output()),
             'nombre' => $filename,
         ]);
-    }
+
+        $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: 'PDF generado correctamente. Iniciando descarga...');
+
+        // Registrar en bitácora
+        // Reporte 'Por Municipio' exportado a PDF – Período: febrero 2026, Municipio: Todos los municipios 
+        $nombre = match ($this->tab) {
+            'resumen' => 'Resumen General',
+            'municipio' => 'Por Municipio',
+            'tipo' => 'Por Tipo Solicitud',
+            'financiero' => 'Financiero',
+        };
+        
+        Bitacora::registrarReporte(
+            "Reporte '{$nombre}' exportado a PDF – Período: {$periodoTexto}, Municipio: {$municipioNombre}",
+        );
+        }
 
     // ---- Helpers ----
 

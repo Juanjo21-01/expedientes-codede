@@ -8,6 +8,7 @@ use App\Models\NotificacionEnviada;
 use App\Models\TipoNotificacion;
 use App\Models\Expediente;
 use App\Models\Municipio;
+use App\Models\Bitacora;
 use App\Mail\NotificacionMail;
 use Illuminate\Support\Facades\Mail;
 
@@ -139,6 +140,15 @@ new class extends Component {
 
             // Marcar como enviada
             $notificacion->marcarEnviada();
+
+            // Registrar en bitácora
+            $contexto = $this->expedienteId
+                ? "sobre Expediente SNIP {$notificacion->expediente?->codigo_snip}"
+                : ($this->municipioId ? "al Municipio {$notificacion->municipio?->nombre}" : 'general');
+            Bitacora::registrarNotificacion(
+                "Notificación enviada a {$this->destinatario_email} – Asunto: {$this->asunto} ({$contexto})",
+                $notificacion->id
+            );
 
             $this->cerrar();
             $this->dispatch('notificacion-enviada');

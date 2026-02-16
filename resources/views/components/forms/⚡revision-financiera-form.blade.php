@@ -3,6 +3,7 @@
 use Livewire\Component;
 use App\Models\Expediente;
 use App\Models\RevisionFinanciera;
+use App\Models\Bitacora;
 
 new class extends Component {
     public int $expedienteId;
@@ -90,6 +91,14 @@ new class extends Component {
         } elseif ($this->accion === RevisionFinanciera::ACCION_RECHAZAR) {
             $expediente->rechazar();
         }
+
+        // Registrar en bitácora
+        $montoTexto = $this->monto_aprobado ? ' – Monto aprobado: Q' . number_format((float) $this->monto_aprobado, 2) : '';
+        $accionTexto = $this->accion ? ", Acción: {$this->accion}" : '';
+        Bitacora::registrarRevision(
+            "Revisión financiera en Expediente {$expediente->codigo_snip} – Estado: {$this->estado}{$accionTexto}{$montoTexto}",
+            $expediente->id
+        );
 
         $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: '¡Revisión registrada con éxito!');
         $this->redirectRoute('expedientes.show', $expediente->id, navigate: true);

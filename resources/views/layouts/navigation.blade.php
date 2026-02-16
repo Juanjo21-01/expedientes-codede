@@ -95,14 +95,16 @@
                         <span class="is-drawer-close:hidden">Notificaciones</span>
                     </a>
                 </li>
-                <li>
-                    <a href="#"
-                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('bitacora') ? 'active' : '' }}"
-                        data-tip="Bitácora">
-                        <x-heroicon-o-clock class="w-5 h-5 shrink-0" />
-                        <span class="is-drawer-close:hidden">Bitácora</span>
-                    </a>
-                </li>
+                @if (auth()->user()->isAdmin() || auth()->user()->isDirector())
+                    <li>
+                        <a href="{{ route('admin.bitacora') }}" wire:navigate
+                            class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.bitacora') ? 'active' : '' }}"
+                            data-tip="Bitácora">
+                            <x-heroicon-o-clock class="w-5 h-5 shrink-0" />
+                            <span class="is-drawer-close:hidden">Bitácora</span>
+                        </a>
+                    </li>
+                @endif
             @endif
 
             {{-- Notificaciones para Técnicos (fuera de la sección admin) --}}

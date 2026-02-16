@@ -99,10 +99,16 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
         Route::livewire('/usuarios', 'pages::admin.usuarios.index')->name('usuarios.index');
         Route::livewire('/usuarios/{usuario}', 'pages::admin.usuarios.show')->name('usuarios.show');
 
-        // Bitácora (solo lectura)
-        Route::livewire('/bitacora', 'pages::admin.bitacora.index')->name('bitacora');
-
     });
+
+    /*
+    |----------------------------------------------------------------------
+    | Bitácora - Administrador y Director General (solo lectura)
+    |----------------------------------------------------------------------
+    */
+    Route::livewire('/admin/bitacora', 'pages::admin.bitacora.index')
+        ->middleware('role:Administrador,Director General')
+        ->name('admin.bitacora');
 
     /*
     |----------------------------------------------------------------------
