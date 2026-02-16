@@ -30,7 +30,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     | Dashboard - Todos los usuarios autenticados
     |----------------------------------------------------------------------
     */
-    Route::view('dashboard', 'pages.dashboard')->name('dashboard');
+    Route::livewire('dashboard', 'pages::dashboard')->name('dashboard');
 
 
     /*

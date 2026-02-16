@@ -151,7 +151,7 @@ new #[Title('- Expedientes')] class extends Component {
             <div class="card-body p-4">
                 <div class="flex items-center gap-4">
                     <div class="avatar placeholder">
-                        <div class="bg-primary text-primary-content rounded-lg w-14 h-14">
+                        <div class="bg-primary text-primary-content rounded-lg w-14 h-14 flex items-center justify-center">
                             <x-heroicon-o-building-office-2 class="w-7 h-7" />
                         </div>
                     </div>
