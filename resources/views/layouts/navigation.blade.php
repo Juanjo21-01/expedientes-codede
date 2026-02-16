@@ -121,17 +121,17 @@
                 </li>
             @endif
 
-            @if (in_array(auth()->user()->role->nombre, ['Administrador', 'Director', 'Jefe Administrativo-Financiero']))
+            @if (in_array(auth()->user()->role->nombre, ['Administrador', 'Director General', 'Jefe Administrativo-Financiero', 'Técnico']))
                 {{-- Reports Section --}}
                 <li class="menu-title mt-4 is-drawer-close:hidden">
                     <span>Reportes</span>
                 </li>
                 <div class="divider my-0 is-drawer-open:hidden"></div>
                 <li>
-                    <a href="#"
+                    <a href="{{ route('reportes') }}" wire:navigate
                         class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('reportes') ? 'active' : '' }}"
                         data-tip="Ver Reportes">
-                        <x-heroicon-o-document-text class="w-5 h-5 shrink-0" />
+                        <x-heroicon-o-chart-bar class="w-5 h-5 shrink-0" />
                         <span class="is-drawer-close:hidden">Ver Reportes</span>
                     </a>
                 </li>

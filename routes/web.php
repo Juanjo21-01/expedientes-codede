@@ -81,11 +81,11 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | Reportes - Solo Director General y Jefe Financiero
+    | Reportes - Admin, Director, Jefe Financiero y Técnico
     |----------------------------------------------------------------------
     */
     Route::livewire('/reportes', 'pages::reportes.index')
-        ->middleware('role:Director General,Jefe Administrativo-Financiero')
+        ->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero,Técnico')
         ->name('reportes');
 
     /*
