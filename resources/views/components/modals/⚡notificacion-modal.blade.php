@@ -142,13 +142,8 @@ new class extends Component {
             $notificacion->marcarEnviada();
 
             // Registrar en bitácora
-            $contexto = $this->expedienteId
-                ? "sobre Expediente SNIP {$notificacion->expediente?->codigo_snip}"
-                : ($this->municipioId ? "al Municipio {$notificacion->municipio?->nombre}" : 'general');
-            Bitacora::registrarNotificacion(
-                "Notificación enviada a {$this->destinatario_email} – Asunto: {$this->asunto} ({$contexto})",
-                $notificacion->id
-            );
+            $contexto = $this->expedienteId ? "sobre Expediente SNIP {$notificacion->expediente?->codigo_snip}" : ($this->municipioId ? "al Municipio {$notificacion->municipio?->nombre}" : 'general');
+            Bitacora::registrarNotificacion("Notificación enviada a {$this->destinatario_email} – Asunto: {$this->asunto} ({$contexto})", $notificacion->id);
 
             $this->cerrar();
             $this->dispatch('notificacion-enviada');
@@ -180,10 +175,10 @@ new class extends Component {
     }
 };
 ?>
-<div>
-    @if ($mostrar)
-        <div class="modal modal-open" wire:keydown.escape.window="cerrar">
-            <div class="modal-box max-w-2xl" wire:click.stop>
+<div x-on:keydown.escape.window="if ($wire.mostrar) $wire.cerrar()">
+    <div class="modal" :class="{ 'modal-open': $wire.mostrar }">
+        <div class="modal-box max-w-2xl" wire:click.stop>
+            @if ($mostrar)
                 {{-- Header --}}
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
@@ -287,8 +282,8 @@ new class extends Component {
                         </button>
                     </div>
                 </form>
-            </div>
-            <div class="modal-backdrop" wire:click="cerrar"></div>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrar"></div>
+    </div>
 </div>

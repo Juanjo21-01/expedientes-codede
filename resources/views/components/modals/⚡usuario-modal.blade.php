@@ -41,10 +41,11 @@ new class extends Component {
 ?>
 
 <div x-on:crear-usuario.window="$wire.crearUsuario()"
-    x-on:abrir-modal-usuario.window="$wire.abrirModal($event.detail.usuarioId)">
-    @if ($show)
-        <div class="modal modal-open">
-            <div class="modal-box w-11/12 max-w-2xl" wire:click.stop>
+    x-on:abrir-modal-usuario.window="$wire.abrirModal($event.detail.usuarioId)"
+    x-on:keydown.escape.window="if ($wire.show) $wire.cerrarModal()">
+    <div class="modal" :class="{ 'modal-open': $wire.show }">
+        <div class="modal-box w-11/12 max-w-2xl" wire:click.stop>
+            @if ($show)
                 <!-- Header -->
                 <div class="flex justify-between items-center mb-4">
                     <h3
@@ -66,10 +67,8 @@ new class extends Component {
 
                 <!-- Formulario -->
                 <livewire:forms.usuario-form :usuarioId="$usuarioId" :key="'usuario-form-' . ($usuarioId ?? 'new')" />
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button wire:click="cerrarModal">close</button>
-            </form>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrarModal"></div>
+    </div>
 </div>

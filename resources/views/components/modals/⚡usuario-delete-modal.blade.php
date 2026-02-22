@@ -82,10 +82,11 @@ new class extends Component {
 };
 ?>
 
-<div x-on:abrir-modal-eliminar.window="$wire.abrirModal($event.detail.usuarioId)">
-    @if ($show && $usuarioEliminar)
-        <div class="modal modal-open">
-            <div class="modal-box" wire:click.stop>
+<div x-on:abrir-modal-eliminar.window="$wire.abrirModal($event.detail.usuarioId)"
+    x-on:keydown.escape.window="if ($wire.show) $wire.cerrarModal()">
+    <div class="modal" :class="{ 'modal-open': $wire.show }">
+        <div class="modal-box" wire:click.stop>
+            @if ($show && $usuarioEliminar)
                 <!-- Header -->
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-error/10 text-error rounded-full p-3">
@@ -138,10 +139,8 @@ new class extends Component {
                         </div>
                     </form>
                 </div>
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button wire:click="cerrarModal">close</button>
-            </form>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrarModal"></div>
+    </div>
 </div>

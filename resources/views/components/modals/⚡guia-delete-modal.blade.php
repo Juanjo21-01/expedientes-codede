@@ -74,10 +74,10 @@ new class extends Component {
 };
 ?>
 
-<div>
-    @if ($mostrar)
-        <div class="modal modal-open">
-            <div class="modal-box max-w-md" wire:click.stop>
+<div x-on:keydown.escape.window="if ($wire.mostrar) $wire.cerrar()">
+    <div class="modal" :class="{ 'modal-open': $wire.mostrar }">
+        <div class="modal-box max-w-md" wire:click.stop>
+            @if ($mostrar)
                 {{-- Encabezado --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
@@ -136,8 +136,8 @@ new class extends Component {
                         </button>
                     </div>
                 </form>
-            </div>
-            <div class="modal-backdrop" wire:click="cerrar"></div>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrar"></div>
+    </div>
 </div>

@@ -34,10 +34,10 @@ new class extends Component {
 };
 ?>
 
-<div>
-    @if ($mostrar)
-        <div class="modal modal-open">
-            <div class="modal-box max-w-6xl w-11/12 h-[90vh] flex flex-col p-0">
+<div x-on:keydown.escape.window="if ($wire.mostrar) $wire.cerrar()">
+    <div class="modal" :class="{ 'modal-open': $wire.mostrar }">
+        <div class="modal-box max-w-6xl w-11/12 h-[90vh] flex flex-col p-0">
+            @if ($mostrar)
                 {{-- Header --}}
                 <div class="flex items-center justify-between px-5 py-3 border-b border-base-content/5">
                     <div class="flex items-center gap-3 min-w-0">
@@ -74,8 +74,8 @@ new class extends Component {
                 <div class="flex-1 bg-base-200">
                     <embed src="{{ $urlPdf }}" type="application/pdf" class="w-full h-full" />
                 </div>
-            </div>
-            <div class="modal-backdrop" wire:click="cerrar"></div>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrar"></div>
+    </div>
 </div>

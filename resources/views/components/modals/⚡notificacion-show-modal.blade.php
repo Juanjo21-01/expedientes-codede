@@ -47,10 +47,11 @@ new class extends Component {
 };
 ?>
 
-<div x-on:ver-detalle-notificacion.window="$wire.abrir($event.detail.notificacionId)">
-    @if ($abierto)
-        <div class="modal modal-open">
-            <div class="modal-box max-w-lg">
+<div x-on:ver-detalle-notificacion.window="$wire.abrir($event.detail.notificacionId)"
+    x-on:keydown.escape.window="if ($wire.abierto) $wire.cerrar()">
+    <div class="modal" :class="{ 'modal-open': $wire.abierto }">
+        <div class="modal-box max-w-lg">
+            @if ($abierto)
                 {{-- Header --}}
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-center gap-2 min-w-0">
@@ -110,8 +111,8 @@ new class extends Component {
                         </div>
                     @endif
                 </div>
-            </div>
-            <div class="modal-backdrop" wire:click="cerrar"></div>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrar"></div>
+    </div>
 </div>

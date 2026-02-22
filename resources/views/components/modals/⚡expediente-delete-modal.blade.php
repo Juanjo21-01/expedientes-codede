@@ -73,10 +73,11 @@ new class extends Component {
 };
 ?>
 
-<div x-on:abrir-modal-eliminar.window="$wire.abrir($event.detail.expedienteId)">
-    @if ($abierto)
-        <div class="modal modal-open">
-            <div class="modal-box max-w-lg">
+<div x-on:abrir-modal-eliminar.window="$wire.abrir($event.detail.expedienteId)"
+    x-on:keydown.escape.window="if ($wire.abierto) $wire.cerrar()">
+    <div class="modal" :class="{ 'modal-open': $wire.abierto }">
+        <div class="modal-box max-w-lg">
+            @if ($abierto)
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
@@ -162,10 +163,8 @@ new class extends Component {
                         </button>
                     </div>
                 @endif
-            </div>
-            <form method="dialog" class="modal-backdrop">
-                <button type="button" wire:click="cerrar">close</button>
-            </form>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrar"></div>
+    </div>
 </div>

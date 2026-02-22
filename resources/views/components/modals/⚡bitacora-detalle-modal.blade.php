@@ -43,10 +43,11 @@ new class extends Component {
 };
 ?>
 
-<div x-on:ver-detalle-bitacora.window="$wire.verDetalle($event.detail.registroId)">
-    @if ($mostrarDetalle && $registroDetalle)
-        <div class="modal modal-open" wire:keydown.escape.window="cerrarDetalle">
-            <div class="modal-box max-w-lg" wire:click.stop>
+<div x-on:ver-detalle-bitacora.window="$wire.verDetalle($event.detail.registroId)"
+    x-on:keydown.escape.window="if ($wire.mostrarDetalle) $wire.cerrarDetalle()">
+    <div class="modal" :class="{ 'modal-open': $wire.mostrarDetalle }">
+        <div class="modal-box max-w-lg" wire:click.stop>
+            @if ($mostrarDetalle && $registroDetalle)
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
                         <x-heroicon-o-information-circle class="w-5 h-5 text-primary" />
@@ -111,8 +112,8 @@ new class extends Component {
                 <div class="modal-action">
                     <button wire:click="cerrarDetalle" class="btn btn-sm">Cerrar</button>
                 </div>
-            </div>
-            <div class="modal-backdrop" wire:click="cerrarDetalle"></div>
+            @endif
         </div>
-    @endif
+        <div class="modal-backdrop" wire:click="cerrarDetalle"></div>
+    </div>
 </div>
