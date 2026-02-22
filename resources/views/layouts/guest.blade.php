@@ -83,8 +83,8 @@
             </div>
 
             <!-- Card -->
-            <div class="card bg-base-200 shadow-xl border border-base-300">
-                <div class="card-body border-b border-base-300">
+            <div class="card bg-base-100 shadow-xl border border-base-300">
+                <div class="card-body">
                     {{ $slot }}
                 </div>
             </div>

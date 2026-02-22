@@ -45,7 +45,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     | Perfil - Todos pueden ver/editar su perfil
     |----------------------------------------------------------------------
     */
-    Route::livewire('/perfil', 'pages::perfil.show')->name('perfil');
+    Route::get('/perfil', fn () => redirect()->route('profile.edit'))->name('perfil');
 
     /*
     |----------------------------------------------------------------------

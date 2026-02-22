@@ -7,15 +7,42 @@ new class extends Component {
 }; ?>
 
 <section class="w-full">
-    @include('partials.settings-heading')
+    <h2 class="sr-only">Configuración de apariencia</h2>
 
-    <flux:heading class="sr-only">{{ __('Appearance Settings') }}</flux:heading>
-
-    <x-pages::settings.layout :heading="__('Appearance')" :subheading="__('Update the appearance settings for your account')">
-        <flux:radio.group x-data variant="segmented" x-model="$flux.appearance">
-            <flux:radio value="light" icon="sun">{{ __('Light') }}</flux:radio>
-            <flux:radio value="dark" icon="moon">{{ __('Dark') }}</flux:radio>
-            <flux:radio value="system" icon="computer-desktop">{{ __('System') }}</flux:radio>
-        </flux:radio.group>
-    </x-pages::settings.layout>
+    <x-auth.settings.layout heading="Apariencia" subheading="Personaliza la apariencia del sistema">
+        <div x-data="{
+            appearance: localStorage.theme ?? 'system',
+            applyTheme(value) {
+                this.appearance = value;
+        
+                if (value === 'system') {
+                    localStorage.removeItem('theme');
+                    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', systemTheme);
+                    return;
+                }
+        
+                localStorage.theme = value;
+                document.documentElement.setAttribute('data-theme', value);
+            }
+        }" class="space-y-4">
+            <div class="form-control">
+                <label class="label cursor-pointer justify-start gap-3">
+                    <input type="radio" class="radio radio-primary" name="appearance" value="light"
+                        x-model="appearance" @change="applyTheme('light')">
+                    <span class="label-text">Claro</span>
+                </label>
+                <label class="label cursor-pointer justify-start gap-3">
+                    <input type="radio" class="radio radio-primary" name="appearance" value="dark"
+                        x-model="appearance" @change="applyTheme('dark')">
+                    <span class="label-text">Oscuro</span>
+                </label>
+                <label class="label cursor-pointer justify-start gap-3">
+                    <input type="radio" class="radio radio-primary" name="appearance" value="system"
+                        x-model="appearance" @change="applyTheme('system')">
+                    <span class="label-text">Sistema</span>
+                </label>
+            </div>
+        </div>
+    </x-auth.settings.layout>
 </section>

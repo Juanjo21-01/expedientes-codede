@@ -40,45 +40,46 @@ new class extends Component {
 }; ?>
 
 <section class="w-full">
-    @include('partials.settings-heading')
+    <h2 class="sr-only">Configuración de contraseña</h2>
 
-    <flux:heading class="sr-only">{{ __('Password Settings') }}</flux:heading>
-
-    <x-pages::settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
+    <x-auth.settings.layout heading="Contraseña"
+        subheading="Asegúrate de usar una contraseña larga y segura para mantener tu cuenta protegida">
         <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
-            <flux:input
-                wire:model="current_password"
-                :label="__('Current password')"
-                type="password"
-                required
-                autocomplete="current-password"
-            />
-            <flux:input
-                wire:model="password"
-                :label="__('New password')"
-                type="password"
-                required
-                autocomplete="new-password"
-            />
-            <flux:input
-                wire:model="password_confirmation"
-                :label="__('Confirm Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-            />
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Contraseña actual <span class="text-error">*</span></legend>
+                <input id="current_password" wire:model="current_password" type="password" required
+                    autocomplete="current-password" class="input w-full" />
+                @error('current_password')
+                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                @enderror
+            </fieldset>
+
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Nueva contraseña <span class="text-error">*</span></legend>
+                <input id="password" wire:model="password" type="password" required autocomplete="new-password"
+                    class="input w-full" />
+                @error('password')
+                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                @enderror
+            </fieldset>
+
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Confirmar contraseña <span class="text-error">*</span></legend>
+                <input id="password_confirmation" wire:model="password_confirmation" type="password" required
+                    autocomplete="new-password" class="input w-full" />
+            </fieldset>
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full" data-test="update-password-button">
-                        {{ __('Save') }}
-                    </flux:button>
+                    <button type="submit" class="btn btn-primary w-full" data-test="update-password-button">
+                        Guardar
+                    </button>
                 </div>
 
                 <x-action-message class="me-3" on="password-updated">
-                    {{ __('Saved.') }}
+                    Guardado.
                 </x-action-message>
             </div>
         </form>
-    </x-pages::settings.layout>
+    </x-auth.settings.layout>
 </section>

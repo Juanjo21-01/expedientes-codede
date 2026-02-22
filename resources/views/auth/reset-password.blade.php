@@ -1,8 +1,8 @@
 <x-layouts::auth>
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Reset password')" :description="__('Please enter your new password below')" />
+        <x-auth-header title="Restablecer contraseña" description="Ingresa tu nueva contraseña" />
 
-        <!-- Session Status -->
+        <!-- Estado de sesión -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
         <form method="POST" action="{{ route('password.update') }}" class="flex flex-col gap-6">
@@ -10,43 +10,33 @@
             <!-- Token -->
             <input type="hidden" name="token" value="{{ request()->route('token') }}">
 
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                value="{{ request('email') }}"
-                :label="__('Email')"
-                type="email"
-                required
-                autocomplete="email"
-            />
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Correo electrónico</legend>
+                <input id="email" name="email" value="{{ request('email') }}" type="email" required
+                    autocomplete="email" class="input w-full" />
+                @error('email')
+                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                @enderror
+            </fieldset>
 
-            <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                viewable
-            />
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Nueva contraseña</legend>
+                <input id="password" name="password" type="password" required autocomplete="new-password"
+                    placeholder="Nueva contraseña" class="input w-full" />
+                @error('password')
+                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                @enderror
+            </fieldset>
 
-            <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                viewable
-            />
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Confirmar contraseña</legend>
+                <input id="password_confirmation" name="password_confirmation" type="password" required
+                    autocomplete="new-password" placeholder="Confirmar contraseña" class="input w-full" />
+            </fieldset>
 
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="reset-password-button">
-                    {{ __('Reset password') }}
-                </flux:button>
-            </div>
+            <button type="submit" class="btn btn-primary w-full" data-test="reset-password-button">
+                Restablecer contraseña
+            </button>
         </form>
     </div>
 </x-layouts::auth>

@@ -3,21 +3,29 @@
         <ul class="menu bg-base-100 rounded-box border border-base-300 p-2" aria-label="Configuración">
             <li>
                 <a href="{{ route('profile.edit') }}" wire:navigate
-                    class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">Perfil</a>
+                    class="{{ request()->routeIs('profile.edit') ? 'active' : '' }}">
+                    Perfil
+                </a>
             </li>
             <li>
                 <a href="{{ route('user-password.edit') }}" wire:navigate
-                    class="{{ request()->routeIs('user-password.edit') ? 'active' : '' }}">Contraseña</a>
+                    class="{{ request()->routeIs('user-password.edit') ? 'active' : '' }}">
+                    Contraseña
+                </a>
             </li>
             @if (Laravel\Fortify\Features::canManageTwoFactorAuthentication())
                 <li>
                     <a href="{{ route('two-factor.show') }}" wire:navigate
-                        class="{{ request()->routeIs('two-factor.show') ? 'active' : '' }}">Autenticación 2FA</a>
+                        class="{{ request()->routeIs('two-factor.show') ? 'active' : '' }}">
+                        Autenticación 2FA
+                    </a>
                 </li>
             @endif
             <li>
                 <a href="{{ route('appearance.edit') }}" wire:navigate
-                    class="{{ request()->routeIs('appearance.edit') ? 'active' : '' }}">Apariencia</a>
+                    class="{{ request()->routeIs('appearance.edit') ? 'active' : '' }}">
+                    Apariencia
+                </a>
             </li>
         </ul>
     </div>

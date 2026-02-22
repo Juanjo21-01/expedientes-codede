@@ -27,37 +27,44 @@ new class extends Component {
 
 <section class="mt-10 space-y-6">
     <div class="relative mb-5">
-        <flux:heading>{{ __('Delete account') }}</flux:heading>
-        <flux:subheading>{{ __('Delete your account and all of its resources') }}</flux:subheading>
+        <h3 class="text-lg font-semibold text-base-content">Eliminar cuenta</h3>
+        <p class="text-sm text-base-content/70">Elimina tu cuenta y todos sus recursos permanentemente</p>
     </div>
 
-    <flux:modal.trigger name="confirm-user-deletion">
-        <flux:button variant="danger" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')" data-test="delete-user-button">
-            {{ __('Delete account') }}
-        </flux:button>
-    </flux:modal.trigger>
+    <button class="btn btn-error" onclick="confirm_user_deletion.showModal()" data-test="delete-user-button">
+        Eliminar cuenta
+    </button>
 
-    <flux:modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable class="max-w-lg">
-        <form method="POST" wire:submit="deleteUser" class="space-y-6">
-            <div>
-                <flux:heading size="lg">{{ __('Are you sure you want to delete your account?') }}</flux:heading>
+    <dialog id="confirm_user_deletion" class="modal" @if ($errors->isNotEmpty()) open @endif>
+        <div class="modal-box max-w-lg">
+            <form method="POST" wire:submit="deleteUser" class="space-y-6">
+                <div>
+                    <h4 class="text-lg font-semibold text-base-content">
+                        ¿Estás seguro de que deseas eliminar tu cuenta?</h4>
+                    <p class="mt-2 text-sm text-base-content/70">
+                        Una vez eliminada tu cuenta, todos sus recursos y datos se borrarán permanentemente.
+                        Ingresa tu contraseña para confirmar que deseas eliminar tu cuenta.
+                    </p>
+                </div>
 
-                <flux:subheading>
-                    {{ __('Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.') }}
-                </flux:subheading>
-            </div>
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Contraseña</legend>
+                    <input id="delete_password" wire:model="password" type="password" class="input w-full" />
+                    @error('password')
+                        <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-            <flux:input wire:model="password" :label="__('Password')" type="password" />
-
-            <div class="flex justify-end space-x-2 rtl:space-x-reverse">
-                <flux:modal.close>
-                    <flux:button variant="filled">{{ __('Cancel') }}</flux:button>
-                </flux:modal.close>
-
-                <flux:button variant="danger" type="submit" data-test="confirm-delete-user-button">
-                    {{ __('Delete account') }}
-                </flux:button>
-            </div>
+                <div class="modal-action">
+                    <button type="button" class="btn" onclick="confirm_user_deletion.close()">Cancelar</button>
+                    <button class="btn btn-error" type="submit" data-test="confirm-delete-user-button">
+                        Eliminar cuenta
+                    </button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>Cerrar</button>
         </form>
-    </flux:modal>
+    </dialog>
 </section>

@@ -131,17 +131,18 @@
                                 <span class="text-xs">{{ auth()->user()->nombres ?? 'Usuario' }}</span>
                             </li>
                             <li>
-                                <a class="flex items-center gap-2">
+                                <a href="{{ route('perfil') }}" wire:navigate class="flex items-center gap-2">
                                     <x-heroicon-o-user class="w-5 h-5" />
                                     Perfil
-                                    <span class="badge badge-sm badge-ghost">Próximamente</span>
                                 </a>
                             </li>
                             <div class="divider my-1"></div>
                             <li>
-                                <form method="POST" action="{{ route('logout') }}" class="flex items-center gap-2 w-full p-0">
+                                <form method="POST" action="{{ route('logout') }}"
+                                    class="flex items-center gap-2 w-full p-0">
                                     @csrf
-                                    <button type="submit" class="text-error flex items-center gap-2 w-full cursor-pointer p-2">
+                                    <button type="submit"
+                                        class="text-error flex items-center gap-2 w-full cursor-pointer p-2">
                                         <x-heroicon-o-arrow-left-start-on-rectangle class="w-5 h-5" />
                                         Cerrar Sesión
                                     </button>
