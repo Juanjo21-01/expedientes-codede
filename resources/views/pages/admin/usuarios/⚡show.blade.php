@@ -2,6 +2,7 @@
 
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 use App\Models\User;
 use App\Models\Expediente;
@@ -26,6 +27,10 @@ new #[Title('- Detalle Usuario')] class extends Component {
     // Cambiar estado del usuario
     public function cambiarEstado()
     {
+        if (!$this->canManageUsuarios) {
+            abort(403, 'Acceso Denegado');
+        }
+
         // No permitir cambiar estado del Administrador
         if ($this->usuario->isAdmin()) {
             $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'No puedes cambiar el estado de un Administrador.');
@@ -47,7 +52,17 @@ new #[Title('- Detalle Usuario')] class extends Component {
     // Emitir evento para editar
     public function editar()
     {
+        if (!$this->canManageUsuarios) {
+            abort(403, 'Acceso Denegado');
+        }
+
         $this->dispatch('abrir-modal-usuario', usuarioId: $this->usuario->id);
+    }
+
+    #[Computed]
+    public function canManageUsuarios(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
     }
 
     // Estadísticas del usuario
@@ -203,24 +218,26 @@ new #[Title('- Detalle Usuario')] class extends Component {
                 </div>
 
                 {{-- Acciones --}}
-                <div class="flex flex-col sm:flex-row gap-2">
-                    @if (!$usuario->isAdmin())
-                        <button wire:click="cambiarEstado"
-                            class="btn {{ $usuario->estaActivo() ? 'btn-outline btn-error' : 'btn-success' }} btn-sm gap-2">
-                            @if ($usuario->estaActivo())
-                                <x-heroicon-o-no-symbol class="w-4 h-4" />
-                                Desactivar
-                            @else
-                                <x-heroicon-o-check-circle class="w-4 h-4" />
-                                Activar
-                            @endif
+                @if ($this->canManageUsuarios)
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        @if (!$usuario->isAdmin())
+                            <button wire:click="cambiarEstado"
+                                class="btn {{ $usuario->estaActivo() ? 'btn-outline btn-error' : 'btn-success' }} btn-sm gap-2">
+                                @if ($usuario->estaActivo())
+                                    <x-heroicon-o-no-symbol class="w-4 h-4" />
+                                    Desactivar
+                                @else
+                                    <x-heroicon-o-check-circle class="w-4 h-4" />
+                                    Activar
+                                @endif
+                            </button>
+                        @endif
+                        <button wire:click="editar" class="btn btn-primary btn-sm gap-2">
+                            <x-heroicon-o-pencil-square class="w-4 h-4" />
+                            Editar perfil
                         </button>
-                    @endif
-                    <button wire:click="editar" class="btn btn-primary btn-sm gap-2">
-                        <x-heroicon-o-pencil-square class="w-4 h-4" />
-                        Editar perfil
-                    </button>
-                </div>
+                    </div>
+                @endif
             </div>
 
             <div class="divider my-4"></div>
@@ -469,8 +486,10 @@ new #[Title('- Detalle Usuario')] class extends Component {
         @endif
     @endif
 
-    {{-- Modal Editar Usuario --}}
-    <livewire:modals.usuario-modal />
+    @if ($this->canManageUsuarios)
+        {{-- Modal Editar Usuario --}}
+        <livewire:modals.usuario-modal />
+    @endif
 </div>
 
 {{-- Script para Chart.js con colores dinámicos del tema --}}

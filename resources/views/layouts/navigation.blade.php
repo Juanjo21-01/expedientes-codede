@@ -61,7 +61,7 @@
                 {{-- Separador visual en modo colapsado --}}
                 <div class="divider my-0 is-drawer-open:hidden"></div>
 
-                @if (auth()->user()->isAdmin())
+                @if (auth()->user()->isAdmin() || auth()->user()->isDirector())
                     <li>
                         <a href="{{ route('admin.usuarios.index') }}" wire:navigate
                             class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.usuarios.*') ? 'active' : '' }}"
@@ -123,7 +123,12 @@
                 </li>
             @endif
 
-            @if (in_array(auth()->user()->role->nombre, ['Administrador', 'Director General', 'Jefe Administrativo-Financiero', 'Técnico']))
+            @if (in_array(auth()->user()->role->nombre, [
+                    'Administrador',
+                    'Director General',
+                    'Jefe Administrativo-Financiero',
+                    'Técnico',
+                ]))
                 {{-- Reports Section --}}
                 <li class="menu-title mt-4 is-drawer-close:hidden">
                     <span>Reportes</span>

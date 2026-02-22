@@ -5,10 +5,18 @@
 <div x-data="{
     toasts: [],
     init() {
-        Livewire.on('mostrar-mensaje', (data) => {
-            const payload = Array.isArray(data) ? data[0] : data;
-            this.addToast(payload);
-        });
+        const initialToast = @js(session('toast'));
+
+        if (initialToast) {
+            this.addToast(initialToast);
+        }
+
+        if (window.Livewire && typeof Livewire.on === 'function') {
+            Livewire.on('mostrar-mensaje', (data) => {
+                const payload = Array.isArray(data) ? data[0] : data;
+                this.addToast(payload);
+            });
+        }
     },
     addToast({ tipo = 'info', mensaje = '' }) {
         const id = Date.now() + Math.random();

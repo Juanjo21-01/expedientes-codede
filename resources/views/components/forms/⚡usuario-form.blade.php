@@ -20,7 +20,6 @@ new class extends Component {
     public $email = '';
     public $password = '';
     public $roleId = '';
-    public $roleIdOriginal = ''; // Para detectar cambio de rol en edición
     public $municipiosSeleccionados = [];
     public $municipioSeleccionado = ''; // Para rol Municipal (select simple)
 
@@ -101,34 +100,6 @@ new class extends Component {
         return $this->roleId ? Role::find($this->roleId) : null;
     }
 
-    // Computed: Rol original del usuario (para detectar cambios)
-    #[Computed]
-    public function rolOriginal()
-    {
-        return $this->roleIdOriginal ? Role::find($this->roleIdOriginal) : null;
-    }
-
-    // Computed: Verificar si se puede cambiar el rol (solo si no tiene municipios en historial)
-    #[Computed]
-    public function puedesCambiarRol()
-    {
-        if (!$this->usuarioId) {
-            return true; // Usuario nuevo, puede elegir cualquier rol
-        }
-
-        $usuario = User::find($this->usuarioId);
-        if (!$usuario) {
-            return true;
-        }
-
-        // Si el rol original requiere municipios, verificar si tiene historial
-        if ($this->rolOriginal?->requiereMunicipios()) {
-            return !$usuario->tieneMunicipiosEnHistorial();
-        }
-
-        return true;
-    }
-
     // Toggle municipio para técnico (checkbox)
     public function toggleMunicipio($municipioId)
     {
@@ -164,7 +135,6 @@ new class extends Component {
             $this->telefono = $usuario->telefono ?? '';
             $this->email = $usuario->email;
             $this->roleId = $usuario->role_id;
-            $this->roleIdOriginal = $usuario->role_id; // Guardar rol original
 
             $municipiosIds = $usuario->municipios->pluck('id')->toArray();
 
@@ -182,17 +152,6 @@ new class extends Component {
     // Limpiar selección de municipios cuando cambia el rol
     public function updatedRoleId()
     {
-        // Si no puede cambiar el rol, revertir al original
-        if (!$this->puedesCambiarRol && $this->rolOriginal?->requiereMunicipios()) {
-            $nuevoRol = Role::find($this->roleId);
-            // Solo bloquear si intenta cambiar entre Municipal/Técnico
-            if ($nuevoRol?->requiereMunicipios() && $this->roleId != $this->roleIdOriginal) {
-                $this->roleId = $this->roleIdOriginal;
-                $this->dispatch('mostrar-mensaje', tipo: 'warning', mensaje: 'No se puede cambiar el rol porque el usuario ya tiene municipios asignados en su historial.');
-                return;
-            }
-        }
-
         $this->municipiosSeleccionados = [];
         $this->municipioSeleccionado = '';
         $this->resetErrorBag('municipiosSeleccionados');
@@ -202,6 +161,19 @@ new class extends Component {
     // Guardar
     public function guardar()
     {
+        if (!auth()->user()?->isAdmin()) {
+            abort(403, 'Acceso Denegado');
+        }
+
+        if ($this->usuarioId) {
+            $usuarioActual = User::find($this->usuarioId);
+            if (!$usuarioActual) {
+                abort(404, 'Usuario no encontrado');
+            }
+            // En edición el rol es solo lectura y no puede cambiarse
+            $this->roleId = $usuarioActual->role_id;
+        }
+
         // Validación base
         $rules = [
             'nombres' => 'required|string|max:50',
@@ -279,7 +251,6 @@ new class extends Component {
                 $usuario->cargo = $this->cargo;
                 $usuario->telefono = $this->telefono;
                 $usuario->email = $this->email;
-                $usuario->role_id = $this->roleId;
 
                 if ($this->password) {
                     $usuario->password = bcrypt($this->password);
@@ -411,39 +382,29 @@ new class extends Component {
                         <p class="label text-error">{{ $message }}</p>
                     @enderror
                 </fieldset>
+            @endif
 
-                <!-- Rol -->
-                <fieldset class="fieldset">
-                    <legend class="fieldset-legend">
-                        Rol<span class="text-error">*</span>
-                    </legend>
+            <!-- Rol -->
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">
+                    Rol<span class="text-error">*</span>
+                </legend>
+
+                @if ($usuarioId)
+                    <input type="text" class="input w-full" value="{{ $this->rolSeleccionado?->nombre }}" readonly disabled />
+                @else
                     <select wire:model.live="roleId" wire:change="clearError('roleId')"
-                        class="select w-full @error('roleId') select-error @enderror"
-                        @if ($usuarioId && $this->rolOriginal?->requiereMunicipios() && !$this->puedesCambiarRol) disabled @endif>
+                        class="select w-full @error('roleId') select-error @enderror">
                         <option value="" disabled selected>Seleccione un rol</option>
                         @foreach ($this->roles as $rol)
-                            <option value="{{ $rol->id }}" @if (
-                                $usuarioId &&
-                                    $this->rolOriginal?->requiereMunicipios() &&
-                                    !$this->puedesCambiarRol &&
-                                    $rol->requiereMunicipios() &&
-                                    $rol->id != $this->roleIdOriginal) disabled @endif>
-                                {{ $rol->nombre }}
-                            </option>
+                            <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
                         @endforeach
                     </select>
                     @error('roleId')
                         <p class="label text-error">{{ $message }}</p>
                     @enderror
-                    @if ($usuarioId && $this->rolOriginal?->requiereMunicipios() && !$this->puedesCambiarRol)
-                        <p class="label text-warning">
-                            <x-heroicon-o-exclamation-triangle class="h-4 w-4 inline mr-1" />
-                            No se puede cambiar el rol porque este usuario tiene municipios asignados en su
-                            historial.
-                        </p>
-                    @endif
-                </fieldset>
-            @endif
+                @endif
+            </fieldset>
 
         </div>
 

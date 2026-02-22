@@ -90,15 +90,17 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | Administración - Solo Administrador
+    | Usuarios - Admin (CRUD) y Director General (solo lectura)
     |----------------------------------------------------------------------
     */
-    Route::prefix('admin')->name('admin.')->middleware('role:Administrador')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('role:Administrador,Director General')->group(function () {
+        Route::livewire('/usuarios', 'pages::admin.usuarios.index')
+            ->can('viewAny', User::class)
+            ->name('usuarios.index');
 
-        // Gestión de Usuarios
-        Route::livewire('/usuarios', 'pages::admin.usuarios.index')->name('usuarios.index');
-        Route::livewire('/usuarios/{usuario}', 'pages::admin.usuarios.show')->name('usuarios.show');
-
+        Route::livewire('/usuarios/{usuario}', 'pages::admin.usuarios.show')
+            ->can('view', 'usuario')
+            ->name('usuarios.show');
     });
 
     /*

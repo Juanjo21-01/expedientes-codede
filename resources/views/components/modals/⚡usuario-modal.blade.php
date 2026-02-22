@@ -11,6 +11,10 @@ new class extends Component {
     // Crear usuario (sin ID)
     public function crearUsuario()
     {
+        if (!auth()->user()?->isAdmin()) {
+            abort(403, 'Acceso Denegado');
+        }
+
         $this->usuarioId = null;
         $this->show = true;
     }
@@ -18,6 +22,10 @@ new class extends Component {
     // Abrir modal con ID (editar)
     public function abrirModal($usuarioId = null)
     {
+        if (!auth()->user()?->isAdmin()) {
+            abort(403, 'Acceso Denegado');
+        }
+
         $this->usuarioId = $usuarioId;
         $this->show = true;
     }

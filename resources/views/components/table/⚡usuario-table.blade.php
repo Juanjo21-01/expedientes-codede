@@ -23,6 +23,12 @@ new class extends Component {
 
     public $perPage = 10;
 
+    #[Computed]
+    public function canManageUsuarios(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
     // Computed: Usuarios paginados con filtros
     #[Computed]
     public function usuarios()
@@ -54,6 +60,10 @@ new class extends Component {
     // Cambiar estado del usuario
     public function cambiarEstado($id)
     {
+        if (!$this->canManageUsuarios) {
+            abort(403, 'Acceso Denegado');
+        }
+
         $usuario = User::find($id);
 
         // No permitir cambiar estado del Administrador
@@ -201,22 +211,32 @@ new class extends Component {
                             @endif
                         </td>
                         <td class="text-center">
-                            <div class="tooltip" data-tip="Cambiar estado">
-                                @if ($usuario->isAdmin())
-                                    <span class="badge badge-success badge-sm gap-1">
-                                        <div class="status status-success status-xs"></div>
-                                        Activo
-                                    </span>
-                                @else
-                                    <button wire:click="cambiarEstado({{ $usuario->id }})"
-                                        class="badge badge-sm cursor-pointer transition-all hover:scale-105 gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
-                                        <div
-                                            class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
-                                        </div>
-                                        {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
-                                    </button>
-                                @endif
-                            </div>
+                            @if ($this->canManageUsuarios)
+                                <div class="tooltip" data-tip="Cambiar estado">
+                                    @if ($usuario->isAdmin())
+                                        <span class="badge badge-success badge-sm gap-1">
+                                            <div class="status status-success status-xs"></div>
+                                            Activo
+                                        </span>
+                                    @else
+                                        <button wire:click="cambiarEstado({{ $usuario->id }})"
+                                            class="badge badge-sm cursor-pointer transition-all hover:scale-105 gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                                            <div
+                                                class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
+                                            </div>
+                                            {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
+                                        </button>
+                                    @endif
+                                </div>
+                            @else
+                                <span
+                                    class="badge badge-sm gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                                    <div
+                                        class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
+                                    </div>
+                                    {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
+                                </span>
+                            @endif
                         </td>
                         <td>
                             <div class="flex justify-center items-center gap-1">
@@ -228,24 +248,26 @@ new class extends Component {
                                     </a>
                                 </div>
 
-                                <!-- Editar -->
-                                <div class="tooltip" data-tip="Editar">
-                                    <button
-                                        @click="$dispatch('abrir-modal-usuario', { usuarioId: {{ $usuario->id }} })"
-                                        class="btn btn-ghost btn-sm btn-square text-warning">
-                                        <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                    </button>
-                                </div>
-
-                                <!-- Eliminar (solo si no es Admin) -->
-                                @if (!$usuario->isAdmin())
-                                    <div class="tooltip" data-tip="Eliminar">
+                                @if ($this->canManageUsuarios)
+                                    <!-- Editar -->
+                                    <div class="tooltip" data-tip="Editar">
                                         <button
-                                            @click="$dispatch('abrir-modal-eliminar', { usuarioId: {{ $usuario->id }} })"
-                                            class="btn btn-ghost btn-sm btn-square text-error">
-                                            <x-heroicon-o-trash class="w-5 h-5" />
+                                            @click="$dispatch('abrir-modal-usuario', { usuarioId: {{ $usuario->id }} })"
+                                            class="btn btn-ghost btn-sm btn-square text-warning">
+                                            <x-heroicon-o-pencil-square class="w-5 h-5" />
                                         </button>
                                     </div>
+
+                                    <!-- Eliminar (solo si no es Admin) -->
+                                    @if (!$usuario->isAdmin())
+                                        <div class="tooltip" data-tip="Eliminar">
+                                            <button
+                                                @click="$dispatch('abrir-modal-eliminar', { usuarioId: {{ $usuario->id }} })"
+                                                class="btn btn-ghost btn-sm btn-square text-error">
+                                                <x-heroicon-o-trash class="w-5 h-5" />
+                                            </button>
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                         </td>

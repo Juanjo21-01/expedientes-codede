@@ -16,6 +16,12 @@ new #[Title('- Usuarios')] class extends Component {
     {
         return Role::all();
     }
+
+    #[Computed]
+    public function canManageUsuarios(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
 };
 ?>
 
@@ -32,11 +38,13 @@ new #[Title('- Usuarios')] class extends Component {
             <p class="text-base-content/60 text-sm mt-1">Administra los usuarios del sistema</p>
         </div>
 
-        <button @click="$dispatch('crear-usuario')"
-            class="btn btn-primary gap-2 shadow-md hover:shadow-lg transition-shadow">
-            <x-heroicon-o-user-plus class="w-5 h-5" />
-            Nuevo Usuario
-        </button>
+        @if ($this->canManageUsuarios)
+            <button @click="$dispatch('crear-usuario')"
+                class="btn btn-primary gap-2 shadow-md hover:shadow-lg transition-shadow">
+                <x-heroicon-o-user-plus class="w-5 h-5" />
+                Nuevo Usuario
+            </button>
+        @endif
     </div>
 
     <!-- Filtros -->
@@ -70,9 +78,11 @@ new #[Title('- Usuarios')] class extends Component {
     <!-- Tabla -->
     <livewire:table.usuario-table :search="$search" :rolFiltro="$rolFiltro" />
 
-    <!-- Modal Crear / Editar -->
-    <livewire:modals.usuario-modal />
+    @if ($this->canManageUsuarios)
+        <!-- Modal Crear / Editar -->
+        <livewire:modals.usuario-modal />
 
-    <!-- Modal Eliminar -->
-    <livewire:modals.usuario-delete-modal />
+        <!-- Modal Eliminar -->
+        <livewire:modals.usuario-delete-modal />
+    @endif
 </div>

@@ -15,6 +15,10 @@ new class extends Component {
     // Abrir modal (llamado desde Alpine.js x-on)
     public function abrirModal($usuarioId)
     {
+        if (!auth()->user()?->isAdmin()) {
+            abort(403, 'Acceso Denegado');
+        }
+
         $this->usuarioEliminar = User::find($usuarioId);
         $this->passwordConfirm = '';
         $this->resetErrorBag();
@@ -24,6 +28,10 @@ new class extends Component {
     // Eliminar usuario
     public function eliminar()
     {
+        if (!auth()->user()?->isAdmin()) {
+            abort(403, 'Acceso Denegado');
+        }
+
         // Validar contraseña del admin
         if (!Hash::check($this->passwordConfirm, Auth::user()->password)) {
             $this->addError('passwordConfirm', 'La contraseña es incorrecta.');

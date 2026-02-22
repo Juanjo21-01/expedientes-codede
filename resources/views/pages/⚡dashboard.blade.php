@@ -543,7 +543,7 @@ new #[Title('Dashboard')] class extends Component {
                         <div class="p-3 hover:bg-base-200/50 transition-colors">
                             <div class="flex items-start gap-3">
                                 <div class="avatar placeholder shrink-0 mt-0.5">
-                                    <div class="bg-neutral text-neutral-content rounded-full w-7 h-7">
+                                    <div class="bg-neutral text-neutral-content rounded-full w-7 h-7 flex items-center justify-center">
                                         <span
                                             class="text-xs">{{ $actividad->user?->iniciales ?? 'S' }}</span>
                                     </div>

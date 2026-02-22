@@ -9,27 +9,27 @@ class UserPolicy
 {
     public function viewAny(User $user)
     {
-        return $user->role->nombre === 'Administrador';
+        return $user->isAdmin() || $user->isDirector();
     }
 
     public function view(User $user, User $model)
     {
-        return $user->role->nombre === 'Administrador';
+        return $user->isAdmin() || $user->isDirector();
     }
 
     public function create(User $user)
     {
-        return $user->role->nombre === 'Administrador';
+        return $user->isAdmin();
     }
 
     public function update(User $user, User $model)
     {
-        return $user->role->nombre === 'Administrador';
+        return $user->isAdmin();
     }
 
     public function delete(User $user, User $model)
     {
-        return $user->role->nombre === 'Administrador';
+        return $user->isAdmin();
     }
 
     /**

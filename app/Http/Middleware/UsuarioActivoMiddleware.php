@@ -17,7 +17,13 @@ class UsuarioActivoMiddleware
     {
         if (auth()->check() && !auth()->user()->estado) {
             auth()->logout();
-            return redirect()->route('login')->with('error', 'Tu cuenta está inactiva. Contacta al administrador.');
+
+            return redirect()
+                ->route('login')
+                ->with('toast', [
+                    'tipo' => 'warning',
+                    'mensaje' => 'Tu cuenta está inactiva. Contacta al administrador.',
+                ]);
         }
 
         return $next($request);
