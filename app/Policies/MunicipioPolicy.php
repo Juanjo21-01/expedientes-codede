@@ -11,19 +11,19 @@ class MunicipioPolicy
     use HandlesAuthorization;
 
     /**
-     * Ver listado de municipios (Admin y Director General)
+     * Ver listado de municipios (Admin, Director y Jefe Financiero)
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isDirector();
+        return $user->isAdmin() || $user->isDirector() || $user->isJefeFinanciero();
     }
 
     /**
-     * Ver detalle de municipio (Admin y Director General)
+     * Ver detalle de municipio (Admin, Director y Jefe Financiero)
      */
     public function view(User $user, Municipio $municipio): bool
     {
-        return $user->isAdmin() || $user->isDirector();
+        return $user->isAdmin() || $user->isDirector() || $user->isJefeFinanciero();
     }
 
     /**

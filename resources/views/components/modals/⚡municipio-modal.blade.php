@@ -11,6 +11,8 @@ new class extends Component {
     // Abrir modal con ID (editar)
     public function abrirModal($municipioId)
     {
+        abort_unless(auth()->user()?->isAdmin(), 403);
+
         $this->municipioId = $municipioId;
         $this->show = true;
     }

@@ -114,12 +114,17 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | Municipios - Administrador (CRUD) y Director General (solo lectura)
+    | Municipios - Administrador (CRUD), Director y Jefe Financiero (solo lectura)
     |----------------------------------------------------------------------
     */
-    Route::prefix('admin/municipios')->name('admin.municipios.')->middleware('role:Administrador,Director General')->group(function () {
-        Route::livewire('/', 'pages::admin.municipios.index')->name('index');
-        Route::livewire('/{municipio}', 'pages::admin.municipios.show')->name('show');
+    Route::prefix('admin/municipios')->name('admin.municipios.')->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero')->group(function () {
+        Route::livewire('/', 'pages::admin.municipios.index')
+            ->can('viewAny', Municipio::class)
+            ->name('index');
+
+        Route::livewire('/{municipio}', 'pages::admin.municipios.show')
+            ->can('view', 'municipio')
+            ->name('show');
     });
 
     /*

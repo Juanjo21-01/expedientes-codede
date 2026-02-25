@@ -45,6 +45,8 @@ new class extends Component {
     // Guardar
     public function guardar()
     {
+        abort_unless(auth()->user()?->isAdmin(), 403);
+
         $this->validate(
             [
                 'contactoNombre' => 'nullable|string|max:100',
