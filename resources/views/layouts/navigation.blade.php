@@ -52,6 +52,14 @@
                     <span class="is-drawer-close:hidden">Guías</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('municipios.index') }}" wire:navigate
+                    class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('municipios.*') ? 'active' : '' }}"
+                    data-tip="Municipalidades">
+                    <x-heroicon-o-building-library class="w-5 h-5 shrink-0" />
+                    <span class="is-drawer-close:hidden">Municipalidades</span>
+                </a>
+            </li>
 
             @if (auth()->user()->isAdmin() || auth()->user()->isDirector() || auth()->user()->isJefeFinanciero())
                 {{-- Admin Section --}}
@@ -71,14 +79,16 @@
                         </a>
                     </li>
                 @endif
-                <li>
-                    <a href="{{ route('admin.municipios.index') }}" wire:navigate
-                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.municipios.*') ? 'active' : '' }}"
-                        data-tip="Municipalidades">
-                        <x-heroicon-o-building-library class="w-5 h-5 shrink-0" />
-                        <span class="is-drawer-close:hidden">Municipalidades</span>
-                    </a>
-                </li>
+                @if (auth()->user()->isAdmin())
+                    <li>
+                        <a href="{{ route('admin.municipios.index') }}" wire:navigate
+                            class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.municipios.*') ? 'active' : '' }}"
+                            data-tip="Gestión Municipios">
+                            <x-heroicon-o-cog-6-tooth class="w-5 h-5 shrink-0" />
+                            <span class="is-drawer-close:hidden">Gestión Municipios</span>
+                        </a>
+                    </li>
+                @endif
                 <li>
                     <a href="{{ route('admin.guias.index') }}" wire:navigate
                         class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.guias.*') ? 'active' : '' }}"
@@ -107,7 +117,7 @@
                 @endif
             @endif
 
-            {{-- Notificaciones para Técnicos (fuera de la sección admin) --}}
+            {{-- Herramientas para Técnicos --}}
             @if (auth()->user()->isTecnico())
                 <li class="menu-title mt-4 is-drawer-close:hidden">
                     <span>Herramientas</span>

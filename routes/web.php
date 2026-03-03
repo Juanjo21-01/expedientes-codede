@@ -42,6 +42,21 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
+    | Municipios (Técnico y Municipal) - Solo sus municipios asignados - Admin, Director pueden ver todos 
+    |----------------------------------------------------------------------
+    */
+    Route::prefix('municipios')->name('municipios.')->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero,Técnico,Municipal')->group(function () {
+        Route::livewire('/', 'pages::municipios.index')
+            ->can('viewAny', Municipio::class)
+            ->name('index');
+
+        Route::livewire('/{municipio}', 'pages::municipios.show')
+            ->can('view', 'municipio')
+            ->name('show');
+    });
+
+    /*
+    |----------------------------------------------------------------------
     | Perfil - Todos pueden ver/editar su perfil
     |----------------------------------------------------------------------
     */

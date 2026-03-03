@@ -11,19 +11,33 @@ class MunicipioPolicy
     use HandlesAuthorization;
 
     /**
-     * Ver listado de municipios (Admin, Director y Jefe Financiero)
+     * Ver listado de municipios (Admin, Director, Jefe Financiero, Técnico y Municipal)
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isDirector() || $user->isJefeFinanciero();
+        return $user->isAdmin()
+            || $user->isDirector()
+            || $user->isJefeFinanciero()
+            || $user->isTecnico()
+            || $user->isMunicipal();
     }
 
     /**
-     * Ver detalle de municipio (Admin, Director y Jefe Financiero)
+     * Ver detalle de municipio
+     * - Admin, Director y Jefe Financiero: acceso global
+     * - Técnico y Municipal: solo municipios asignados
      */
     public function view(User $user, Municipio $municipio): bool
     {
-        return $user->isAdmin() || $user->isDirector() || $user->isJefeFinanciero();
+        if ($user->isAdmin() || $user->isDirector() || $user->isJefeFinanciero()) {
+            return true;
+        }
+
+        if ($user->isTecnico() || $user->isMunicipal()) {
+            return $user->tieneAccesoAMunicipio($municipio->id);
+        }
+
+        return false;
     }
 
     /**
