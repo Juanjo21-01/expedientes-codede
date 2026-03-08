@@ -156,7 +156,7 @@ new #[Title(' - Bitácora')] class extends Component {
             {{-- Entidad --}}
             <select wire:model.live="entidad" class="select select-bordered select-sm w-full">
                 <option value="">Todas las entidades</option>
-                @foreach (\App\Models\Bitacora::getEntidades() as $ent)
+                @foreach (Bitacora::getEntidades() as $ent)
                     <option value="{{ $ent }}">{{ $ent }}</option>
                 @endforeach
             </select>
@@ -164,7 +164,7 @@ new #[Title(' - Bitácora')] class extends Component {
             {{-- Tipo --}}
             <select wire:model.live="tipo" class="select select-bordered select-sm w-full">
                 <option value="">Todos los tipos</option>
-                @foreach (\App\Models\Bitacora::getTipos() as $t)
+                @foreach (Bitacora::getTipos() as $t)
                     <option value="{{ $t }}">{{ $t }}</option>
                 @endforeach
             </select>
@@ -194,8 +194,8 @@ new #[Title(' - Bitácora')] class extends Component {
     </div>
 
     {{-- Tabla --}}
-    <livewire:table.bitacora-table :search="$search" :entidad="$entidad" :tipo="$tipo" :usuario_id="$usuario_id" :fecha_desde="$fecha_desde"
-        :fecha_hasta="$fecha_hasta" />
+    <livewire:table.bitacora-table :search="$search" :entidad="$entidad" :tipo="$tipo" :usuario_id="$usuario_id"
+        :fecha_desde="$fecha_desde" :fecha_hasta="$fecha_hasta" />
 
     {{-- Modal de detalle --}}
     <livewire:modals.bitacora-detalle-modal />

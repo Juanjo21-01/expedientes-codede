@@ -20,10 +20,13 @@ class RevisionFinanciera extends Model
     public const ACCION_APROBAR = 'Aprobar';
     public const ACCION_RECHAZAR = 'Rechazar';
     public const ACCION_SOLICITAR_CORRECCIONES = 'SolicitarCorrecciones';
+    public const ACCION_REACTIVAR = 'Reactivar';
 
     // Atributos asignables
     protected $fillable = [
         'expediente_id',
+        'tipo_solicitud_id',
+        'numero_revision',
         'revisor_id',
         'estado',
         'accion',
@@ -55,6 +58,11 @@ class RevisionFinanciera extends Model
     public function revisor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'revisor_id');
+    }
+
+    public function tipoSolicitud(): BelongsTo
+    {
+        return $this->belongsTo(TipoSolicitud::class, 'tipo_solicitud_id');
     }
 
     // ---- Scopes ----
@@ -146,6 +154,11 @@ class RevisionFinanciera extends Model
         return $this->accion === self::ACCION_SOLICITAR_CORRECCIONES;
     }
 
+    public function fueReactivada(): bool
+    {
+        return $this->accion === self::ACCION_REACTIVAR;
+    }
+
     public function tieneAccion(): bool
     {
         return !empty($this->accion);
@@ -198,6 +211,7 @@ class RevisionFinanciera extends Model
             self::ACCION_APROBAR => 'badge-success',
             self::ACCION_RECHAZAR => 'badge-error',
             self::ACCION_SOLICITAR_CORRECCIONES => 'badge-warning',
+            self::ACCION_REACTIVAR => 'badge-info',
             default => 'badge-ghost',
         };
     }
@@ -211,6 +225,7 @@ class RevisionFinanciera extends Model
             self::ACCION_APROBAR => 'Aprobado',
             self::ACCION_RECHAZAR => 'Rechazado',
             self::ACCION_SOLICITAR_CORRECCIONES => 'Solicitar Correcciones',
+            self::ACCION_REACTIVAR => 'Reactivada',
             default => 'Sin acción',
         };
     }
@@ -231,6 +246,7 @@ class RevisionFinanciera extends Model
             self::ACCION_APROBAR,
             self::ACCION_RECHAZAR,
             self::ACCION_SOLICITAR_CORRECCIONES,
+            self::ACCION_REACTIVAR,
         ];
     }
 }

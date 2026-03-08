@@ -14,9 +14,9 @@ class TipoSolicitudesSeeder extends Seeder
     public function run(): void
     {
         // Crear tipos de solicitudes
-        TipoSolicitud::create(['nombre' => 'Anticipo (20%)']);
-        TipoSolicitud::create(['nombre' => 'Primer Desembolso']);
-        TipoSolicitud::create(['nombre' => 'Segundo Desembolso (46%)']);
+        TipoSolicitud::create(['nombre' => 'Primer Desembolso (20%)']);
+        TipoSolicitud::create(['nombre' => 'Segundo Desembolso']);
+        TipoSolicitud::create(['nombre' => 'Tercer Desembolso']);
         TipoSolicitud::create(['nombre' => 'Pago Final (100%)']);
     }
 }

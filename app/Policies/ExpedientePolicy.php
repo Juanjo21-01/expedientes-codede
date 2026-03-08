@@ -25,8 +25,6 @@ class ExpedientePolicy
             Role::ADMIN, Role::DIRECTOR => true,
             Role::JEFE_FINANCIERO => in_array($expediente->estado, [
                 Expediente::ESTADO_EN_REVISION,
-                Expediente::ESTADO_COMPLETO,
-                Expediente::ESTADO_INCOMPLETO,
                 Expediente::ESTADO_APROBADO,
                 Expediente::ESTADO_RECHAZADO,
             ]),
@@ -63,7 +61,7 @@ class ExpedientePolicy
             $expediente->estaEnRevision();
     }
 
-    // Enviar a revisión (Técnico, desde Recibido)
+    // Enviar a revisión (Técnico, desde Recibido o cuando se le devuelve)
     public function enviarRevision(User $user, Expediente $expediente): bool
     {
         return $user->isTecnico() &&
@@ -71,10 +69,10 @@ class ExpedientePolicy
             $expediente->estaRecibido();
     }
 
-    // Cambiar estado rápido (solo Admin)
+    // Cambiar estado rápido (solo Admin, no en estados finales)
     public function cambiarEstado(User $user, Expediente $expediente): bool
     {
-        return $user->isAdmin() && !$expediente->estaArchivado();
+        return $user->isAdmin() && !$expediente->estaFinalizado();
     }
 
     // Eliminar (Admin, solo si NO tiene revisiones financieras y está en Recibido)
@@ -85,10 +83,12 @@ class ExpedientePolicy
             $expediente->revisionesFinancieras()->count() === 0;
     }
 
-    // Archivar (Admin, cualquier estado excepto ya archivado)
+    // Archivar (Admin, solo Recibido y Rechazado)
     public function archivar(User $user, Expediente $expediente): bool
     {
-        return $user->isAdmin() && !$expediente->estaArchivado();
+        return $user->isAdmin() && (
+            $expediente->estaRecibido() || $expediente->estaRechazado()
+        );
     }
 
     public function restore(User $user, Expediente $expediente): bool

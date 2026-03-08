@@ -217,8 +217,6 @@
                     <th>Municipio</th>
                     <th>Recibidos</th>
                     <th>En Revisión</th>
-                    <th>Completos</th>
-                    <th>Incompletos</th>
                     <th>Aprobados</th>
                     <th>Rechazados</th>
                     <th>Archivados</th>
@@ -234,8 +232,6 @@
                             <td>{{ $fila['nombre'] }}</td>
                             <td>{{ $fila['recibidos'] }}</td>
                             <td>{{ $fila['en_revision'] }}</td>
-                            <td>{{ $fila['completos'] }}</td>
-                            <td>{{ $fila['incompletos'] }}</td>
                             <td>{{ $fila['aprobados'] }}</td>
                             <td>{{ $fila['rechazados'] }}</td>
                             <td>{{ $fila['archivados'] }}</td>
@@ -251,8 +247,6 @@
                     <td>TOTAL</td>
                     <td>{{ $datos->sum('recibidos') }}</td>
                     <td>{{ $datos->sum('en_revision') }}</td>
-                    <td>{{ $datos->sum('completos') }}</td>
-                    <td>{{ $datos->sum('incompletos') }}</td>
                     <td>{{ $datos->sum('aprobados') }}</td>
                     <td>{{ $datos->sum('rechazados') }}</td>
                     <td>{{ $datos->sum('archivados') }}</td>

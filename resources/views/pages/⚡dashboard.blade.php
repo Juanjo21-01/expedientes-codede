@@ -14,7 +14,6 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Title('Dashboard')] class extends Component {
-
     // ---- Helpers de rol ----
 
     #[Computed]
@@ -57,12 +56,7 @@ new #[Title('Dashboard')] class extends Component {
         $tasaAprobacion = $finalizados > 0 ? round(($aprobados / $finalizados) * 100, 1) : 0;
 
         // Tiempo promedio de trámite (solo aprobados con fecha_aprobacion)
-        $tiempoPromedio = (clone $base)
-            ->aprobados()
-            ->whereNotNull('fecha_aprobacion')
-            ->whereNotNull('fecha_recibido')
-            ->selectRaw('AVG(DATEDIFF(fecha_aprobacion, fecha_recibido)) as promedio')
-            ->value('promedio');
+        $tiempoPromedio = (clone $base)->aprobados()->whereNotNull('fecha_aprobacion')->whereNotNull('fecha_recibido')->selectRaw('AVG(DATEDIFF(fecha_aprobacion, fecha_recibido)) as promedio')->value('promedio');
         $tiempoPromedio = $tiempoPromedio ? round($tiempoPromedio) : 0;
 
         // Monto total contratado
@@ -70,56 +64,28 @@ new #[Title('Dashboard')] class extends Component {
 
         // Stats específicos por rol
         if ($user->isAdmin() || $user->isDirector()) {
-            return [
-                ['label' => 'Total Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'],
-                ['label' => 'Activos', 'value' => $activos, 'icon' => 'clock', 'color' => 'text-info'],
-                ['label' => 'Este Mes', 'value' => $esteMes, 'icon' => 'calendar-days', 'color' => 'text-success'],
-                ['label' => 'Monto Contratado', 'value' => 'Q ' . number_format($montoTotal, 2), 'icon' => 'banknotes', 'color' => 'text-warning'],
-                ['label' => 'Tasa Aprobación', 'value' => $tasaAprobacion . '%', 'icon' => 'check-badge', 'color' => 'text-success'],
-                ['label' => 'Tiempo Prom. (días)', 'value' => $tiempoPromedio, 'icon' => 'clock', 'color' => 'text-accent'],
-                ['label' => 'Municipios Activos', 'value' => Municipio::activos()->count(), 'icon' => 'building-library', 'color' => 'text-secondary'],
-                ['label' => 'Usuarios Activos', 'value' => User::activos()->count(), 'icon' => 'users', 'color' => 'text-primary'],
-            ];
+            return [['label' => 'Total Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'], ['label' => 'Activos', 'value' => $activos, 'icon' => 'clock', 'color' => 'text-info'], ['label' => 'Este Mes', 'value' => $esteMes, 'icon' => 'calendar-days', 'color' => 'text-success'], ['label' => 'Monto Contratado', 'value' => 'Q ' . number_format($montoTotal, 2), 'icon' => 'banknotes', 'color' => 'text-warning'], ['label' => 'Tasa Aprobación', 'value' => $tasaAprobacion . '%', 'icon' => 'check-badge', 'color' => 'text-success'], ['label' => 'Tiempo Prom. (días)', 'value' => $tiempoPromedio, 'icon' => 'clock', 'color' => 'text-accent'], ['label' => 'Municipios Activos', 'value' => Municipio::activos()->count(), 'icon' => 'building-library', 'color' => 'text-secondary'], ['label' => 'Usuarios Activos', 'value' => User::activos()->count(), 'icon' => 'users', 'color' => 'text-primary']];
         }
 
         if ($user->isJefeFinanciero()) {
             $enRevision = (clone $base)->enRevision()->count();
             $revisionesMes = RevisionFinanciera::deEsteMes()->count();
-            $montoAprobado = RevisionFinanciera::completas()
-                ->whereHas('expediente', fn($q) => $q->accesiblesPor($user))
-                ->sum('monto_aprobado');
+            $montoAprobado = RevisionFinanciera::completas()->whereHas('expediente', fn($q) => $q->accesiblesPor($user))->sum('monto_aprobado');
             $pendientes = RevisionFinanciera::pendientesComplemento()->count();
 
-            return [
-                ['label' => 'En Revisión', 'value' => $enRevision, 'icon' => 'magnifying-glass', 'color' => 'text-warning'],
-                ['label' => 'Revisiones este Mes', 'value' => $revisionesMes, 'icon' => 'clipboard-document-check', 'color' => 'text-info'],
-                ['label' => 'Monto Aprobado', 'value' => 'Q ' . number_format($montoAprobado, 2), 'icon' => 'banknotes', 'color' => 'text-success'],
-                ['label' => 'Pend. Complemento', 'value' => $pendientes, 'icon' => 'exclamation-triangle', 'color' => 'text-error'],
-                ['label' => 'Total Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'],
-                ['label' => 'Tasa Aprobación', 'value' => $tasaAprobacion . '%', 'icon' => 'check-badge', 'color' => 'text-success'],
-            ];
+            return [['label' => 'En Revisión', 'value' => $enRevision, 'icon' => 'magnifying-glass', 'color' => 'text-warning'], ['label' => 'Revisiones este Mes', 'value' => $revisionesMes, 'icon' => 'clipboard-document-check', 'color' => 'text-info'], ['label' => 'Monto Aprobado', 'value' => 'Q ' . number_format($montoAprobado, 2), 'icon' => 'banknotes', 'color' => 'text-success'], ['label' => 'Pend. Complemento', 'value' => $pendientes, 'icon' => 'exclamation-triangle', 'color' => 'text-error'], ['label' => 'Total Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'], ['label' => 'Tasa Aprobación', 'value' => $tasaAprobacion . '%', 'icon' => 'check-badge', 'color' => 'text-success']];
         }
 
         if ($user->isTecnico()) {
             $pendientes = (clone $base)->whereIn('estado', [Expediente::ESTADO_RECIBIDO, Expediente::ESTADO_EN_REVISION])->count();
-            $incompletos = (clone $base)->incompletos()->count();
+            $rechazados = (clone $base)->rechazados()->count();
 
-            return [
-                ['label' => 'Mis Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'],
-                ['label' => 'Pendientes', 'value' => $pendientes, 'icon' => 'clock', 'color' => 'text-warning'],
-                ['label' => 'Incompletos', 'value' => $incompletos, 'icon' => 'exclamation-triangle', 'color' => 'text-error'],
-                ['label' => 'Aprobados este Mes', 'value' => (clone $base)->aprobados()->deEsteMes()->count(), 'icon' => 'check-badge', 'color' => 'text-success'],
-            ];
+            return [['label' => 'Mis Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'], ['label' => 'Pendientes', 'value' => $pendientes, 'icon' => 'clock', 'color' => 'text-warning'], ['label' => 'Rechazados', 'value' => $rechazados, 'icon' => 'exclamation-triangle', 'color' => 'text-error'], ['label' => 'Aprobados este Mes', 'value' => (clone $base)->aprobados()->deEsteMes()->count(), 'icon' => 'check-badge', 'color' => 'text-success']];
         }
 
         // Municipal
         $enProceso = (clone $base)->activos()->count();
-        return [
-            ['label' => 'Mis Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'],
-            ['label' => 'En Proceso', 'value' => $enProceso, 'icon' => 'clock', 'color' => 'text-info'],
-            ['label' => 'Aprobados', 'value' => $aprobados, 'icon' => 'check-badge', 'color' => 'text-success'],
-            ['label' => 'Este Mes', 'value' => $esteMes, 'icon' => 'calendar-days', 'color' => 'text-accent'],
-        ];
+        return [['label' => 'Mis Expedientes', 'value' => $total, 'icon' => 'folder-open', 'color' => 'text-primary'], ['label' => 'En Proceso', 'value' => $enProceso, 'icon' => 'clock', 'color' => 'text-info'], ['label' => 'Aprobados', 'value' => $aprobados, 'icon' => 'check-badge', 'color' => 'text-success'], ['label' => 'Este Mes', 'value' => $esteMes, 'icon' => 'calendar-days', 'color' => 'text-accent']];
     }
 
     // ===============================================================
@@ -138,8 +104,6 @@ new #[Title('Dashboard')] class extends Component {
         $colores = [
             Expediente::ESTADO_RECIBIDO => '#3b82f6',
             Expediente::ESTADO_EN_REVISION => '#f59e0b',
-            Expediente::ESTADO_COMPLETO => '#10b981',
-            Expediente::ESTADO_INCOMPLETO => '#ef4444',
             Expediente::ESTADO_APROBADO => '#22c55e',
             Expediente::ESTADO_RECHAZADO => '#dc2626',
             Expediente::ESTADO_ARCHIVADO => '#6b7280',
@@ -169,13 +133,7 @@ new #[Title('Dashboard')] class extends Component {
     {
         $base = $this->expedienteBase();
 
-        $municipios = (clone $base)
-            ->select('municipio_id', DB::raw('COUNT(*) as total'))
-            ->groupBy('municipio_id')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->with('municipio:id,nombre')
-            ->get();
+        $municipios = (clone $base)->select('municipio_id', DB::raw('COUNT(*) as total'))->groupBy('municipio_id')->orderByDesc('total')->limit(10)->with('municipio:id,nombre')->get();
 
         return [
             'labels' => $municipios->pluck('municipio.nombre')->toArray(),
@@ -197,18 +155,11 @@ new #[Title('Dashboard')] class extends Component {
             $fecha = now()->subMonths($i);
             $labels[] = $fecha->translatedFormat('M Y');
 
-            $mesBase = (clone $this->expedienteBase())
-                ->whereYear('fecha_recibido', $fecha->year)
-                ->whereMonth('fecha_recibido', $fecha->month);
+            $mesBase = (clone $this->expedienteBase())->whereYear('fecha_recibido', $fecha->year)->whereMonth('fecha_recibido', $fecha->month);
 
             $recibidos[] = (clone $mesBase)->count();
 
-            $aprobadosMes[] = (clone $this->expedienteBase())
-                ->aprobados()
-                ->whereNotNull('fecha_aprobacion')
-                ->whereYear('fecha_aprobacion', $fecha->year)
-                ->whereMonth('fecha_aprobacion', $fecha->month)
-                ->count();
+            $aprobadosMes[] = (clone $this->expedienteBase())->aprobados()->whereNotNull('fecha_aprobacion')->whereYear('fecha_aprobacion', $fecha->year)->whereMonth('fecha_aprobacion', $fecha->month)->count();
         }
 
         return compact('labels', 'recibidos', 'aprobadosMes');
@@ -261,8 +212,7 @@ new #[Title('Dashboard')] class extends Component {
 
             $query->where(function ($q) use ($expedienteIds) {
                 $q->where(function ($sub) use ($expedienteIds) {
-                    $sub->where('entidad', Bitacora::ENTIDAD_EXPEDIENTE)
-                        ->whereIn('entidad_id', $expedienteIds);
+                    $sub->where('entidad', Bitacora::ENTIDAD_EXPEDIENTE)->whereIn('entidad_id', $expedienteIds);
                 })->orWhere('user_id', $this->user->id);
             });
         }
@@ -278,7 +228,7 @@ new #[Title('Dashboard')] class extends Component {
     public function expedientesRecientes()
     {
         return $this->expedienteBase()
-            ->with(['municipio:id,nombre', 'tipoSolicitud:id,nombre'])
+            ->with(['municipio:id,nombre'])
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
@@ -323,7 +273,8 @@ new #[Title('Dashboard')] class extends Component {
 
 <div>
     {{-- Banner de bienvenida --}}
-    <div class="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-box p-5 mb-6 border border-primary/20">
+    <div
+        class="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent rounded-box p-5 mb-6 border border-primary/20">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold">
@@ -371,7 +322,8 @@ new #[Title('Dashboard')] class extends Component {
     </div>
 
     {{-- Stat Cards --}}
-    <div class="grid grid-cols-2 {{ count($this->stats) > 6 ? 'lg:grid-cols-4' : 'lg:grid-cols-' . min(count($this->stats), 4) }} gap-4 mb-6">
+    <div
+        class="grid grid-cols-2 {{ count($this->stats) > 6 ? 'lg:grid-cols-4' : 'lg:grid-cols-' . min(count($this->stats), 4) }} gap-4 mb-6">
         @foreach ($this->stats as $stat)
             <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 p-4">
                 <div class="flex items-center justify-between">
@@ -437,8 +389,7 @@ new #[Title('Dashboard')] class extends Component {
                 Distribución por Estado
             </h3>
             @if (count($this->chartEstados['data']) > 0)
-                <div class="flex justify-center" wire:ignore
-                    x-data="dashboardDonutChart(@js($this->chartEstados))" x-init="initChart()"
+                <div class="flex justify-center" wire:ignore x-data="dashboardDonutChart(@js($this->chartEstados))" x-init="initChart()"
                     x-effect="updateChart(@js($this->chartEstados))">
                     <canvas x-ref="donutChart" style="max-height: 280px;"></canvas>
                 </div>
@@ -456,8 +407,8 @@ new #[Title('Dashboard')] class extends Component {
                     <x-heroicon-o-arrow-trending-up class="w-5 h-5 text-success" />
                     Tendencia Mensual (últimos 6 meses)
                 </h3>
-                <div wire:ignore x-data="dashboardTendenciaChart(@js($this->chartTendencia))"
-                    x-init="initChart()" x-effect="updateChart(@js($this->chartTendencia))">
+                <div wire:ignore x-data="dashboardTendenciaChart(@js($this->chartTendencia))" x-init="initChart()"
+                    x-effect="updateChart(@js($this->chartTendencia))">
                     <canvas x-ref="tendenciaChart" style="max-height: 280px;"></canvas>
                 </div>
             </div>
@@ -471,8 +422,8 @@ new #[Title('Dashboard')] class extends Component {
                     Top Municipios con más Expedientes
                 </h3>
                 @if (count($this->chartMunicipios['data']) > 0)
-                    <div wire:ignore x-data="dashboardBarChart(@js($this->chartMunicipios))"
-                        x-init="initChart()" x-effect="updateChart(@js($this->chartMunicipios))">
+                    <div wire:ignore x-data="dashboardBarChart(@js($this->chartMunicipios))" x-init="initChart()"
+                        x-effect="updateChart(@js($this->chartMunicipios))">
                         <canvas x-ref="barChart" style="max-height: 300px;"></canvas>
                     </div>
                 @else
@@ -491,8 +442,7 @@ new #[Title('Dashboard')] class extends Component {
                     Revisiones por Tipo de Acción
                 </h3>
                 @if (array_sum($this->chartRevisiones['data']) > 0)
-                    <div class="flex justify-center" wire:ignore
-                        x-data="dashboardDonutChart(@js($this->chartRevisiones))" x-init="initChart()"
+                    <div class="flex justify-center" wire:ignore x-data="dashboardDonutChart(@js($this->chartRevisiones))" x-init="initChart()"
                         x-effect="updateChart(@js($this->chartRevisiones))">
                         <canvas x-ref="donutChart" style="max-height: 280px;"></canvas>
                     </div>
@@ -511,8 +461,8 @@ new #[Title('Dashboard')] class extends Component {
                     <x-heroicon-o-building-library class="w-5 h-5 text-accent" />
                     Expedientes en Mis Municipios
                 </h3>
-                <div wire:ignore x-data="dashboardBarChart(@js($this->chartMunicipios))"
-                    x-init="initChart()" x-effect="updateChart(@js($this->chartMunicipios))">
+                <div wire:ignore x-data="dashboardBarChart(@js($this->chartMunicipios))" x-init="initChart()"
+                    x-effect="updateChart(@js($this->chartMunicipios))">
                     <canvas x-ref="barChart" style="max-height: 280px;"></canvas>
                 </div>
             </div>
@@ -531,8 +481,7 @@ new #[Title('Dashboard')] class extends Component {
                         Actividad Reciente
                     </h3>
                     @if ($this->user->isAdmin() || $this->user->isDirector())
-                        <a href="{{ route('admin.bitacora') }}" wire:navigate
-                            class="btn btn-ghost btn-xs gap-1">
+                        <a href="{{ route('admin.bitacora') }}" wire:navigate class="btn btn-ghost btn-xs gap-1">
                             Ver todo
                             <x-heroicon-o-arrow-right class="w-3 h-3" />
                         </a>
@@ -543,9 +492,9 @@ new #[Title('Dashboard')] class extends Component {
                         <div class="p-3 hover:bg-base-200/50 transition-colors">
                             <div class="flex items-start gap-3">
                                 <div class="avatar placeholder shrink-0 mt-0.5">
-                                    <div class="bg-neutral text-neutral-content rounded-full w-7 h-7 flex items-center justify-center">
-                                        <span
-                                            class="text-xs">{{ $actividad->user?->iniciales ?? 'S' }}</span>
+                                    <div
+                                        class="bg-neutral text-neutral-content rounded-full w-7 h-7 flex items-center justify-center">
+                                        <span class="text-xs">{{ $actividad->user?->iniciales ?? 'S' }}</span>
                                     </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -659,7 +608,9 @@ new #[Title('Dashboard')] class extends Component {
                                             padding: 15,
                                             usePointStyle: true,
                                             pointStyle: 'circle',
-                                            font: { size: 11 }
+                                            font: {
+                                                size: 11
+                                            }
                                         }
                                     },
                                     tooltip: {
@@ -683,7 +634,10 @@ new #[Title('Dashboard')] class extends Component {
                         chart.update();
                     },
                     destroyChart() {
-                        if (chart) { chart.destroy(); chart = null; }
+                        if (chart) {
+                            chart.destroy();
+                            chart = null;
+                        }
                     }
                 };
             });
@@ -699,8 +653,7 @@ new #[Title('Dashboard')] class extends Component {
                             type: 'line',
                             data: {
                                 labels: initialData.labels,
-                                datasets: [
-                                    {
+                                datasets: [{
                                         label: 'Recibidos',
                                         data: initialData.recibidos,
                                         borderColor: '#3b82f6',
@@ -725,22 +678,44 @@ new #[Title('Dashboard')] class extends Component {
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: true,
-                                interaction: { intersect: false, mode: 'index' },
+                                interaction: {
+                                    intersect: false,
+                                    mode: 'index'
+                                },
                                 scales: {
                                     y: {
                                         beginAtZero: true,
-                                        ticks: { stepSize: 1, font: { size: 11 } },
-                                        grid: { color: 'rgba(0,0,0,0.05)' }
+                                        ticks: {
+                                            stepSize: 1,
+                                            font: {
+                                                size: 11
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0,0,0,0.05)'
+                                        }
                                     },
                                     x: {
-                                        ticks: { font: { size: 10 } },
-                                        grid: { display: false }
+                                        ticks: {
+                                            font: {
+                                                size: 10
+                                            }
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
                                     }
                                 },
                                 plugins: {
                                     legend: {
                                         position: 'bottom',
-                                        labels: { padding: 15, usePointStyle: true, font: { size: 11 } }
+                                        labels: {
+                                            padding: 15,
+                                            usePointStyle: true,
+                                            font: {
+                                                size: 11
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -754,7 +729,10 @@ new #[Title('Dashboard')] class extends Component {
                         chart.update();
                     },
                     destroyChart() {
-                        if (chart) { chart.destroy(); chart = null; }
+                        if (chart) {
+                            chart.destroy();
+                            chart = null;
+                        }
                     }
                 };
             });
@@ -787,16 +765,31 @@ new #[Title('Dashboard')] class extends Component {
                                 scales: {
                                     x: {
                                         beginAtZero: true,
-                                        ticks: { stepSize: 1, font: { size: 11 } },
-                                        grid: { color: 'rgba(0,0,0,0.05)' }
+                                        ticks: {
+                                            stepSize: 1,
+                                            font: {
+                                                size: 11
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0,0,0,0.05)'
+                                        }
                                     },
                                     y: {
-                                        ticks: { font: { size: 10 } },
-                                        grid: { display: false }
+                                        ticks: {
+                                            font: {
+                                                size: 10
+                                            }
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
                                     }
                                 },
                                 plugins: {
-                                    legend: { display: false }
+                                    legend: {
+                                        display: false
+                                    }
                                 }
                             }
                         });
@@ -808,7 +801,10 @@ new #[Title('Dashboard')] class extends Component {
                         chart.update();
                     },
                     destroyChart() {
-                        if (chart) { chart.destroy(); chart = null; }
+                        if (chart) {
+                            chart.destroy();
+                            chart = null;
+                        }
                     }
                 };
             });

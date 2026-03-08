@@ -18,7 +18,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
     // Montar el componente
     public function mount(Municipio $municipio)
     {
-        $this->municipio = $municipio->load(['expedientes.tipoSolicitud', 'expedientes.responsable']);
+        $this->municipio = $municipio->load(['expedientes.responsable']);
         $this->anioFiltro = (string) now()->year;
     }
 
@@ -26,7 +26,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
     #[On('municipio-guardado')]
     public function refrescar()
     {
-        $this->municipio = $this->municipio->fresh(['expedientes.tipoSolicitud', 'expedientes.responsable']);
+        $this->municipio = $this->municipio->fresh(['expedientes.responsable']);
     }
 
     // Emitir evento para editar (solo Admin)
@@ -89,8 +89,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
             'total' => $expedientes->count(),
             'recibidos' => $expedientes->where('estado', Expediente::ESTADO_RECIBIDO)->count(),
             'en_revision' => $expedientes->where('estado', Expediente::ESTADO_EN_REVISION)->count(),
-            'completos' => $expedientes->where('estado', Expediente::ESTADO_COMPLETO)->count(),
-            'incompletos' => $expedientes->where('estado', Expediente::ESTADO_INCOMPLETO)->count(),
             'aprobados' => $expedientes->where('estado', Expediente::ESTADO_APROBADO)->count(),
             'rechazados' => $expedientes->where('estado', Expediente::ESTADO_RECHAZADO)->count(),
             'archivados' => $expedientes->where('estado', Expediente::ESTADO_ARCHIVADO)->count(),
@@ -107,8 +105,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
             'total' => $expedientes->count(),
             'recibidos' => $expedientes->where('estado', Expediente::ESTADO_RECIBIDO)->count(),
             'en_revision' => $expedientes->where('estado', Expediente::ESTADO_EN_REVISION)->count(),
-            'completos' => $expedientes->where('estado', Expediente::ESTADO_COMPLETO)->count(),
-            'incompletos' => $expedientes->where('estado', Expediente::ESTADO_INCOMPLETO)->count(),
             'aprobados' => $expedientes->where('estado', Expediente::ESTADO_APROBADO)->count(),
             'rechazados' => $expedientes->where('estado', Expediente::ESTADO_RECHAZADO)->count(),
             'archivados' => $expedientes->where('estado', Expediente::ESTADO_ARCHIVADO)->count(),
@@ -122,7 +118,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         return $this->municipio
             ->expedientes()
             ->when($this->anioFiltro, fn($q) => $q->whereYear('fecha_recibido', $this->anioFiltro))
-            ->with(['tipoSolicitud', 'responsable'])
+            ->with(['responsable'])
             ->orderBy('fecha_recibido', 'desc')
             ->get();
     }
@@ -156,13 +152,11 @@ new #[Title('- Detalle Municipio')] class extends Component {
     {
         $stats = $this->estadisticasAnio;
         return [
-            'labels' => ['Recibidos', 'En Revisión', 'Completos', 'Incompletos', 'Aprobados', 'Rechazados', 'Archivados'],
-            'data' => [$stats['recibidos'], $stats['en_revision'], $stats['completos'], $stats['incompletos'], $stats['aprobados'], $stats['rechazados'], $stats['archivados']],
+            'labels' => ['Recibidos', 'En Revisión', 'Aprobados', 'Rechazados', 'Archivados'],
+            'data' => [$stats['recibidos'], $stats['en_revision'], $stats['aprobados'], $stats['rechazados'], $stats['archivados']],
             'colors' => [
                 'rgba(59, 130, 246, 0.7)', // info - Recibidos
                 'rgba(234, 179, 8, 0.7)', // warning - En Revisión
-                'rgba(34, 197, 94, 0.7)', // success - Completos
-                'rgba(249, 115, 22, 0.7)', // orange - Incompletos
                 'rgba(16, 185, 129, 0.7)', // emerald - Aprobados
                 'rgba(239, 68, 68, 0.7)', // error - Rechazados
                 'rgba(148, 163, 184, 0.7)', // slate - Archivados
@@ -481,7 +475,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
             </div>
             <div class="stat-title text-warning/70">En Proceso</div>
             <div class="stat-value text-warning">
-                {{ $this->estadisticas['recibidos'] + $this->estadisticas['en_revision'] + $this->estadisticas['completos'] + $this->estadisticas['incompletos'] }}
+                {{ $this->estadisticas['recibidos'] + $this->estadisticas['en_revision'] }}
             </div>
             <div class="stat-desc">Activos</div>
         </div>
@@ -523,12 +517,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 </span>
                 <span class="badge badge-warning gap-1">
                     <span class="font-bold">{{ $this->estadisticasAnio['en_revision'] }}</span> En Revisión
-                </span>
-                <span class="badge badge-success badge-outline gap-1">
-                    <span class="font-bold">{{ $this->estadisticasAnio['completos'] }}</span> Completos
-                </span>
-                <span class="badge badge-warning badge-outline gap-1">
-                    <span class="font-bold">{{ $this->estadisticasAnio['incompletos'] }}</span> Incompletos
                 </span>
                 <span class="badge badge-success gap-1">
                     <span class="font-bold">{{ $this->estadisticasAnio['aprobados'] }}</span> Aprobados
@@ -587,7 +575,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                 <th class="text-center">No.</th>
                                 <th>Código SNIP</th>
                                 <th>Proyecto</th>
-                                <th>Tipo Solicitud</th>
                                 <th>Tipo</th>
                                 <th class="text-center">Estado</th>
                                 <th class="text-center">Fecha Recibido</th>
@@ -611,10 +598,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                     </td>
                                     <td>
                                         <span
-                                            class="text-sm text-base-content/70">{{ $expediente->tipoSolicitud->nombre ?? '—' }}</span>
-                                    </td>
-                                    <td>
-                                        <span
                                             class="badge badge-outline badge-xs">{{ $expediente->ordinario_extraordinario ?? '—' }}</span>
                                     </td>
                                     <td class="text-center">
@@ -624,8 +607,6 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                             @elseif($expediente->estado === 'Rechazado') badge-error
                                             @elseif($expediente->estado === 'En Revisión') badge-warning
                                             @elseif($expediente->estado === 'Recibido') badge-info
-                                            @elseif($expediente->estado === 'Completo') badge-success badge-outline
-                                            @elseif($expediente->estado === 'Incompleto') badge-warning badge-outline
                                             @elseif($expediente->estado === 'Archivado') badge-ghost
                                             @else badge-ghost @endif">
                                             @if ($expediente->estado === 'Aprobado')

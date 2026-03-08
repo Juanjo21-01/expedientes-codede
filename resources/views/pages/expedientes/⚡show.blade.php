@@ -6,6 +6,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use App\Models\Expediente;
 use App\Models\NotificacionEnviada;
+use App\Models\RevisionFinanciera;
 use App\Models\Role;
 
 new #[Title('- Detalle Expediente')] class extends Component {
@@ -13,7 +14,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
 
     public function mount(Expediente $expediente)
     {
-        $this->expediente = $expediente->load(['municipio', 'responsable.role', 'tipoSolicitud', 'revisionesFinancieras.revisor']);
+        $this->expediente = $expediente->load(['municipio', 'responsable.role', 'revisionesFinancieras.revisor', 'revisionesFinancieras.tipoSolicitud']);
     }
 
     #[On('expediente-estado-cambiado')]
@@ -21,22 +22,8 @@ new #[Title('- Detalle Expediente')] class extends Component {
     #[On('notificacion-enviada')]
     public function refrescar()
     {
-        $this->expediente = $this->expediente->fresh(['municipio', 'responsable.role', 'tipoSolicitud', 'revisionesFinancieras.revisor']);
+        $this->expediente = $this->expediente->fresh(['municipio', 'responsable.role', 'revisionesFinancieras.revisor', 'revisionesFinancieras.tipoSolicitud']);
         unset($this->notificaciones);
-    }
-
-    // Enviar a revisión (Técnico)
-    public function enviarARevision()
-    {
-        $user = auth()->user();
-        if (!$user->can('enviarRevision', $this->expediente)) {
-            $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'No tienes permiso para esta acción.');
-            return;
-        }
-
-        $this->expediente->marcarEnRevision();
-        $this->expediente = $this->expediente->fresh(['municipio', 'responsable.role', 'tipoSolicitud', 'revisionesFinancieras.revisor']);
-        $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: 'Expediente enviado a revisión financiera.');
     }
 
     // Revisiones financieras ordenadas
@@ -109,7 +96,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
                                 <span class="tooltip" data-tip="Código SNIP">
                                     <h1 class="text-xl font-bold font-mono">{{ $expediente->codigo_snip }}</h1>
                                 </span>
-                                <span class="badge badge-lg {{ $expediente->estado_badge_class }} tooltip"
+                                <span class="badge badge-lg badge-soft {{ $expediente->estado_badge_class }} tooltip"
                                     data-tip="Estado actual">
                                     {{ $expediente->estado }}
                                 </span>
@@ -117,7 +104,6 @@ new #[Title('- Detalle Expediente')] class extends Component {
                                     $tipoBadge = match ($expediente->ordinario_extraordinario) {
                                         'ORDINARIO' => 'badge-ghost',
                                         'EXTRAORDINARIO' => 'badge-accent badge-outline',
-                                        'ASIGNACION EXTRAORDINARIA' => 'badge-secondary badge-outline',
                                         default => 'badge-ghost',
                                     };
                                 @endphp
@@ -129,8 +115,6 @@ new #[Title('- Detalle Expediente')] class extends Component {
                             <div class="flex items-center gap-4 mt-2 text-sm text-base-content/60">
                                 <span>{{ $expediente->municipio->nombre }}</span>
                                 <span>·</span>
-                                <span>{{ $expediente->tipoSolicitud->nombre }}</span>
-                                <span>·</span>
                                 <span>{{ $this->diasTranscurridos }} días desde recibido</span>
                             </div>
                         </div>
@@ -141,7 +125,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
                 <div class="flex flex-wrap gap-2 items-start">
                     {{-- Enviar a revisión (Técnico) --}}
                     @can('enviarRevision', $expediente)
-                        <button wire:click="enviarARevision" wire:confirm="¿Enviar este expediente a revisión financiera?"
+                        <button @click="$dispatch('abrir-modal-enviar-revision', { expedienteId: {{ $expediente->id }} })"
                             class="btn btn-primary btn-sm gap-2">
                             <x-heroicon-o-paper-airplane class="w-4 h-4" />
                             Enviar a Revisión
@@ -214,11 +198,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
                             <p class="font-medium">{{ $expediente->nombre_proyecto }}</p>
                         </div>
                         <div>
-                            <span class="text-xs text-base-content/50 uppercase">Tipo de Solicitud</span>
-                            <p>{{ $expediente->tipoSolicitud->nombre }}</p>
-                        </div>
-                        <div>
-                            <span class="text-xs text-base-content/50 uppercase">Tipo</span>
+                            <span class="text-xs text-base-content/50 uppercase">Tipo de Asignación</span>
                             <p>{{ ucfirst(strtolower($expediente->ordinario_extraordinario)) }}</p>
                         </div>
                         @if ($expediente->observaciones)
@@ -245,8 +225,8 @@ new #[Title('- Detalle Expediente')] class extends Component {
                             <p class="font-bold text-lg">{{ $expediente->monto_formateado }}</p>
                         </div>
                         <div>
-                            <span class="text-xs text-base-content/50 uppercase">Adjudicatario</span>
-                            <p>{{ $expediente->adjudicatario ?? 'N/A' }}</p>
+                            <span class="text-xs text-base-content/50 uppercase">Aporte de la Municipalidad</span>
+                            <p class="font-bold text-lg">{{ $expediente->aporte_municipalidad_formateado }}</p>
                         </div>
                         @if ($expediente->fecha_aprobacion)
                             <div>
@@ -272,46 +252,83 @@ new #[Title('- Detalle Expediente')] class extends Component {
                     <div class="divider my-1"></div>
 
                     @if ($this->revisiones->isNotEmpty())
-                        <div class="space-y-4">
+                        <ul class="timeline timeline-vertical timeline-compact timeline-snap-icon">
                             @foreach ($this->revisiones as $revision)
-                                <div
-                                    class="border border-base-content/5 rounded-lg p-4 {{ $loop->first ? 'bg-base-200/50' : '' }}">
-                                    <div class="flex justify-between items-start">
-                                        <div class="flex items-center gap-2">
+                                @php
+                                    $iconColor = match (true) {
+                                        $revision->accion === RevisionFinanciera::ACCION_APROBAR => 'text-success',
+                                        $revision->accion === RevisionFinanciera::ACCION_RECHAZAR => 'text-error',
+                                        $revision->accion === RevisionFinanciera::ACCION_REACTIVAR => 'text-info',
+                                        $revision->accion === RevisionFinanciera::ACCION_SOLICITAR_CORRECCIONES
+                                            => 'text-warning',
+                                        default => 'text-base-content/30',
+                                    };
+                                @endphp
+                                <li>
+                                    @unless ($loop->first)
+                                        <hr class="{{ $iconColor }}" />
+                                    @endunless
+                                    <div class="timeline-middle">
+                                        @if ($revision->accion === RevisionFinanciera::ACCION_APROBAR)
+                                            <x-heroicon-s-check-circle class="w-5 h-5 {{ $iconColor }}" />
+                                        @elseif ($revision->accion === RevisionFinanciera::ACCION_RECHAZAR)
+                                            <x-heroicon-s-x-circle class="w-5 h-5 {{ $iconColor }}" />
+                                        @elseif ($revision->accion === RevisionFinanciera::ACCION_REACTIVAR)
+                                            <x-heroicon-s-arrow-path class="w-5 h-5 {{ $iconColor }}" />
+                                        @elseif ($revision->accion === RevisionFinanciera::ACCION_SOLICITAR_CORRECCIONES)
+                                            <x-heroicon-s-exclamation-triangle class="w-5 h-5 {{ $iconColor }}" />
+                                        @else
+                                            <x-heroicon-o-ellipsis-horizontal-circle
+                                                class="w-5 h-5 {{ $iconColor }}" />
+                                        @endif
+                                    </div>
+                                    <div class="timeline-end mb-6 w-full">
+                                        <div class="flex items-center justify-between gap-2 mb-1">
                                             <span
-                                                class="badge {{ $revision->estado_badge_class }}">{{ $revision->estado }}</span>
-                                            @if ($revision->tieneAccion())
+                                                class="text-xs font-medium text-base-content/50">{{ $revision->fecha_revision->format('d/m/Y H:i') }}</span>
+                                            @if ($revision->tipoSolicitud)
                                                 <span
-                                                    class="badge {{ $revision->accion_badge_class }}">{{ $revision->accion_texto }}</span>
+                                                    class="badge badge-xs badge-outline">{{ $revision->tipoSolicitud->nombre }}</span>
                                             @endif
                                         </div>
-                                        <span
-                                            class="text-xs text-base-content/50">{{ $revision->fecha_revision->format('d/m/Y H:i') }}</span>
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span
+                                                class="badge badge-sm badge-soft {{ $revision->estado_badge_class }}">{{ $revision->estado }}</span>
+                                            @if ($revision->tieneAccion())
+                                                <span
+                                                    class="badge badge-sm badge-soft {{ $revision->accion_badge_class }}">{{ $revision->accion_texto }}</span>
+                                            @endif
+                                        </div>
+                                        @if ($revision->monto_aprobado)
+                                            <p class="text-xs mt-1.5">
+                                                <span class="text-base-content/50">Monto aprobado:</span>
+                                                <span
+                                                    class="font-bold text-success">{{ $revision->monto_formateado }}</span>
+                                            </p>
+                                        @endif
+                                        <p class="text-xs text-base-content/50 mt-1">
+                                            <x-heroicon-o-user class="w-3 h-3 inline -mt-0.5" />
+                                            {{ $revision->revisor->nombre_completo }}
+                                        </p>
+                                        @if ($revision->observaciones)
+                                            <div
+                                                class="mt-1.5 text-xs bg-base-200/60 rounded-lg px-2.5 py-2 text-base-content/70 leading-relaxed">
+                                                {{ $revision->observaciones }}
+                                            </div>
+                                        @endif
+                                        @if ($revision->tieneComplemento())
+                                            <div class="text-xs text-base-content/50 mt-2">
+                                                Complemento: {{ $revision->fecha_complemento->format('d/m/Y') }} ·
+                                                {{ $revision->dias_transcurridos }} días
+                                            </div>
+                                        @endif
                                     </div>
-                                    <div class="mt-2 text-sm">
-                                        <span class="text-base-content/60">Revisor:</span>
-                                        <span class="font-medium">{{ $revision->revisor->nombre_completo }}</span>
-                                    </div>
-                                    @if ($revision->monto_aprobado)
-                                        <div class="text-sm mt-1">
-                                            <span class="text-base-content/60">Monto aprobado:</span>
-                                            <span class="font-bold">{{ $revision->monto_formateado }}</span>
-                                        </div>
-                                    @endif
-                                    @if ($revision->observaciones)
-                                        <div class="mt-2 text-sm bg-base-200 rounded p-2">
-                                            {{ $revision->observaciones }}
-                                        </div>
-                                    @endif
-                                    @if ($revision->tieneComplemento())
-                                        <div class="text-xs text-base-content/50 mt-2">
-                                            Complemento: {{ $revision->fecha_complemento->format('d/m/Y') }} ·
-                                            {{ $revision->dias_transcurridos }} días
-                                        </div>
-                                    @endif
-                                </div>
+                                    @unless ($loop->last)
+                                        <hr />
+                                    @endunless
+                                </li>
                             @endforeach
-                        </div>
+                        </ul>
                     @else
                         <div class="text-center py-8">
                             <x-heroicon-o-clipboard-document-list class="w-10 h-10 text-base-content/20 mx-auto mb-2" />
@@ -350,7 +367,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
                             <div class="space-y-3">
                                 @foreach ($this->notificaciones as $noti)
                                     <div
-                                        class="border border-base-content/5 rounded-lg p-3 {{ $loop->first ? 'bg-base-200/50' : '' }}">
+                                        class="border border-base-content/10 rounded-lg p-3 {{ $loop->first ? 'bg-base-200/50 ring-1 ring-base-content/5' : '' }}">
                                         <div class="flex justify-between items-start">
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 <span
@@ -529,6 +546,11 @@ new #[Title('- Detalle Expediente')] class extends Component {
             </div>
         </div>
     </div>
+
+    {{-- Modal enviar a revisión (Técnico) --}}
+    @can('enviarRevision', $expediente)
+        <livewire:modals.expediente-enviar-revision-modal />
+    @endcan
 
     {{-- Modales Admin --}}
     @if (auth()->user()->isAdmin())

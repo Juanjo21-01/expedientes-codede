@@ -418,7 +418,7 @@ new class extends Component {
                     </legend>
                     <select wire:model="municipioSeleccionado"
                         class="select w-full @error('municipioSeleccionado') select-error @enderror">
-                        <option value="">Seleccione un municipio</option>
+                        <option value="" selected disabled>Seleccione un municipio</option>
                         @foreach ($this->municipiosDisponiblesMunicipal as $municipio)
                             <option value="{{ $municipio->id }}">{{ $municipio->nombre }}</option>
                         @endforeach

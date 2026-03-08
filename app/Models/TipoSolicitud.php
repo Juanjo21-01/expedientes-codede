@@ -16,9 +16,9 @@ class TipoSolicitud extends Model
 
     // ---- Relaciones ----
 
-    public function expedientes(): HasMany
+    public function revisionesFinancieras(): HasMany
     {
-        return $this->hasMany(Expediente::class, 'tipo_solicitud_id');
+        return $this->hasMany(RevisionFinanciera::class, 'tipo_solicitud_id');
     }
 
     // ---- Scopes ----
@@ -40,28 +40,20 @@ class TipoSolicitud extends Model
     }
 
     /**
-     * Tipos con expedientes
+     * Tipos con revisiones financieras
      */
-    public function scopeConExpedientes(Builder $query): Builder
+    public function scopeConRevisiones(Builder $query): Builder
     {
-        return $query->has('expedientes');
+        return $query->has('revisionesFinancieras');
     }
 
     // ---- Accesores ----
 
     /**
-     * Total de expedientes de este tipo
+     * Total de revisiones financieras de este tipo
      */
-    public function getTotalExpedientesAttribute(): int
+    public function getTotalRevisionesAttribute(): int
     {
-        return $this->expedientes()->count();
-    }
-
-    /**
-     * Expedientes activos de este tipo
-     */
-    public function getExpedientesActivosAttribute(): int
-    {
-        return $this->expedientes()->activos()->count();
+        return $this->revisionesFinancieras()->count();
     }
 }

@@ -353,8 +353,6 @@
                     $estados = [
                         'Recibidos' => $estadisticas['recibidos'],
                         'En Revisión' => $estadisticas['enRevision'],
-                        'Completos' => $estadisticas['completos'],
-                        'Incompletos' => $estadisticas['incompletos'],
                         'Aprobados' => $estadisticas['aprobados'],
                         'Rechazados' => $estadisticas['rechazados'],
                         'Archivados' => $estadisticas['archivados'],

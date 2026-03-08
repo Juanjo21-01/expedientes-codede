@@ -13,7 +13,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
 
     public function mount(Municipio $municipio)
     {
-        $this->municipio = $municipio->load(['expedientes.tipoSolicitud', 'expedientes.responsable']);
+        $this->municipio = $municipio->load(['expedientes.responsable']);
         $this->anioFiltro = (string) now()->year;
     }
 
@@ -46,8 +46,6 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
             'total' => $expedientes->count(),
             'recibidos' => $expedientes->where('estado', Expediente::ESTADO_RECIBIDO)->count(),
             'en_revision' => $expedientes->where('estado', Expediente::ESTADO_EN_REVISION)->count(),
-            'completos' => $expedientes->where('estado', Expediente::ESTADO_COMPLETO)->count(),
-            'incompletos' => $expedientes->where('estado', Expediente::ESTADO_INCOMPLETO)->count(),
             'aprobados' => $expedientes->where('estado', Expediente::ESTADO_APROBADO)->count(),
             'rechazados' => $expedientes->where('estado', Expediente::ESTADO_RECHAZADO)->count(),
             'archivados' => $expedientes->where('estado', Expediente::ESTADO_ARCHIVADO)->count(),
@@ -63,8 +61,6 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
             'total' => $expedientes->count(),
             'recibidos' => $expedientes->where('estado', Expediente::ESTADO_RECIBIDO)->count(),
             'en_revision' => $expedientes->where('estado', Expediente::ESTADO_EN_REVISION)->count(),
-            'completos' => $expedientes->where('estado', Expediente::ESTADO_COMPLETO)->count(),
-            'incompletos' => $expedientes->where('estado', Expediente::ESTADO_INCOMPLETO)->count(),
             'aprobados' => $expedientes->where('estado', Expediente::ESTADO_APROBADO)->count(),
             'rechazados' => $expedientes->where('estado', Expediente::ESTADO_RECHAZADO)->count(),
             'archivados' => $expedientes->where('estado', Expediente::ESTADO_ARCHIVADO)->count(),
@@ -77,7 +73,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
         return $this->municipio
             ->expedientes()
             ->when($this->anioFiltro, fn($q) => $q->whereYear('fecha_recibido', $this->anioFiltro))
-            ->with(['tipoSolicitud', 'responsable'])
+            ->with(['responsable'])
             ->orderBy('fecha_recibido', 'desc')
             ->get();
     }
@@ -107,9 +103,9 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
         $stats = $this->estadisticasAnio;
 
         return [
-            'labels' => ['Recibidos', 'En Revisión', 'Completos', 'Incompletos', 'Aprobados', 'Rechazados', 'Archivados'],
-            'data' => [$stats['recibidos'], $stats['en_revision'], $stats['completos'], $stats['incompletos'], $stats['aprobados'], $stats['rechazados'], $stats['archivados']],
-            'colors' => ['rgba(59, 130, 246, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(34, 197, 94, 0.7)', 'rgba(249, 115, 22, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(239, 68, 68, 0.7)', 'rgba(148, 163, 184, 0.7)'],
+            'labels' => ['Recibidos', 'En Revisión', 'Aprobados', 'Rechazados', 'Archivados'],
+            'data' => [$stats['recibidos'], $stats['en_revision'], $stats['aprobados'], $stats['rechazados'], $stats['archivados']],
+            'colors' => ['rgba(59, 130, 246, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(239, 68, 68, 0.7)', 'rgba(148, 163, 184, 0.7)'],
         ];
     }
 
@@ -233,7 +229,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
             </div>
             <div class="stat-title text-xs">En Proceso</div>
             <div class="stat-value text-2xl text-warning">
-                {{ $this->estadisticas['recibidos'] + $this->estadisticas['en_revision'] + $this->estadisticas['completos'] + $this->estadisticas['incompletos'] }}
+                {{ $this->estadisticas['recibidos'] + $this->estadisticas['en_revision'] }}
             </div>
             <div class="stat-desc">Activos</div>
         </div>
@@ -278,16 +274,6 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                 <span class="badge badge-soft badge-error gap-1">
                     <span class="font-bold">{{ $this->estadisticasAnio['rechazados'] }}</span> Rechazados
                 </span>
-                @if ($this->estadisticasAnio['completos'] > 0)
-                    <span class="badge badge-soft badge-accent gap-1">
-                        <span class="font-bold">{{ $this->estadisticasAnio['completos'] }}</span> Completos
-                    </span>
-                @endif
-                @if ($this->estadisticasAnio['incompletos'] > 0)
-                    <span class="badge badge-soft badge-neutral gap-1">
-                        <span class="font-bold">{{ $this->estadisticasAnio['incompletos'] }}</span> Incompletos
-                    </span>
-                @endif
             </div>
 
             {{-- Gráficas --}}
@@ -335,7 +321,8 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                     @if ($this->usuarioMunicipal)
                         <div class="flex items-center gap-3">
                             <div class="avatar placeholder">
-                                <div class="bg-primary text-primary-content rounded-full w-10 h-10 flex items-center justify-center">
+                                <div
+                                    class="bg-primary text-primary-content rounded-full w-10 h-10 flex items-center justify-center">
                                     <span
                                         class="text-sm font-bold">{{ $this->usuarioMunicipal->iniciales ?? 'U' }}</span>
                                 </div>
@@ -367,7 +354,8 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                             @foreach ($this->tecnicosAsignados as $tecnico)
                                 <div class="flex items-center gap-3">
                                     <div class="avatar placeholder">
-                                        <div class="bg-info text-info-content rounded-full w-8 h-8 flex items-center justify-center">
+                                        <div
+                                            class="bg-info text-info-content rounded-full w-8 h-8 flex items-center justify-center">
                                             <span class="text-xs font-bold">{{ $tecnico->iniciales ?? 'T' }}</span>
                                         </div>
                                     </div>

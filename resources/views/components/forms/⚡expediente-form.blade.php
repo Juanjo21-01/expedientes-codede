@@ -3,7 +3,6 @@
 use Livewire\Component;
 use App\Models\Expediente;
 use App\Models\Municipio;
-use App\Models\TipoSolicitud;
 use App\Models\User;
 use App\Models\Role;
 use Livewire\Attributes\Computed;
@@ -18,11 +17,10 @@ new class extends Component {
     public string $nombre_proyecto = '';
     public $municipio_id = '';
     public $responsable_id = '';
-    public $tipo_solicitud_id = '';
     public string $ordinario_extraordinario = '';
     public string $fecha_recibido = '';
     public $monto_contrato = '';
-    public string $adjudicatario = '';
+    public $aporte_municipalidad = '';
     public string $observaciones = '';
 
     public function mount($expedienteId = null)
@@ -60,11 +58,10 @@ new class extends Component {
         $this->nombre_proyecto = $expediente->nombre_proyecto;
         $this->municipio_id = $expediente->municipio_id;
         $this->responsable_id = $expediente->responsable_id;
-        $this->tipo_solicitud_id = $expediente->tipo_solicitud_id;
         $this->ordinario_extraordinario = $expediente->ordinario_extraordinario;
         $this->fecha_recibido = $expediente->fecha_recibido->format('Y-m-d');
         $this->monto_contrato = $expediente->monto_contrato ?? '';
-        $this->adjudicatario = $expediente->adjudicatario ?? '';
+        $this->aporte_municipalidad = $expediente->aporte_municipalidad ?? '';
         $this->observaciones = $expediente->observaciones ?? '';
     }
 
@@ -99,13 +96,6 @@ new class extends Component {
         return collect([$user]);
     }
 
-    // Tipos de solicitud
-    #[Computed]
-    public function tiposSolicitud()
-    {
-        return TipoSolicitud::ordenados()->get();
-    }
-
     // Cuando cambia el municipio, actualizar responsables
     public function updatedMunicipioId()
     {
@@ -132,11 +122,10 @@ new class extends Component {
             'nombre_proyecto' => 'required|string|max:255',
             'municipio_id' => 'required|exists:municipios,id',
             'responsable_id' => 'required|exists:users,id',
-            'tipo_solicitud_id' => 'required|exists:tipo_solicitudes,id',
-            'ordinario_extraordinario' => 'required|in:ORDINARIO,EXTRAORDINARIO,ASIGNACION EXTRAORDINARIA',
+            'ordinario_extraordinario' => 'required|in:ORDINARIO,EXTRAORDINARIO',
             'fecha_recibido' => 'required|date',
             'monto_contrato' => 'nullable|numeric|min:0|max:999999999999.99',
-            'adjudicatario' => 'nullable|string|max:100',
+            'aporte_municipalidad' => 'nullable|numeric|min:0|max:999999999999.99',
             'observaciones' => 'nullable|string|max:1000',
         ];
 
@@ -146,11 +135,10 @@ new class extends Component {
             'nombre_proyecto.required' => 'El nombre del proyecto es obligatorio.',
             'municipio_id.required' => 'Debes seleccionar un municipio.',
             'responsable_id.required' => 'Debes seleccionar un responsable.',
-            'tipo_solicitud_id.required' => 'Debes seleccionar el tipo de solicitud.',
-            'ordinario_extraordinario.required' => 'Debes seleccionar el tipo.',
+            'ordinario_extraordinario.required' => 'Debes seleccionar el tipo de asignación.',
             'fecha_recibido.required' => 'La fecha de recibido es obligatoria.',
-            'monto_contrato.numeric' => 'El monto debe ser un número válido.',
-            'adjudicatario.max' => 'El adjudicatario no debe exceder 100 caracteres.',
+            'monto_contrato.numeric' => 'El monto del contrato debe ser un número válido.',
+            'aporte_municipalidad.numeric' => 'El aporte de la municipalidad debe ser un número válido.',
             'observaciones.max' => 'Las observaciones no deben exceder 1000 caracteres.',
         ];
 
@@ -161,11 +149,10 @@ new class extends Component {
             'nombre_proyecto' => $this->nombre_proyecto,
             'municipio_id' => $this->municipio_id,
             'responsable_id' => $this->responsable_id,
-            'tipo_solicitud_id' => $this->tipo_solicitud_id,
             'ordinario_extraordinario' => $this->ordinario_extraordinario,
             'fecha_recibido' => $this->fecha_recibido,
             'monto_contrato' => $this->monto_contrato ?: null,
-            'adjudicatario' => $this->adjudicatario ?: null,
+            'aporte_municipalidad' => $this->aporte_municipalidad ?: null,
             'observaciones' => $this->observaciones ?: null,
         ];
 
@@ -196,7 +183,7 @@ new class extends Component {
 <div>
     <form wire:submit="guardar" class="space-y-6">
         {{-- Sección: Información General --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
             <div class="card-body">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-information-circle class="w-5 h-5 text-primary" />
@@ -242,21 +229,21 @@ new class extends Component {
         <div class="divider"></div>
 
         {{-- Sección: Clasificación --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
             <div class="card-body">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-tag class="w-5 h-5 text-primary" />
                     Clasificación
                 </h3>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {{-- Municipio --}}
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Municipio <span class="text-error">*</span></legend>
                         <select wire:model.live="municipio_id"
                             class="select w-full @error('municipio_id') select-error @enderror"
                             {{ !auth()->user()->isAdmin() && $this->municipiosDisponibles->count() === 1 ? 'disabled' : '' }}>
-                            <option value="">Seleccionar municipio...</option>
+                            <option value="" selected disabled>Seleccionar municipio...</option>
                             @foreach ($this->municipiosDisponibles as $mun)
                                 <option value="{{ $mun->id }}">{{ $mun->nombre }} - {{ $mun->departamento }}
                                 </option>
@@ -267,28 +254,13 @@ new class extends Component {
                         @enderror
                     </fieldset>
 
-                    {{-- Tipo Solicitud --}}
-                    <fieldset class="fieldset w-full">
-                        <legend class="fieldset-legend">Tipo de Solicitud <span class="text-error">*</span></legend>
-                        <select wire:model="tipo_solicitud_id"
-                            class="select w-full @error('tipo_solicitud_id') select-error @enderror">
-                            <option value="">Seleccionar tipo...</option>
-                            @foreach ($this->tiposSolicitud as $tipo)
-                                <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
-                            @endforeach
-                        </select>
-                        @error('tipo_solicitud_id')
-                            <p class="label text-error">{{ $message }}</p>
-                        @enderror
-                    </fieldset>
-
                     {{-- Ordinario/Extraordinario --}}
                     <fieldset class="fieldset w-full">
-                        <legend class="fieldset-legend">Tipo <span class="text-error">*</span></legend>
+                        <legend class="fieldset-legend">Tipo de Asignación <span class="text-error">*</span></legend>
                         <select wire:model="ordinario_extraordinario"
                             class="select w-full @error('ordinario_extraordinario') select-error @enderror">
-                            <option value="">Seleccionar...</option>
-                            @foreach (App\Models\Expediente::getTipos() as $tipo)
+                            <option value="" selected disabled>Seleccionar asignación...</option>
+                            @foreach (Expediente::getTipos() as $tipo)
                                 <option value="{{ $tipo }}">{{ ucfirst(strtolower($tipo)) }}</option>
                             @endforeach
                         </select>
@@ -303,7 +275,7 @@ new class extends Component {
         <div class="divider"></div>
 
         {{-- Sección: Responsable (Admin puede elegir, Técnico se auto-asigna) --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
             <div class="card-body">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-user class="w-5 h-5 text-primary" />
@@ -317,7 +289,7 @@ new class extends Component {
                         @if (auth()->user()->isAdmin())
                             <select wire:model="responsable_id"
                                 class="select w-full @error('responsable_id') select-error @enderror">
-                                <option value="">Seleccionar técnico...</option>
+                                <option value="" selected disabled>Seleccionar técnico...</option>
                                 @foreach ($this->responsablesDisponibles as $resp)
                                     <option value="{{ $resp->id }}">{{ $resp->nombre_completo }}</option>
                                 @endforeach
@@ -340,7 +312,7 @@ new class extends Component {
         <div class="divider"></div>
 
         {{-- Sección: Información Financiera (opcional) --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
             <div class="card-body">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-banknotes class="w-5 h-5 text-primary" />
@@ -359,13 +331,13 @@ new class extends Component {
                         @enderror
                     </fieldset>
 
-                    {{-- Adjudicatario --}}
+                    {{-- Aporte de la Municipalidad --}}
                     <fieldset class="fieldset w-full">
-                        <legend class="fieldset-legend">Adjudicatario</legend>
-                        <input type="text" wire:model="adjudicatario"
-                            class="input w-full @error('adjudicatario') input-error @enderror"
-                            placeholder="Nombre del adjudicatario" maxlength="100" />
-                        @error('adjudicatario')
+                        <legend class="fieldset-legend">Aporte de la Municipalidad (Q)</legend>
+                        <input type="number" wire:model="aporte_municipalidad" step="0.01" min="0"
+                            class="input w-full @error('aporte_municipalidad') input-error @enderror"
+                            placeholder="0.00" />
+                        @error('aporte_municipalidad')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
                     </fieldset>
@@ -376,7 +348,7 @@ new class extends Component {
         <div class="divider"></div>
 
         {{-- Observaciones --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
+        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
             <div class="card-body">
                 <fieldset class="fieldset w-full">
                     <legend class="fieldset-legend">Observaciones</legend>

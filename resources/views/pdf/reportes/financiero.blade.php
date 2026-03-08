@@ -341,7 +341,6 @@
                 <tr>
                     <th>SNIP</th>
                     <th>Municipio</th>
-                    <th>Tipo Solicitud</th>
                     <th>Monto Contratado</th>
                     <th>Monto Aprobado</th>
                     <th>Diferencia</th>
@@ -356,8 +355,6 @@
                         <td style="text-align: left; font-family: inherit; font-weight: normal;">
                             {{ $fila['municipio'] }}
                         </td>
-                        <td style="font-family: inherit; font-weight: normal; font-size: 8px;">
-                            {{ $fila['tipo_solicitud'] }}</td>
                         <td class="text-right">Q {{ number_format($fila['monto_contratado'], 2) }}</td>
                         <td class="text-right">Q {{ number_format($fila['monto_aprobado'], 2) }}</td>
                         <td class="text-right {{ $fila['diferencia'] >= 0 ? 'text-success' : 'text-error' }}">
@@ -371,8 +368,6 @@
                                     'Rechazado' => 'badge-error',
                                     'Recibido' => 'badge-info',
                                     'En Revisión' => 'badge-warning',
-                                    'Completo' => 'badge-success',
-                                    'Incompleto' => 'badge-error',
                                     'Archivado' => 'badge-ghost',
                                     default => 'badge-ghost',
                                 };

@@ -6,7 +6,6 @@ use Livewire\Attributes\Computed;
 use Livewire\Component;
 use App\Models\Expediente;
 use App\Models\Municipio;
-use App\Models\TipoSolicitud;
 use App\Models\Role;
 
 new #[Title('- Expedientes')] class extends Component {
@@ -14,7 +13,6 @@ new #[Title('- Expedientes')] class extends Component {
     public string $search = '';
     public string $estadoFiltro = '';
     public string $municipioFiltro = '';
-    public string $tipoSolicitudFiltro = '';
     public string $tipoFiltro = '';
     public string $anioFiltro = '';
 
@@ -37,8 +35,6 @@ new #[Title('- Expedientes')] class extends Component {
             'total' => (clone $baseQuery)->count(),
             'recibidos' => (clone $baseQuery)->recibidos()->count(),
             'en_revision' => (clone $baseQuery)->enRevision()->count(),
-            'completos' => (clone $baseQuery)->completos()->count(),
-            'incompletos' => (clone $baseQuery)->incompletos()->count(),
             'aprobados' => (clone $baseQuery)->aprobados()->count(),
             'rechazados' => (clone $baseQuery)->rechazados()->count(),
             'archivados' => (clone $baseQuery)->archivados()->count(),
@@ -60,13 +56,6 @@ new #[Title('- Expedientes')] class extends Component {
         }
 
         return Municipio::activos()->ordenados()->get();
-    }
-
-    // Tipos de solicitud
-    #[Computed]
-    public function tiposSolicitud()
-    {
-        return TipoSolicitud::ordenados()->get();
     }
 
     // Años disponibles
@@ -106,7 +95,6 @@ new #[Title('- Expedientes')] class extends Component {
         $this->search = '';
         $this->estadoFiltro = '';
         $this->municipioFiltro = '';
-        $this->tipoSolicitudFiltro = '';
         $this->tipoFiltro = '';
         $this->anioFiltro = (string) now()->year;
     }
@@ -151,7 +139,8 @@ new #[Title('- Expedientes')] class extends Component {
             <div class="card-body p-4">
                 <div class="flex items-center gap-4">
                     <div class="avatar placeholder">
-                        <div class="bg-primary text-primary-content rounded-lg w-14 h-14 flex items-center justify-center">
+                        <div
+                            class="bg-primary text-primary-content rounded-lg w-14 h-14 flex items-center justify-center">
                             <x-heroicon-o-building-office-2 class="w-7 h-7" />
                         </div>
                     </div>
@@ -171,36 +160,46 @@ new #[Title('- Expedientes')] class extends Component {
     @endif
 
     {{-- Estadísticas --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
         <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+            <div class="stat-figure text-base-content/20">
+                <x-heroicon-o-folder class="w-5 h-5" />
+            </div>
             <div class="stat-title text-xs">Total</div>
             <div class="stat-value text-lg">{{ $this->estadisticas['total'] }}</div>
         </div>
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+        <div class="stat bg-info/5 shadow-sm border border-info/10 rounded-box p-3">
+            <div class="stat-figure text-info/40">
+                <x-heroicon-o-inbox-arrow-down class="w-5 h-5" />
+            </div>
             <div class="stat-title text-xs">Recibidos</div>
             <div class="stat-value text-lg text-info">{{ $this->estadisticas['recibidos'] }}</div>
         </div>
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+        <div class="stat bg-warning/5 shadow-sm border border-warning/10 rounded-box p-3">
+            <div class="stat-figure text-warning/40">
+                <x-heroicon-o-clock class="w-5 h-5" />
+            </div>
             <div class="stat-title text-xs">En Revisión</div>
             <div class="stat-value text-lg text-warning">{{ $this->estadisticas['en_revision'] }}</div>
         </div>
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
-            <div class="stat-title text-xs">Completos</div>
-            <div class="stat-value text-lg text-success">{{ $this->estadisticas['completos'] }}</div>
-        </div>
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
-            <div class="stat-title text-xs">Incompletos</div>
-            <div class="stat-value text-lg text-error">{{ $this->estadisticas['incompletos'] }}</div>
-        </div>
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+        <div class="stat bg-success/5 shadow-sm border border-success/10 rounded-box p-3">
+            <div class="stat-figure text-success/40">
+                <x-heroicon-o-check-circle class="w-5 h-5" />
+            </div>
             <div class="stat-title text-xs">Aprobados</div>
             <div class="stat-value text-lg text-success">{{ $this->estadisticas['aprobados'] }}</div>
         </div>
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+        <div class="stat bg-error/5 shadow-sm border border-error/10 rounded-box p-3">
+            <div class="stat-figure text-error/40">
+                <x-heroicon-o-x-circle class="w-5 h-5" />
+            </div>
             <div class="stat-title text-xs">Rechazados</div>
             <div class="stat-value text-lg text-error">{{ $this->estadisticas['rechazados'] }}</div>
         </div>
         <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+            <div class="stat-figure text-base-content/20">
+                <x-heroicon-o-archive-box class="w-5 h-5" />
+            </div>
             <div class="stat-title text-xs">Archivados</div>
             <div class="stat-value text-lg text-base-content/40">{{ $this->estadisticas['archivados'] }}</div>
         </div>
@@ -209,7 +208,7 @@ new #[Title('- Expedientes')] class extends Component {
     {{-- Filtros --}}
     <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
         <div class="card-body p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
                 {{-- Búsqueda --}}
                 <div class="xl:col-span-2">
                     <label class="input input-sm">
@@ -227,7 +226,7 @@ new #[Title('- Expedientes')] class extends Component {
                 {{-- Estado --}}
                 <select wire:model.live="estadoFiltro" class="select select-sm w-full">
                     <option value="">Todos los estados</option>
-                    @foreach (App\Models\Expediente::getEstados() as $estado)
+                    @foreach (Expediente::getEstados() as $estado)
                         <option value="{{ $estado }}">{{ $estado }}</option>
                     @endforeach
                 </select>
@@ -241,14 +240,6 @@ new #[Title('- Expedientes')] class extends Component {
                         @endforeach
                     </select>
                 @endunless
-
-                {{-- Tipo Solicitud --}}
-                <select wire:model.live="tipoSolicitudFiltro" class="select select-sm w-full">
-                    <option value="">Tipo solicitud</option>
-                    @foreach ($this->tiposSolicitud as $tipo)
-                        <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
-                    @endforeach
-                </select>
 
                 {{-- Año --}}
                 <div class="flex gap-2">
@@ -268,12 +259,16 @@ new #[Title('- Expedientes')] class extends Component {
     </div>
 
     {{-- Tabla de expedientes --}}
-    <livewire:table.expediente-table :search="$search" :estadoFiltro="$estadoFiltro" :municipioFiltro="$municipioFiltro" :tipoSolicitudFiltro="$tipoSolicitudFiltro"
-        :tipoFiltro="$tipoFiltro" :anioFiltro="$anioFiltro" />
+    <livewire:table.expediente-table :search="$search" :estadoFiltro="$estadoFiltro" :municipioFiltro="$municipioFiltro" :tipoFiltro="$tipoFiltro"
+        :anioFiltro="$anioFiltro" />
 
-    {{-- Modales (solo Admin) --}}
+    {{-- Modales --}}
     @if (auth()->user()->isAdmin())
         <livewire:modals.expediente-estado-modal />
         <livewire:modals.expediente-delete-modal />
     @endif
+
+    @can('create', Expediente::class)
+        <livewire:modals.expediente-enviar-revision-modal />
+    @endcan
 </div>

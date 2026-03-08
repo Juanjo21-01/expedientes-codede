@@ -14,14 +14,14 @@ new #[Title('- Detalle Usuario')] class extends Component {
     // Montar el componente con el usuario
     public function mount(User $usuario)
     {
-        $this->usuario = $usuario->load(['role', 'municipios', 'expedientes.municipio', 'expedientes.tipoSolicitud']);
+        $this->usuario = $usuario->load(['role', 'municipios', 'expedientes.municipio']);
     }
 
     // Refrescar cuando se edita el usuario
     #[On('usuario-guardado')]
     public function refrescar()
     {
-        $this->usuario = $this->usuario->fresh(['role', 'municipios', 'expedientes.municipio', 'expedientes.tipoSolicitud']);
+        $this->usuario = $this->usuario->fresh(['role', 'municipios', 'expedientes.municipio']);
     }
 
     // Cambiar estado del usuario
@@ -73,7 +73,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
         return [
             'total_expedientes' => $expedientes->count(),
             'expedientes_aprobados' => $expedientes->where('estado', Expediente::ESTADO_APROBADO)->count(),
-            'expedientes_pendientes' => $expedientes->whereIn('estado', [Expediente::ESTADO_RECIBIDO, Expediente::ESTADO_EN_REVISION, Expediente::ESTADO_COMPLETO, Expediente::ESTADO_INCOMPLETO])->count(),
+            'expedientes_pendientes' => $expedientes->whereIn('estado', [Expediente::ESTADO_RECIBIDO, Expediente::ESTADO_EN_REVISION])->count(),
             'expedientes_rechazados' => $expedientes->where('estado', Expediente::ESTADO_RECHAZADO)->count(),
         ];
     }
@@ -83,7 +83,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
     {
         return $this->usuario
             ->expedientes()
-            ->with(['municipio', 'tipoSolicitud'])
+            ->with(['municipio'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
@@ -443,10 +443,6 @@ new #[Title('- Detalle Usuario')] class extends Component {
                                         <td>
                                             <span
                                                 class="badge badge-ghost badge-sm">{{ $expediente->municipio->nombre }}</span>
-                                        </td>
-                                        <td>
-                                            <span
-                                                class="text-sm text-base-content/70">{{ $expediente->tipoSolicitud->nombre ?? '-' }}</span>
                                         </td>
                                         <td class="text-center">
                                             <span

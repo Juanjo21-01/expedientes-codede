@@ -1,15 +1,23 @@
 <?php
 
 use Livewire\Attributes\Title;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Expediente;
+use App\Models\RevisionFinanciera;
 
 new #[Title('- Revisión Financiera')] class extends Component {
     public Expediente $expediente;
 
     public function mount(Expediente $expediente)
     {
-        $this->expediente = $expediente->load(['municipio', 'responsable', 'tipoSolicitud', 'revisionesFinancieras.revisor']);
+        $this->expediente = $expediente->load(['municipio', 'responsable', 'revisionesFinancieras.revisor', 'revisionesFinancieras.tipoSolicitud']);
+    }
+
+    #[On('fase-reactivada')]
+    public function refrescar()
+    {
+        $this->expediente = $this->expediente->fresh(['municipio', 'responsable', 'revisionesFinancieras.revisor', 'revisionesFinancieras.tipoSolicitud']);
     }
 };
 ?>
@@ -36,33 +44,53 @@ new #[Title('- Revisión Financiera')] class extends Component {
     </div>
 
     {{-- Header --}}
-    <div class="flex items-center justify-between gap-3 mb-6">
-        <div class="flex items-center gap-3">
-            <div class="bg-accent/10 text-accent rounded-btn p-2">
-                <x-heroicon-o-clipboard-document-list class="w-6 h-6" />
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold">Revisión Financiera</h1>
-                <p class="text-base-content/60 text-sm">
-                    <span class="font-mono">{{ $expediente->codigo_snip }}</span> ·
-                    {{ $expediente->nombre_proyecto }}
-                </p>
+    <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
+        <div class="card-body p-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="avatar placeholder shrink-0">
+                        <div class="bg-accent/10 text-accent rounded-lg w-12 h-12 flex items-center justify-center">
+                            <x-heroicon-o-clipboard-document-list class="w-6 h-6" />
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-xl font-bold">Revisión Financiera</h1>
+                            <span
+                                class="badge badge-soft {{ $expediente->estado_badge_class }}">{{ $expediente->estado }}</span>
+                        </div>
+                        <p class="text-base-content/60 text-sm mt-0.5">
+                            <span class="font-mono font-semibold">{{ $expediente->codigo_snip }}</span> ·
+                            {{ Str::limit($expediente->nombre_proyecto, 60) }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('expedientes.show', $expediente->id) }}" wire:navigate
+                        class="btn btn-ghost btn-sm gap-2">
+                        <x-heroicon-o-arrow-uturn-left class="w-4 h-4" />
+                        Volver
+                    </a>
+                    <button @click="$dispatch('abrir-notificacion-modal', { expedienteId: {{ $expediente->id }} })"
+                        class="btn btn-info btn-sm gap-2">
+                        <x-heroicon-o-envelope class="w-4 h-4" />
+                        Notificar
+                    </button>
+                </div>
             </div>
         </div>
-        <button @click="$dispatch('abrir-notificacion-modal', { expedienteId: {{ $expediente->id }} })"
-            class="btn btn-info btn-sm gap-2">
-            <x-heroicon-o-envelope class="w-4 h-4" />
-            Notificar
-        </button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {{-- Columna izquierda: Info del expediente + Historial --}}
         <div class="lg:col-span-1 space-y-6">
             {{-- Resumen del Expediente --}}
-            <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
                 <div class="card-body p-4">
-                    <h3 class="font-semibold text-sm">Resumen del Expediente</h3>
+                    <h3 class="font-semibold text-sm flex items-center gap-2">
+                        <x-heroicon-o-document-text class="w-4 h-4 text-accent" />
+                        Resumen del Expediente
+                    </h3>
                     <div class="divider my-1"></div>
 
                     <div class="space-y-3 text-sm">
@@ -75,20 +103,16 @@ new #[Title('- Revisión Financiera')] class extends Component {
                             <span class="font-medium">{{ $expediente->municipio->nombre }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-base-content/60">Tipo Solicitud</span>
-                            <span>{{ $expediente->tipoSolicitud->nombre }}</span>
-                        </div>
-                        <div class="flex justify-between">
                             <span class="text-base-content/60">Tipo</span>
                             <span>{{ ucfirst(strtolower($expediente->ordinario_extraordinario)) }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-base-content/60">Monto</span>
+                            <span class="text-base-content/60">Monto Contrato</span>
                             <span class="font-bold">{{ $expediente->monto_formateado }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-base-content/60">Adjudicatario</span>
-                            <span>{{ $expediente->adjudicatario ?? 'N/A' }}</span>
+                            <span class="text-base-content/60">Aporte Municipal</span>
+                            <span>{{ $expediente->aporte_municipalidad_formateado }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-base-content/60">Responsable</span>
@@ -103,9 +127,10 @@ new #[Title('- Revisión Financiera')] class extends Component {
             </div>
 
             {{-- Historial de Revisiones --}}
-            <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
+                        <x-heroicon-o-clock class="w-4 h-4 text-accent" />
                         Historial de Revisiones
                         @if ($expediente->revisionesFinancieras->isNotEmpty())
                             <span
@@ -115,34 +140,101 @@ new #[Title('- Revisión Financiera')] class extends Component {
                     <div class="divider my-1"></div>
 
                     @if ($expediente->revisionesFinancieras->isNotEmpty())
-                        <div class="space-y-3">
+                        <ul class="timeline timeline-vertical timeline-compact timeline-snap-icon">
                             @foreach ($expediente->revisionesFinancieras->sortByDesc('fecha_revision') as $revision)
-                                <div class="border border-base-300 rounded-lg p-3 text-sm">
-                                    <div class="flex justify-between items-center">
-                                        <span
-                                            class="badge badge-sm {{ $revision->estado_badge_class }}">{{ $revision->estado }}</span>
-                                        <span
-                                            class="text-xs text-base-content/50">{{ $revision->fecha_revision->format('d/m/Y') }}</span>
+                                @php
+                                    $iconColor = match (true) {
+                                        $revision->accion === RevisionFinanciera::ACCION_APROBAR => 'text-success',
+                                        $revision->accion === RevisionFinanciera::ACCION_RECHAZAR => 'text-error',
+                                        $revision->accion === RevisionFinanciera::ACCION_REACTIVAR => 'text-info',
+                                        $revision->accion === RevisionFinanciera::ACCION_SOLICITAR_CORRECCIONES
+                                            => 'text-warning',
+                                        default => 'text-base-content/30',
+                                    };
+                                @endphp
+                                <li>
+                                    @unless ($loop->first)
+                                        <hr class="{{ $iconColor }}" />
+                                    @endunless
+                                    <div class="timeline-middle">
+                                        @if ($revision->accion === RevisionFinanciera::ACCION_APROBAR)
+                                            <x-heroicon-s-check-circle class="w-5 h-5 {{ $iconColor }}" />
+                                        @elseif ($revision->accion === RevisionFinanciera::ACCION_RECHAZAR)
+                                            <x-heroicon-s-x-circle class="w-5 h-5 {{ $iconColor }}" />
+                                        @elseif ($revision->accion === RevisionFinanciera::ACCION_REACTIVAR)
+                                            <x-heroicon-s-arrow-path class="w-5 h-5 {{ $iconColor }}" />
+                                        @elseif ($revision->accion === RevisionFinanciera::ACCION_SOLICITAR_CORRECCIONES)
+                                            <x-heroicon-s-exclamation-triangle class="w-5 h-5 {{ $iconColor }}" />
+                                        @else
+                                            <x-heroicon-o-ellipsis-horizontal-circle
+                                                class="w-5 h-5 {{ $iconColor }}" />
+                                        @endif
                                     </div>
-                                    @if ($revision->tieneAccion())
-                                        <div class="mt-1">
+                                    <div class="timeline-end mb-6 w-full">
+                                        {{-- Fecha y fase --}}
+                                        <div class="flex items-center justify-between gap-2 mb-1">
                                             <span
-                                                class="badge badge-sm {{ $revision->accion_badge_class }}">{{ $revision->accion_texto }}</span>
+                                                class="text-xs font-medium text-base-content/50">{{ $revision->fecha_revision->format('d/m/Y') }}</span>
+                                            @if ($revision->tipoSolicitud)
+                                                <span
+                                                    class="badge badge-xs badge-outline">{{ $revision->tipoSolicitud->nombre }}</span>
+                                            @endif
                                         </div>
-                                    @endif
-                                    <div class="text-xs text-base-content/60 mt-1">
-                                        {{ $revision->revisor->nombre_completo }}
+                                        {{-- Estado y acción --}}
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span
+                                                class="badge badge-sm badge-soft {{ $revision->estado_badge_class }}">{{ $revision->estado }}</span>
+                                            @if ($revision->tieneAccion())
+                                                <span
+                                                    class="badge badge-sm badge-soft {{ $revision->accion_badge_class }}">{{ $revision->accion_texto }}</span>
+                                            @endif
+                                        </div>
+                                        {{-- Monto --}}
+                                        @if ($revision->monto_aprobado)
+                                            <p class="text-xs mt-1.5">
+                                                <span class="text-base-content/50">Monto:</span>
+                                                <span
+                                                    class="font-bold text-success">{{ $revision->monto_formateado }}</span>
+                                            </p>
+                                        @endif
+                                        {{-- Revisor --}}
+                                        <p class="text-xs text-base-content/50 mt-1">
+                                            <x-heroicon-o-user class="w-3 h-3 inline -mt-0.5" />
+                                            {{ $revision->revisor->nombre_completo }}
+                                        </p>
+                                        {{-- Observaciones --}}
+                                        @if ($revision->observaciones)
+                                            <div
+                                                class="mt-1.5 text-xs bg-base-200/60 rounded-lg px-2.5 py-2 text-base-content/70 leading-relaxed">
+                                                {{ Str::limit($revision->observaciones, 120) }}
+                                            </div>
+                                        @endif
+                                        {{-- Botón reactivar --}}
+                                        @if (auth()->user()->isAdmin() &&
+                                                $revision->accion === RevisionFinanciera::ACCION_RECHAZAR &&
+                                                $revision->id ===
+                                                    $expediente->revisionesFinancieras->where('tipo_solicitud_id', $revision->tipo_solicitud_id)->sortByDesc('id')->first()?->id)
+                                            <button
+                                                @click="$dispatch('abrir-reactivar-fase', { expedienteId: {{ $expediente->id }}, tipoSolicitudId: {{ $revision->tipo_solicitud_id }} })"
+                                                class="btn btn-info btn-xs gap-1 mt-2 w-full">
+                                                <x-heroicon-o-arrow-path class="w-3.5 h-3.5" />
+                                                Reactivar fase
+                                            </button>
+                                        @endif
                                     </div>
-                                    @if ($revision->observaciones)
-                                        <div class="mt-1 text-xs bg-base-200 rounded p-2">
-                                            {{ Str::limit($revision->observaciones, 120) }}
-                                        </div>
-                                    @endif
-                                </div>
+                                    @unless ($loop->last)
+                                        <hr />
+                                    @endunless
+                                </li>
                             @endforeach
-                        </div>
+                        </ul>
                     @else
-                        <p class="text-sm text-base-content/40 text-center py-4">Sin revisiones previas</p>
+                        <div class="text-center py-6">
+                            <div class="bg-base-200 rounded-full p-3 w-fit mx-auto mb-2">
+                                <x-heroicon-o-clipboard-document-list class="w-6 h-6 text-base-content/20" />
+                            </div>
+                            <p class="text-sm text-base-content/40">Sin revisiones previas</p>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -150,7 +242,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
 
         {{-- Columna derecha: Formulario de Revisión --}}
         <div class="lg:col-span-2">
-            <div class="card bg-base-100 shadow-sm border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
                 <div class="card-body">
                     <h3 class="card-title text-base gap-2">
                         <x-heroicon-o-pencil-square class="w-5 h-5 text-accent" />
@@ -162,6 +254,14 @@ new #[Title('- Revisión Financiera')] class extends Component {
             </div>
         </div>
     </div>
+
+    {{-- Modal de información inicial (si falta monto_contrato) --}}
+    <livewire:modals.expediente-info-revision-modal :expedienteId="$expediente->id" />
+
+    {{-- Modal de reactivación de fase rechazada (solo admin) --}}
+    @if (auth()->user()->isAdmin())
+        <livewire:modals.revision-reactivar-modal />
+    @endif
 
     {{-- Modal de notificación --}}
     <livewire:modals.notificacion-modal />

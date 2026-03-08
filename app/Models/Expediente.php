@@ -20,8 +20,6 @@ class Expediente extends Model
     // ---- Constantes de Estado ----
     public const ESTADO_RECIBIDO = 'Recibido';
     public const ESTADO_EN_REVISION = 'En Revisión';
-    public const ESTADO_COMPLETO = 'Completo';
-    public const ESTADO_INCOMPLETO = 'Incompleto';
     public const ESTADO_APROBADO = 'Aprobado';
     public const ESTADO_RECHAZADO = 'Rechazado';
     public const ESTADO_ARCHIVADO = 'Archivado';
@@ -30,7 +28,6 @@ class Expediente extends Model
     public const ESTADOS_EDITABLES = [
         self::ESTADO_RECIBIDO,
         self::ESTADO_EN_REVISION,
-        self::ESTADO_INCOMPLETO,
     ];
 
     // Estados finales (no se puede cambiar)
@@ -43,7 +40,6 @@ class Expediente extends Model
     // ---- Constantes de Tipo ----
     public const TIPO_ORDINARIO = 'ORDINARIO';
     public const TIPO_EXTRAORDINARIO = 'EXTRAORDINARIO';
-    public const TIPO_ASIGNACION_EXTRAORDINARIA = 'ASIGNACION EXTRAORDINARIA';
 
     // Atributos asignables
     protected $fillable = [
@@ -51,13 +47,12 @@ class Expediente extends Model
         'nombre_proyecto',
         'municipio_id',
         'responsable_id',
-        'tipo_solicitud_id',
         'ordinario_extraordinario',
         'fecha_recibido',
         'estado',
         'fecha_aprobacion',
         'monto_contrato',
-        'adjudicatario',
+        'aporte_municipalidad',
         'observaciones',
         'etiquetas',
     ];
@@ -70,6 +65,7 @@ class Expediente extends Model
             'fecha_recibido' => 'date',
             'fecha_aprobacion' => 'date',
             'monto_contrato' => 'decimal:2',
+            'aporte_municipalidad' => 'decimal:2',
         ];
     }
 
@@ -83,11 +79,6 @@ class Expediente extends Model
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(User::class, 'responsable_id');
-    }
-
-    public function tipoSolicitud(): BelongsTo
-    {
-        return $this->belongsTo(TipoSolicitud::class, 'tipo_solicitud_id');
     }
 
     public function revisionesFinancieras(): HasMany
@@ -132,22 +123,6 @@ class Expediente extends Model
     public function scopeEnRevision(Builder $query): Builder
     {
         return $query->deEstado(self::ESTADO_EN_REVISION);
-    }
-
-    /**
-     * Expedientes completos
-     */
-    public function scopeCompletos(Builder $query): Builder
-    {
-        return $query->deEstado(self::ESTADO_COMPLETO);
-    }
-
-    /**
-     * Expedientes incompletos
-     */
-    public function scopeIncompletos(Builder $query): Builder
-    {
-        return $query->deEstado(self::ESTADO_INCOMPLETO);
     }
 
     /**
@@ -282,16 +257,6 @@ class Expediente extends Model
         return $this->estado === self::ESTADO_EN_REVISION;
     }
 
-    public function estaCompleto(): bool
-    {
-        return $this->estado === self::ESTADO_COMPLETO;
-    }
-
-    public function estaIncompleto(): bool
-    {
-        return $this->estado === self::ESTADO_INCOMPLETO;
-    }
-
     public function estaAprobado(): bool
     {
         return $this->estado === self::ESTADO_APROBADO;
@@ -329,11 +294,6 @@ class Expediente extends Model
         return $this->ordinario_extraordinario === self::TIPO_EXTRAORDINARIO;
     }
 
-    public function esAsignacionExtraordinaria(): bool
-    {
-        return $this->ordinario_extraordinario === self::TIPO_ASIGNACION_EXTRAORDINARIA;
-    }
-
     // ---- Métodos de Cambio de Estado ----
 
     /**
@@ -341,7 +301,8 @@ class Expediente extends Model
      */
     public function cambiarEstado(string $nuevoEstado): bool
     {
-        if ($this->estaFinalizado()) {
+        // Permitir Rechazado → Archivado como caso especial
+        if ($this->estaFinalizado() && !($this->estaRechazado() && $nuevoEstado === self::ESTADO_ARCHIVADO)) {
             return false;
         }
 
@@ -357,16 +318,6 @@ class Expediente extends Model
     public function marcarEnRevision(): bool
     {
         return $this->cambiarEstado(self::ESTADO_EN_REVISION);
-    }
-
-    public function marcarCompleto(): bool
-    {
-        return $this->cambiarEstado(self::ESTADO_COMPLETO);
-    }
-
-    public function marcarIncompleto(): bool
-    {
-        return $this->cambiarEstado(self::ESTADO_INCOMPLETO);
     }
 
     public function aprobar(): bool
@@ -405,6 +356,54 @@ class Expediente extends Model
     }
 
     /**
+     * Aporte municipal formateado
+     */
+    public function getAporteMunicipalidadFormateadoAttribute(): string
+    {
+        return $this->aporte_municipalidad 
+            ? 'Q ' . number_format($this->aporte_municipalidad, 2) 
+            : 'N/A';
+    }
+
+    /**
+     * Monto total aprobado (suma de todas las revisiones aprobadas)
+     */
+    public function getMontoTotalAprobadoAttribute(): float
+    {
+        return (float) $this->revisionesFinancieras()
+            ->completas()
+            ->whereNotNull('monto_aprobado')
+            ->sum('monto_aprobado');
+    }
+
+    /**
+     * Monto restante disponible para aprobar
+     */
+    public function getMontoRestanteAttribute(): ?float
+    {
+        if (!$this->monto_contrato) {
+            return null;
+        }
+        return max(0, (float)$this->monto_contrato - $this->monto_total_aprobado);
+    }
+
+    /**
+     * Fase actual de desembolso (basada en revisiones completas)
+     */
+    public function getFaseActualAttribute(): int
+    {
+        return $this->revisionesFinancieras()->completas()->distinct('tipo_solicitud_id')->count('tipo_solicitud_id');
+    }
+
+    /**
+     * Verificar si tiene toda la info necesaria para iniciar revisión
+     */
+    public function tieneInfoParaRevision(): bool
+    {
+        return !empty($this->monto_contrato);
+    }
+
+    /**
      * Badge del estado con color
      */
     public function getEstadoBadgeClassAttribute(): string
@@ -412,8 +411,6 @@ class Expediente extends Model
         return match ($this->estado) {
             self::ESTADO_RECIBIDO => 'badge-info',
             self::ESTADO_EN_REVISION => 'badge-warning',
-            self::ESTADO_COMPLETO => 'badge-success',
-            self::ESTADO_INCOMPLETO => 'badge-error',
             self::ESTADO_APROBADO => 'badge-success',
             self::ESTADO_RECHAZADO => 'badge-error',
             self::ESTADO_ARCHIVADO => 'badge-ghost',
@@ -429,8 +426,6 @@ class Expediente extends Model
         return [
             self::ESTADO_RECIBIDO,
             self::ESTADO_EN_REVISION,
-            self::ESTADO_COMPLETO,
-            self::ESTADO_INCOMPLETO,
             self::ESTADO_APROBADO,
             self::ESTADO_RECHAZADO,
             self::ESTADO_ARCHIVADO,
@@ -445,7 +440,6 @@ class Expediente extends Model
         return [
             self::TIPO_ORDINARIO,
             self::TIPO_EXTRAORDINARIO,
-            self::TIPO_ASIGNACION_EXTRAORDINARIA,
         ];
     }
 }

@@ -37,7 +37,7 @@ new #[Title('- Nuevo Expediente')] class extends Component {
     </div>
 
     {{-- Formulario --}}
-    <div class="card bg-base-100 shadow-sm border border-base-300">
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
         <div class="card-body">
             <livewire:forms.expediente-form />
         </div>

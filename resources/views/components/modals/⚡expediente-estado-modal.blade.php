@@ -3,6 +3,7 @@
 use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Expediente;
+use App\Models\Bitacora;
 
 new class extends Component {
     public bool $abierto = false;
@@ -17,10 +18,8 @@ new class extends Component {
     public function getTransicionesValidas(): array
     {
         return match ($this->estadoActual) {
-            Expediente::ESTADO_RECIBIDO => [Expediente::ESTADO_EN_REVISION, Expediente::ESTADO_ARCHIVADO],
-            Expediente::ESTADO_EN_REVISION => [Expediente::ESTADO_COMPLETO, Expediente::ESTADO_INCOMPLETO, Expediente::ESTADO_RECIBIDO, Expediente::ESTADO_ARCHIVADO],
-            Expediente::ESTADO_COMPLETO => [Expediente::ESTADO_APROBADO, Expediente::ESTADO_RECHAZADO, Expediente::ESTADO_EN_REVISION, Expediente::ESTADO_ARCHIVADO],
-            Expediente::ESTADO_INCOMPLETO => [Expediente::ESTADO_EN_REVISION, Expediente::ESTADO_RECIBIDO, Expediente::ESTADO_ARCHIVADO],
+            Expediente::ESTADO_RECIBIDO => [Expediente::ESTADO_EN_REVISION],
+            Expediente::ESTADO_EN_REVISION => [Expediente::ESTADO_RECIBIDO, Expediente::ESTADO_RECHAZADO],
             default => [],
         };
     }
@@ -64,9 +63,9 @@ new class extends Component {
         $resultado = $expediente->cambiarEstado($this->nuevoEstado);
 
         if ($resultado) {
-            // Registrar observaciones si se proporcionaron
+            // Registrar observaciones en bitácora (no sobreescribir campo del expediente)
             if ($this->observaciones) {
-                $expediente->update(['observaciones' => $this->observaciones]);
+                Bitacora::registrarCambioEstadoExpediente("Motivo del cambio de estado ({$this->estadoActual} → {$this->nuevoEstado}): {$this->observaciones}", $expediente->id);
             }
 
             $this->dispatch('expediente-estado-cambiado');
@@ -114,8 +113,6 @@ new class extends Component {
                             $badgeClass = match ($estadoActual) {
                                 Expediente::ESTADO_RECIBIDO => 'badge-info',
                                 Expediente::ESTADO_EN_REVISION => 'badge-warning',
-                                Expediente::ESTADO_COMPLETO => 'badge-success',
-                                Expediente::ESTADO_INCOMPLETO => 'badge-error',
                                 Expediente::ESTADO_APROBADO => 'badge-success',
                                 Expediente::ESTADO_RECHAZADO => 'badge-error',
                                 Expediente::ESTADO_ARCHIVADO => 'badge-ghost',
@@ -132,7 +129,7 @@ new class extends Component {
                         <legend class="fieldset-legend">Nuevo Estado <span class="text-error">*</span></legend>
                         <select wire:model="nuevoEstado" id="nuevoEstado"
                             class="select w-full @error('nuevoEstado') select-error @enderror">
-                            <option value="">Seleccionar nuevo estado...</option>
+                            <option value="" selected disabled>Seleccionar nuevo estado...</option>
                             @foreach ($this->getTransicionesValidas() as $estado)
                                 <option value="{{ $estado }}">{{ $estado }}</option>
                             @endforeach

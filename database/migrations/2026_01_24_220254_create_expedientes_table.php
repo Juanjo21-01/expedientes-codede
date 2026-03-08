@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('municipio_id')->constrained('municipios');
             $table->foreignId('responsable_id')->constrained('users');
             $table->foreignId('tipo_solicitud_id')->constrained('tipo_solicitudes');
-            $table->enum('ordinario_extraordinario', ['ORDINARIO', 'EXTRAORDINARIO', 'ASIGNACION EXTRAORDINARIA']);
+            $table->enum('tipo_asignacion', ['ORDINARIO', 'EXTRAORDINARIO']);
             $table->date('fecha_recibido');
             
             // Estados del expediente:
