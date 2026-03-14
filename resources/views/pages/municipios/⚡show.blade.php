@@ -161,10 +161,19 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         </p>
                     </div>
                 </div>
-                <div class="badge badge-lg gap-1.5 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
-                    <span
-                        class="w-2 h-2 rounded-full {{ $municipio->estaActivo() ? 'bg-success-content' : 'bg-error-content' }}"></span>
-                    {{ $municipio->estaActivo() ? 'Activo' : 'Inactivo' }}
+                <div class="flex items-center gap-2">
+                    @if (auth()->user()->isMunicipal())
+                        <a href="{{ route('notificaciones.index') }}" wire:navigate class="btn btn-info btn-sm gap-2">
+                            <x-heroicon-o-envelope-open class="w-4 h-4" />
+                            Mis Notificaciones
+                        </a>
+                    @endif
+                    <div
+                        class="badge badge-lg gap-1.5 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                        <span
+                            class="w-2 h-2 rounded-full {{ $municipio->estaActivo() ? 'bg-success-content' : 'bg-error-content' }}"></span>
+                        {{ $municipio->estaActivo() ? 'Activo' : 'Inactivo' }}
+                    </div>
                 </div>
             </div>
 

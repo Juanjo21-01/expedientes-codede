@@ -150,6 +150,15 @@ new #[Title('- Detalle Expediente')] class extends Component {
                         </a>
                     @endcan
 
+                    {{-- Cambiar estado (Admin según policy) --}}
+                    @can('cambiarEstado', $expediente)
+                        <button @click="$dispatch('abrir-modal-estado', { expedienteId: {{ $expediente->id }} })"
+                            class="btn btn-secondary btn-sm gap-2">
+                            <x-heroicon-o-arrows-right-left class="w-4 h-4" />
+                            Cambiar Estado
+                        </button>
+                    @endcan
+
                     {{-- Notificar (Admin, Director, Jefe Financiero, Técnico) --}}
                     @if (auth()->user()->isAdmin() ||
                             auth()->user()->isDirector() ||
@@ -331,7 +340,8 @@ new #[Title('- Detalle Expediente')] class extends Component {
                         </ul>
                     @else
                         <div class="text-center py-8">
-                            <x-heroicon-o-clipboard-document-list class="w-10 h-10 text-base-content/20 mx-auto mb-2" />
+                            <x-heroicon-o-clipboard-document-list
+                                class="w-10 h-10 text-base-content/20 mx-auto mb-2" />
                             <p class="text-base-content/40 text-sm">Aún no hay revisiones financieras</p>
                         </div>
                     @endif

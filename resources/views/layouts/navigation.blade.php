@@ -60,6 +60,16 @@
                     <span class="is-drawer-close:hidden">Municipalidades</span>
                 </a>
             </li>
+            @if (auth()->user()->isMunicipal())
+                <li>
+                    <a href="{{ route('notificaciones.index') }}" wire:navigate
+                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('notificaciones.*') ? 'active' : '' }}"
+                        data-tip="Mis Notificaciones">
+                        <x-heroicon-o-envelope-open class="w-5 h-5 shrink-0" />
+                        <span class="is-drawer-close:hidden">Mis Notificaciones</span>
+                    </a>
+                </li>
+            @endif
 
             @if (auth()->user()->isAdmin() || auth()->user()->isDirector() || auth()->user()->isJefeFinanciero())
                 {{-- Admin Section --}}
@@ -124,11 +134,11 @@
                 </li>
                 <div class="divider my-0 is-drawer-open:hidden"></div>
                 <li>
-                    <a href="{{ route('admin.notificaciones.index') }}" wire:navigate
-                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('admin.notificaciones.*') ? 'active' : '' }}"
+                    <a href="{{ route('notificaciones.index') }}" wire:navigate
+                        class="is-drawer-close:tooltip is-drawer-close:tooltip-right is-drawer-close:flex is-drawer-close:justify-center {{ request()->routeIs('notificaciones.*') ? 'active' : '' }}"
                         data-tip="Notificaciones">
                         <x-heroicon-o-envelope class="w-5 h-5 shrink-0" />
-                        <span class="is-drawer-close:hidden">Notificaciones</span>
+                        <span class="is-drawer-close:hidden">Mis Notificaciones</span>
                     </a>
                 </li>
             @endif

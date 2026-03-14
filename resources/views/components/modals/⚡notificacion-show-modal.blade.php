@@ -23,7 +23,16 @@ new class extends Component {
     #[On('ver-detalle-notificacion')]
     public function abrir(int $notificacionId): void
     {
-        $noti = NotificacionEnviada::with(['remitente', 'tipoNotificacion', 'expediente', 'municipio'])->findOrFail($notificacionId);
+        $user = auth()->user();
+        $query = NotificacionEnviada::query();
+
+        if ($user->isMunicipal()) {
+            $query->recibidasPorMunicipal($user);
+        } else {
+            $query->accesiblesPor($user);
+        }
+
+        $noti = $query->with(['remitente', 'tipoNotificacion', 'expediente', 'municipio'])->findOrFail($notificacionId);
 
         $this->asunto = $noti->asunto;
         $this->mensaje = $noti->mensaje;

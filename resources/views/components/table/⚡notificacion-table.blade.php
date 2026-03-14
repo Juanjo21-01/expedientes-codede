@@ -19,6 +19,9 @@ new class extends Component {
     #[Reactive]
     public string $tipoFiltro = '';
 
+    #[Reactive]
+    public string $modo = 'general';
+
     // Resetear paginación al cambiar filtros
     public function updatedSearch()
     {
@@ -40,8 +43,15 @@ new class extends Component {
     {
         $user = auth()->user();
 
-        return NotificacionEnviada::query()
-            ->accesiblesPor($user)
+        $query = NotificacionEnviada::query();
+
+        if ($this->modo === 'municipal') {
+            $query->recibidasPorMunicipal($user);
+        } else {
+            $query->accesiblesPor($user);
+        }
+
+        return $query
             ->with(['remitente', 'tipoNotificacion', 'expediente', 'municipio'])
             ->when($this->search, fn($q) => $q->buscar($this->search))
             ->when($this->estadoFiltro, fn($q) => $q->where('estado', $this->estadoFiltro))

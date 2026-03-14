@@ -184,6 +184,23 @@ class NotificacionEnviada extends Model
         });
     }
 
+    /**
+     * Notificaciones recibidas por un usuario municipal
+     */
+    public function scopeRecibidasPorMunicipal(Builder $query, User $user): Builder
+    {
+        if (!$user->isMunicipal()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $municipioIds = $user->municipios->pluck('id')->toArray();
+
+        return $query->where(function ($q) use ($municipioIds, $user) {
+            $q->whereIn('municipio_id', $municipioIds)
+              ->orWhere('destinatario_email', $user->email);
+        });
+    }
+
     // ---- Helpers de Estado ----
 
     public function estaPendiente(): bool

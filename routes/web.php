@@ -57,6 +57,15 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
+    | Notificaciones - Historial para roles Municipal y Técnico
+    |----------------------------------------------------------------------
+    */
+    Route::livewire('/notificaciones', 'pages::notificaciones.index')
+        ->middleware('role:Municipal,Técnico')
+        ->name('notificaciones.index');
+
+    /*
+    |----------------------------------------------------------------------
     | Perfil - Todos pueden ver/editar su perfil
     |----------------------------------------------------------------------
     */
@@ -163,7 +172,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::livewire('/admin/notificaciones', 'pages::admin.notificaciones.index')
-        ->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero,Técnico')
+        ->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero')
         ->name('admin.notificaciones.index');
 
 });
