@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <title>Reporte - Resumen General</title>
     <style>
+        @page {
+            margin: 28px 28px 24px 28px;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,133 +16,157 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 10.5px;
-            color: #1e293b;
-            line-height: 1.5;
-            background: #fff;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10px;
+            color: #1f2937;
+            line-height: 1.45;
+            background: #ffffff;
+        }
+
+        .page-wrapper {
+            width: 100%;
         }
 
         .header {
-            background-color: #1e3a5f;
+            background-color: #163a63;
             color: #ffffff;
-            padding: 20px 30px;
-            margin: -10px -10px 0;
+            padding: 16px 20px;
         }
 
-        .header-content {
-            display: flex;
-            align-items: center;
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
         }
 
         .header-logo {
-            width: 50px;
-            height: 50px;
-            margin-right: 15px;
-            border-radius: 6px;
+            width: 46px;
+            height: 46px;
         }
 
-        .header h1 {
-            font-size: 19px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-            margin-bottom: 2px;
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            line-height: 1.1;
+            margin-bottom: 3px;
         }
 
         .header-subtitle {
-            font-size: 10px;
-            color: #94b8d6;
+            font-size: 9px;
+            color: #c7d8ea;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+        }
+
+        .header-right-label {
+            font-size: 9px;
+            color: #c7d8ea;
+            text-align: right;
+            margin-bottom: 3px;
+        }
+
+        .header-right-value {
+            font-size: 12px;
+            font-weight: bold;
+            color: #ffffff;
+            text-align: right;
         }
 
         .accent-line {
-            height: 3px;
+            height: 4px;
             background-color: #3b82f6;
-            margin: 0 -10px;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 16px;
         }
 
         .content {
-            padding: 18px 16px 14px;
+            padding: 18px 20px 14px;
+        }
+
+        .block {
+            margin-bottom: 16px;
         }
 
         .report-meta {
-            background-color: #eff6ff;
-            border: 1px solid #bfdbfe;
+            border: 1px solid #cfe0f2;
+            background-color: #f5f9ff;
             border-radius: 8px;
-            padding: 12px 16px;
-            margin: 18px 0;
+            padding: 10px 12px;
         }
 
         .report-meta table {
             width: 100%;
+            border-collapse: collapse;
         }
 
         .report-meta td {
-            padding: 3px 8px;
-            font-size: 10px;
+            padding: 5px 6px;
+            vertical-align: top;
         }
 
         .report-meta .label {
-            color: #64748b;
-            font-weight: 600;
+            width: 120px;
+            color: #5b6b7c;
+            font-size: 9px;
+            font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            width: 130px;
+            letter-spacing: 0.4px;
         }
 
         .report-meta .value {
-            color: #1e293b;
-            font-weight: 600;
+            color: #1f2937;
+            font-size: 10px;
+            font-weight: bold;
         }
 
         .section-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #1e3a5f;
-            border-bottom: 2px solid #3b82f6;
-            padding-bottom: 6px;
-            margin: 18px 0 11px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #163a63;
+            margin-bottom: 8px;
         }
 
-        .stats-grid {
-            display: table;
+        .section-line {
+            height: 2px;
+            background-color: #60a5fa;
+            margin-bottom: 12px;
+        }
+
+        .stats-table {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 6px;
-            margin-bottom: 16px;
-        }
-
-        .stats-row {
-            display: table-row;
+            border-spacing: 6px 0;
+            table-layout: fixed;
         }
 
         .stat-card {
-            display: table-cell;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 10px 12px;
+            border: 1px solid #d8e2ec;
+            background-color: #fbfdff;
+            border-radius: 8px;
             text-align: center;
-            width: 16.66%;
+            padding: 14px 8px 12px 8px;
         }
 
-        .stat-card .number {
-            font-size: 20px;
-            font-weight: 800;
-            line-height: 1.2;
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: 5px;
         }
 
-        .stat-card .label {
-            font-size: 9px;
-            color: #64748b;
+        .stat-label {
+            font-size: 8.5px;
+            color: #6b7280;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 2px;
+            letter-spacing: 0.8px;
+            font-weight: bold;
         }
 
         .color-primary {
-            color: #1e40af;
+            color: #1d4ed8;
         }
 
         .color-warning {
@@ -153,18 +181,12 @@
             color: #dc2626;
         }
 
-        .color-info {
-            color: #0284c7;
-        }
-
-        .color-accent {
-            color: #7c3aed;
-        }
-
         .estados-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 12px 0;
+            border: 1px solid #d7e0ea;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .estados-table thead {
@@ -176,94 +198,94 @@
         }
 
         .estados-table th {
-            background-color: #1e3a5f;
+            background-color: #163a63;
             color: #ffffff;
-            font-size: 9px;
+            font-size: 8.5px;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            padding: 8px 10px;
+            padding: 9px 10px;
+            border-right: 1px solid #2a4d73;
             text-align: center;
         }
 
         .estados-table th:first-child {
             text-align: left;
-            border-radius: 6px 0 0 0;
         }
 
         .estados-table th:last-child {
-            border-radius: 0 6px 0 0;
+            border-right: none;
         }
 
         .estados-table td {
-            padding: 8px 10px;
+            padding: 9px 10px;
+            font-size: 10px;
+            border-top: 1px solid #e5edf5;
             text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 11px;
         }
 
         .estados-table td:first-child {
             text-align: left;
-            font-weight: 600;
+            font-weight: bold;
         }
 
-        .estados-table tr:nth-child(even) {
-            background-color: #f8fafc;
+        .estados-table tbody tr:nth-child(even) {
+            background-color: #f8fbff;
         }
 
         .estados-table tfoot td {
-            font-weight: 700;
-            background-color: #eff6ff;
-            border-top: 2px solid #3b82f6;
+            background-color: #eef5ff;
+            font-weight: bold;
+            border-top: 2px solid #60a5fa;
         }
 
-        .montos-section {
-            margin-top: 16px;
-        }
-
-        .monto-row {
-            display: table;
+        .financial-table {
             width: 100%;
-            margin-bottom: 6px;
+            border-collapse: separate;
+            border-spacing: 6px 0;
+            table-layout: fixed;
         }
 
-        .monto-label,
-        .monto-value {
-            display: table-cell;
-            padding: 8px 12px;
+        .financial-card {
+            border: 1px solid #d8e2ec;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #ffffff;
         }
 
-        .monto-label {
-            background-color: #eff6ff;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 600;
+        .financial-inner {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .financial-label {
             width: 40%;
-            border: 1px solid #bfdbfe;
-            border-right: none;
-            border-radius: 6px 0 0 6px;
+            background-color: #f1f6fc;
+            color: #5b6b7c;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 10px 12px;
+            border-right: 1px solid #d8e2ec;
         }
 
-        .monto-value {
-            background-color: #f8fafc;
-            color: #1e293b;
-            font-weight: 700;
-            font-size: 13px;
-            border: 1px solid #e2e8f0;
-            border-left: none;
-            border-radius: 0 6px 6px 0;
+        .financial-value {
+            background-color: #ffffff;
+            color: #1f2937;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 12px;
         }
 
         .footer {
-            margin-top: 26px;
-            padding-top: 12px;
-            border-top: 1px solid #cbd5e1;
+            margin-top: 24px;
+            padding-top: 10px;
+            border-top: 1px solid #d7e0ea;
             text-align: center;
-            color: #94a3b8;
-            font-size: 9.5px;
+            font-size: 9px;
+            color: #7b8794;
         }
 
         .footer strong {
-            color: #64748b;
+            color: #4b5563;
         }
 
         .page-break {
@@ -273,139 +295,158 @@
 </head>
 
 <body>
-    {{-- Header --}}
-    <div class="header">
-        <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-                <td width="55">
-                    <img src="{{ public_path('img/logo.png') }}" class="header-logo" alt="CODEDE">
-                </td>
-                <td>
-                    <h1>CODEDE San Marcos</h1>
-                    <div class="header-subtitle">Sistema de Gestión de Expedientes</div>
-                </td>
-                <td style="text-align: right; vertical-align: top;">
-                    <div style="font-size: 10px; color: #94b8d6;">Reporte generado</div>
-                    <div style="font-size: 12px; font-weight: 600;">{{ $fechaGeneracion }}</div>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="accent-line"></div>
+    <div class="page-wrapper">
 
-    <div class="content">
-
-        {{-- Meta información --}}
-        <div class="report-meta">
-            <table>
+        {{-- Header --}}
+        <div class="header">
+            <table class="header-table" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td class="label">Tipo de Reporte:</td>
-                    <td class="value">Resumen General</td>
-                    <td class="label">Período:</td>
-                    <td class="value">{{ $periodoTexto }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Municipio:</td>
-                    <td class="value">{{ $municipioNombre }}</td>
-                    <td class="label">Generado por:</td>
-                    <td class="value">{{ $generadoPor }}</td>
+                    <td width="56">
+                        <img src="{{ public_path('img/logo.png') }}" class="header-logo" alt="CODEDE">
+                    </td>
+                    <td>
+                        <div class="header-title">CODEDE San Marcos</div>
+                        <div class="header-subtitle">Sistema de Gestión de Expedientes</div>
+                    </td>
+                    <td width="170">
+                        <div class="header-right-label">Reporte generado</div>
+                        <div class="header-right-value">{{ $fechaGeneracion }}</div>
+                    </td>
                 </tr>
             </table>
         </div>
+        <div class="accent-line"></div>
 
-        {{-- Stats Cards --}}
-        <div class="section-title">Indicadores Principales</div>
+        <div class="content">
 
-        <table width="100%" cellpadding="0" cellspacing="4" style="margin-bottom: 16px;">
-            <tr>
-                <td class="stat-card">
-                    <div class="number color-primary">{{ $estadisticas['total'] }}</div>
-                    <div class="label">Total Expedientes</div>
-                </td>
-                <td class="stat-card">
-                    <div class="number color-warning">{{ $estadisticas['enProceso'] }}</div>
-                    <div class="label">En Proceso</div>
-                </td>
-                <td class="stat-card">
-                    <div class="number color-success">{{ $estadisticas['aprobados'] }}</div>
-                    <div class="label">Aprobados</div>
-                </td>
-                <td class="stat-card">
-                    <div class="number color-error">{{ $estadisticas['rechazados'] }}</div>
-                    <div class="label">Rechazados</div>
-                </td>
-            </tr>
-        </table>
+            {{-- Meta información --}}
+            <div class="block">
+                <div class="report-meta">
+                    <table cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td class="label">Tipo de Reporte:</td>
+                            <td class="value">Resumen General</td>
+                            <td class="label">Período:</td>
+                            <td class="value">{{ $periodoTexto }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Municipio:</td>
+                            <td class="value">{{ $municipioNombre }}</td>
+                            <td class="label">Rol emisor:</td>
+                            <td class="value">{{ $generadoPor }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
-        {{-- Desglose por Estado --}}
-        <div class="section-title">Desglose por Estado</div>
+            {{-- Stats Cards --}}
+            <div class="block">
+                <div class="section-title">Indicadores Principales</div>
+                <div class="section-line"></div>
 
-        <table class="estados-table">
-            <thead>
-                <tr>
-                    <th>Estado</th>
-                    <th>Cantidad</th>
-                    <th>Porcentaje</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php
-                    $estados = [
-                        'Recibidos' => $estadisticas['recibidos'],
-                        'En Revisión' => $estadisticas['enRevision'],
-                        'Aprobados' => $estadisticas['aprobados'],
-                        'Rechazados' => $estadisticas['rechazados'],
-                        'Archivados' => $estadisticas['archivados'],
-                    ];
-                @endphp
-                @foreach ($estados as $nombre => $cantidad)
+                <table class="stats-table" cellpadding="0" cellspacing="0">
                     <tr>
-                        <td>{{ $nombre }}</td>
-                        <td>{{ $cantidad }}</td>
-                        <td>{{ $estadisticas['total'] > 0 ? round(($cantidad / $estadisticas['total']) * 100, 1) : 0 }}%
+                        <td class="stat-card">
+                            <div class="stat-number color-primary">{{ $estadisticas['total'] }}</div>
+                            <div class="stat-label">Total Expedientes</div>
+                        </td>
+                        <td class="stat-card">
+                            <div class="stat-number color-warning">{{ $estadisticas['enProceso'] }}</div>
+                            <div class="stat-label">En Proceso</div>
+                        </td>
+                        <td class="stat-card">
+                            <div class="stat-number color-success">{{ $estadisticas['aprobados'] }}</div>
+                            <div class="stat-label">Aprobados</div>
+                        </td>
+                        <td class="stat-card">
+                            <div class="stat-number color-error">{{ $estadisticas['rechazados'] }}</div>
+                            <div class="stat-label">Rechazados</div>
                         </td>
                     </tr>
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td>TOTAL</td>
-                    <td>{{ $estadisticas['total'] }}</td>
-                    <td>100%</td>
-                </tr>
-            </tfoot>
-        </table>
+                </table>
+            </div>
 
-        {{-- Montos --}}
-        <div class="section-title">Resumen Financiero</div>
+            {{-- Desglose por Estado --}}
+            <div class="block">
+                <div class="section-title">Desglose por Estado</div>
+                <div class="section-line"></div>
 
-        <table width="100%" cellpadding="0" cellspacing="4">
-            <tr>
-                <td style="width: 50%;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
+                <table class="estados-table">
+                    <thead>
                         <tr>
-                            <td class="monto-label">Monto Total Contratado</td>
-                            <td class="monto-value">Q {{ number_format($estadisticas['montoContratado'], 2) }}</td>
+                            <th>Estado</th>
+                            <th>Cantidad</th>
+                            <th>Porcentaje</th>
                         </tr>
-                    </table>
-                </td>
-                <td style="width: 50%;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
+                    </thead>
+                    <tbody>
+                        @php
+                            $estados = [
+                                'Recibidos' => $estadisticas['recibidos'],
+                                'En Revisión' => $estadisticas['enRevision'],
+                                'Aprobados' => $estadisticas['aprobados'],
+                                'Rechazados' => $estadisticas['rechazados'],
+                            ];
+                        @endphp
+                        @foreach ($estados as $nombre => $cantidad)
+                            <tr>
+                                <td>{{ $nombre }}</td>
+                                <td>{{ $cantidad }}</td>
+                                <td>{{ $estadisticas['total'] > 0 ? round(($cantidad / $estadisticas['total']) * 100, 1) : 0 }}%
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
                         <tr>
-                            <td class="monto-label">Monto Total Aprobado</td>
-                            <td class="monto-value">Q {{ number_format($estadisticas['montoAprobado'], 2) }}</td>
+                            <td>TOTAL</td>
+                            <td>{{ $estadisticas['total'] }}</td>
+                            <td>100%</td>
                         </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
+                    </tfoot>
+                </table>
+            </div>
 
-        {{-- Footer --}}
-        <div class="footer">
-            <strong>CODEDE San Marcos</strong> · Sistema de Gestión de Expedientes<br>
-            Este documento fue generado automáticamente · {{ $fechaGeneracion }}
+            {{-- Montos --}}
+            <div class="block">
+                <div class="section-title">Resumen Financiero</div>
+                <div class="section-line"></div>
+
+                <table class="financial-table" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <div class="financial-card">
+                                <table class="financial-inner" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="financial-label">Monto Total Contratado</td>
+                                        <td class="financial-value">Q
+                                            {{ number_format($estadisticas['montoContratado'], 2) }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="financial-card">
+                                <table class="financial-inner" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="financial-label">Monto Total Aprobado</td>
+                                        <td class="financial-value">Q
+                                            {{ number_format($estadisticas['montoAprobado'], 2) }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            {{-- Footer --}}
+            <div class="footer">
+                <strong>CODEDE San Marcos</strong> · Sistema de Gestión de Expedientes<br>
+                Este documento fue generado automáticamente · {{ $fechaGeneracion }}
+            </div>
+
         </div>
-
     </div>
 </body>
 

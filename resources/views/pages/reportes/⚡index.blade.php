@@ -87,7 +87,16 @@ new #[Title(' - Reportes')] class extends Component {
         return Expediente::query()
             ->accesiblesPor($user)
             ->when($this->fecha_desde && $this->fecha_hasta, fn($q) => $q->recibidosEntre($this->fecha_desde, $this->fecha_hasta))
-            ->when($this->municipio_id, fn($q) => $q->deMunicipio((int) $this->municipio_id));
+            ->when($this->municipio_id, fn($q) => $q->deMunicipio((int) $this->municipio_id))
+            ->where('estado', '!=', Expediente::ESTADO_ARCHIVADO);
+    }
+
+    /**
+     * Suma de montos aprobados (revisiones completas) para un conjunto de expedientes.
+     */
+    private function montoAprobadoExpedientes($expedientesSubquery, ?int $tipoSolicitudId = null): float
+    {
+        return (float) RevisionFinanciera::query()->completas()->whereNotNull('monto_aprobado')->whereIn('expediente_id', $expedientesSubquery)->when($tipoSolicitudId, fn($q) => $q->where('tipo_solicitud_id', $tipoSolicitudId))->sum('monto_aprobado');
     }
 
     // ---- Computadas: Municipios Disponibles ----
@@ -111,19 +120,18 @@ new #[Title(' - Reportes')] class extends Component {
     {
         $query = $this->baseQuery();
 
-        $total = (clone $query)->count();
         $recibidos = (clone $query)->deEstado(Expediente::ESTADO_RECIBIDO)->count();
         $enRevision = (clone $query)->deEstado(Expediente::ESTADO_EN_REVISION)->count();
         $aprobados = (clone $query)->deEstado(Expediente::ESTADO_APROBADO)->count();
         $rechazados = (clone $query)->deEstado(Expediente::ESTADO_RECHAZADO)->count();
-        $archivados = (clone $query)->deEstado(Expediente::ESTADO_ARCHIVADO)->count();
+        $total = $recibidos + $enRevision + $aprobados + $rechazados;
 
         $montoContratado = (clone $query)->sum('monto_contrato');
-        $montoAprobado = RevisionFinanciera::whereIn('expediente_id', (clone $query)->select('id'))->sum('monto_aprobado');
+        $montoAprobado = $this->montoAprobadoExpedientes((clone $query)->select('id'));
 
         $enProceso = $recibidos + $enRevision;
 
-        return compact('total', 'recibidos', 'enRevision', 'aprobados', 'rechazados', 'archivados', 'enProceso', 'montoContratado', 'montoAprobado');
+        return compact('total', 'recibidos', 'enRevision', 'aprobados', 'rechazados', 'enProceso', 'montoContratado', 'montoAprobado');
     }
 
     // ---- Computadas: Datos por Municipio ----
@@ -146,20 +154,24 @@ new #[Title(' - Reportes')] class extends Component {
         $municipios = $municipiosQuery->get();
 
         $datos = $municipios->map(function ($municipio) {
-            $query = Expediente::query()
-                ->deMunicipio($municipio->id)
-                ->when($this->fecha_desde && $this->fecha_hasta, fn($q) => $q->recibidosEntre($this->fecha_desde, $this->fecha_hasta));
+            // Reutilizamos baseQuery para mantener filtros y exclusion de archivados consistentes.
+            $query = $this->baseQuery()->deMunicipio($municipio->id);
+
+            $recibidos = (clone $query)->deEstado(Expediente::ESTADO_RECIBIDO)->count();
+            $enRevision = (clone $query)->deEstado(Expediente::ESTADO_EN_REVISION)->count();
+            $aprobados = (clone $query)->deEstado(Expediente::ESTADO_APROBADO)->count();
+            $rechazados = (clone $query)->deEstado(Expediente::ESTADO_RECHAZADO)->count();
+            $total = $recibidos + $enRevision + $aprobados + $rechazados;
 
             return [
                 'nombre' => $municipio->nombre,
-                'recibidos' => (clone $query)->deEstado(Expediente::ESTADO_RECIBIDO)->count(),
-                'en_revision' => (clone $query)->deEstado(Expediente::ESTADO_EN_REVISION)->count(),
-                'aprobados' => (clone $query)->deEstado(Expediente::ESTADO_APROBADO)->count(),
-                'rechazados' => (clone $query)->deEstado(Expediente::ESTADO_RECHAZADO)->count(),
-                'archivados' => (clone $query)->deEstado(Expediente::ESTADO_ARCHIVADO)->count(),
-                'total' => (clone $query)->count(),
+                'recibidos' => $recibidos,
+                'en_revision' => $enRevision,
+                'aprobados' => $aprobados,
+                'rechazados' => $rechazados,
+                'total' => $total,
                 'monto_contratado' => (clone $query)->sum('monto_contrato'),
-                'monto_aprobado' => RevisionFinanciera::whereIn('expediente_id', (clone $query)->select('id'))->sum('monto_aprobado'),
+                'monto_aprobado' => $this->montoAprobadoExpedientes((clone $query)->select('id')),
             ];
         });
 
@@ -172,31 +184,55 @@ new #[Title(' - Reportes')] class extends Component {
     public function datosPorTipo()
     {
         $tipos = TipoSolicitud::ordenados()->get();
+        $expedientesFiltrados = $this->baseQuery()->select('id');
 
-        return $tipos->map(function ($tipo) {
-            // Now tipo_solicitud_id is on revisiones_financieras, not expedientes
-            $expedienteIds = RevisionFinanciera::where('tipo_solicitud_id', $tipo->id)->distinct('expediente_id')->pluck('expediente_id');
+        return $tipos->map(function ($tipo) use ($expedientesFiltrados) {
+            // Por tipo trabajamos sobre expedientes unicos, pero mantenemos tambien el total de revisiones del tipo.
+            $revisionesDelTipo = RevisionFinanciera::query()->where('tipo_solicitud_id', $tipo->id)->whereIn('expediente_id', $expedientesFiltrados);
 
-            $query = $this->baseQuery()->whereIn('id', $expedienteIds);
+            $expedienteIds = (clone $revisionesDelTipo)->select('expediente_id')->distinct();
+            $query = Expediente::query()->whereIn('id', $expedienteIds);
 
             $total = (clone $query)->count();
+            $revisiones = (clone $revisionesDelTipo)->count();
             $aprobados = (clone $query)->deEstado(Expediente::ESTADO_APROBADO)->count();
             $pendientes = (clone $query)->activos()->count();
             $rechazados = (clone $query)->deEstado(Expediente::ESTADO_RECHAZADO)->count();
-            $montoContratado = (clone $query)->sum('monto_contrato');
-            $montoAprobado = RevisionFinanciera::where('tipo_solicitud_id', $tipo->id)->where('estado', RevisionFinanciera::ESTADO_COMPLETO)->sum('monto_aprobado');
+            $montoAprobado = $this->montoAprobadoExpedientes((clone $query)->select('id'), $tipo->id);
 
             return [
                 'nombre' => $tipo->nombre,
                 'total' => $total,
+                'revisiones' => $revisiones,
                 'aprobados' => $aprobados,
                 'pendientes' => $pendientes,
                 'rechazados' => $rechazados,
-                'monto_contratado' => $montoContratado,
                 'monto_aprobado' => $montoAprobado,
                 'porcentaje_aprobacion' => $total > 0 ? round(($aprobados / $total) * 100, 1) : 0,
             ];
         });
+    }
+
+    #[Computed]
+    public function montoContratadoPorEstado()
+    {
+        $query = $this->baseQuery();
+
+        $porEstado = collect([Expediente::ESTADO_RECIBIDO, Expediente::ESTADO_EN_REVISION, Expediente::ESTADO_APROBADO, Expediente::ESTADO_RECHAZADO])->map(function ($estado) use ($query) {
+            $estadoQuery = (clone $query)->deEstado($estado);
+
+            return [
+                'estado' => $estado,
+                'expedientes' => (clone $estadoQuery)->count(),
+                'monto_contratado' => (float) (clone $estadoQuery)->sum('monto_contrato'),
+            ];
+        });
+
+        return [
+            'porEstado' => $porEstado,
+            'totalExpedientes' => $porEstado->sum('expedientes'),
+            'totalMonto' => $porEstado->sum('monto_contratado'),
+        ];
     }
 
     // ---- Computadas: Datos Financieros ----
@@ -205,13 +241,25 @@ new #[Title(' - Reportes')] class extends Component {
     public function datosFinancieros()
     {
         $expedientes = $this->baseQuery()
-            ->with(['municipio', 'ultimaRevision'])
-            ->whereHas('revisionesFinancieras')
-            ->orderBy('fecha_recibido', 'desc')
-            ->get();
+            ->with(['municipio'])
+            ->withCount('revisionesFinancieras')
+            ->withSum(
+                [
+                    'revisionesFinancieras as monto_aprobado_total' => fn($q) => $q->completas()->whereNotNull('monto_aprobado'),
+                ],
+                'monto_aprobado',
+            )
+            ->get()
+            ->sortBy(function ($exp) {
+                $municipio = strtolower($exp->municipio->nombre ?? 'zzz');
+                $snip = strtolower((string) ($exp->codigo_snip ?? ''));
+
+                return $municipio . '|' . $snip;
+            })
+            ->values();
 
         return $expedientes->map(function ($exp) {
-            $montoAprobado = $exp->ultimaRevision?->monto_aprobado ?? 0;
+            $montoAprobado = (float) ($exp->monto_aprobado_total ?? 0);
             $diferencia = $montoAprobado - ($exp->monto_contrato ?? 0);
             $diasTramite = $exp->fecha_aprobacion ? $exp->fecha_recibido->diffInDays($exp->fecha_aprobacion) : $exp->fecha_recibido->diffInDays(now());
 
@@ -223,10 +271,17 @@ new #[Title(' - Reportes')] class extends Component {
                 'monto_aprobado' => $montoAprobado,
                 'diferencia' => $diferencia,
                 'dias_tramite' => $diasTramite,
+                'tiene_revision' => ($exp->revisiones_financieras_count ?? 0) > 0,
                 'estado' => $exp->estado,
                 'estado_badge' => $exp->estado_badge_class,
             ];
         });
+    }
+
+    #[Computed]
+    public function datosFinancierosAgrupados()
+    {
+        return $this->datosFinancieros->groupBy('municipio');
     }
 
     // ---- Computadas: Resumen Financiero ----
@@ -237,19 +292,11 @@ new #[Title(' - Reportes')] class extends Component {
         $query = $this->baseQuery();
 
         $montoContratado = (clone $query)->sum('monto_contrato');
-        $montoAprobado = RevisionFinanciera::whereIn('expediente_id', (clone $query)->select('id'))->sum('monto_aprobado');
+        $montoAprobado = $this->montoAprobadoExpedientes((clone $query)->select('id'));
         $diferencia = $montoAprobado - $montoContratado;
         $variacion = $montoContratado > 0 ? round(($diferencia / $montoContratado) * 100, 1) : 0;
 
-        $totalExpedientes = (clone $query)->count();
-        $promedioMonto = $totalExpedientes > 0 ? $montoContratado / $totalExpedientes : 0;
-
-        // Promedio días de trámite para aprobados
-        $aprobados = (clone $query)->deEstado(Expediente::ESTADO_APROBADO)->whereNotNull('fecha_aprobacion')->get();
-
-        $promedioDias = $aprobados->count() > 0 ? round($aprobados->avg(fn($e) => $e->fecha_recibido->diffInDays($e->fecha_aprobacion))) : 0;
-
-        return compact('montoContratado', 'montoAprobado', 'diferencia', 'variacion', 'promedioMonto', 'promedioDias');
+        return compact('montoContratado', 'montoAprobado', 'diferencia', 'variacion');
     }
 
     // ---- Computadas: Gráficas ----
@@ -260,14 +307,13 @@ new #[Title(' - Reportes')] class extends Component {
         $stats = $this->estadisticas;
 
         return [
-            'labels' => ['Recibidos', 'En Revisión', 'Aprobados', 'Rechazados', 'Archivados'],
-            'data' => [$stats['recibidos'], $stats['enRevision'], $stats['aprobados'], $stats['rechazados'], $stats['archivados']],
+            'labels' => ['Recibidos', 'En Revisión', 'Aprobados', 'Rechazados'],
+            'data' => [$stats['recibidos'], $stats['enRevision'], $stats['aprobados'], $stats['rechazados']],
             'colors' => [
                 'rgba(59, 130, 246, 0.7)', // info - Recibidos
                 'rgba(234, 179, 8, 0.7)', // warning - En Revisión
                 'rgba(16, 185, 129, 0.7)', // emerald - Aprobados
                 'rgba(239, 68, 68, 0.7)', // error - Rechazados
-                'rgba(148, 163, 184, 0.7)', // slate - Archivados
             ],
         ];
     }
@@ -282,7 +328,7 @@ new #[Title(' - Reportes')] class extends Component {
 
         return [
             'labels' => $conDatos->pluck('nombre')->values()->toArray(),
-            'datasets' => [['label' => 'Aprobados', 'data' => $conDatos->pluck('aprobados')->values()->toArray(), 'color' => 'rgba(16, 185, 129, 0.7)'], ['label' => 'En Proceso', 'data' => $conDatos->map(fn($d) => $d['recibidos'] + $d['en_revision'])->values()->toArray(), 'color' => 'rgba(234, 179, 8, 0.7)'], ['label' => 'Rechazados', 'data' => $conDatos->pluck('rechazados')->values()->toArray(), 'color' => 'rgba(239, 68, 68, 0.7)'], ['label' => 'Archivados', 'data' => $conDatos->pluck('archivados')->values()->toArray(), 'color' => 'rgba(148, 163, 184, 0.7)']],
+            'datasets' => [['label' => 'Aprobados', 'data' => $conDatos->pluck('aprobados')->values()->toArray(), 'color' => 'rgba(16, 185, 129, 0.7)'], ['label' => 'En Proceso', 'data' => $conDatos->map(fn($d) => $d['recibidos'] + $d['en_revision'])->values()->toArray(), 'color' => 'rgba(234, 179, 8, 0.7)'], ['label' => 'Rechazados', 'data' => $conDatos->pluck('rechazados')->values()->toArray(), 'color' => 'rgba(239, 68, 68, 0.7)']],
         ];
     }
 
@@ -334,7 +380,7 @@ new #[Title(' - Reportes')] class extends Component {
             'fecha_desde' => $this->fecha_desde,
             'fecha_hasta' => $this->fecha_hasta,
             'municipioNombre' => $municipioNombre,
-            'generadoPor' => Auth::user()->nombre_completo ?? Auth::user()->nombres,
+            'generadoPor' => Auth::user()->role->nombre ?? 'Usuario autorizado',
             'fechaGeneracion' => now()->format('d/m/Y H:i'),
         ];
 
@@ -342,7 +388,11 @@ new #[Title(' - Reportes')] class extends Component {
         match ($this->tab) {
             'resumen' => ($data['estadisticas'] = $this->estadisticas),
             'municipio' => ($data['datos'] = $this->datosPorMunicipio),
-            'tipo' => ($data['datos'] = $this->datosPorTipo),
+            'tipo' => ($data = array_merge($data, [
+                'datos' => $this->datosPorTipo,
+                'montoContratadoPorEstado' => $this->montoContratadoPorEstado,
+                'totalExpedientesReales' => $this->estadisticas['total'],
+            ])),
             'financiero' => ($data = array_merge($data, [
                 'resumen' => $this->resumenFinanciero,
                 'datos' => $this->datosFinancieros,
@@ -369,7 +419,7 @@ new #[Title(' - Reportes')] class extends Component {
             'financiero' => 'Financiero',
         };
 
-        Bitacora::registrarReporte("Reporte '{$nombre}' exportado a PDF – Período: {$periodoTexto}, Municipio: {$municipioNombre}");
+        Bitacora::registrarReporte("Reporte '{$nombre}' exportado a PDF - Período: {$periodoTexto}, Municipio: {$municipioNombre}");
     }
 
     // ---- Helpers ----
@@ -392,7 +442,7 @@ new #[Title(' - Reportes')] class extends Component {
 
     private function resetComputadas(): void
     {
-        unset($this->estadisticas, $this->datosPorMunicipio, $this->datosPorTipo, $this->datosFinancieros, $this->resumenFinanciero, $this->chartEstados, $this->chartMunicipios, $this->chartFinanciero);
+        unset($this->estadisticas, $this->datosPorMunicipio, $this->datosPorTipo, $this->montoContratadoPorEstado, $this->datosFinancieros, $this->datosFinancierosAgrupados, $this->resumenFinanciero, $this->chartEstados, $this->chartMunicipios, $this->chartFinanciero);
     }
 
     public function formatoMoneda(float|int|null $monto): string
@@ -610,9 +660,6 @@ new #[Title(' - Reportes')] class extends Component {
                         <span class="badge gap-1 p-3 badge-outline border-error text-error">
                             <span class="font-bold">{{ $this->estadisticas['rechazados'] }}</span> Rechazados
                         </span>
-                        <span class="badge badge-ghost gap-1 p-3">
-                            <span class="font-bold">{{ $this->estadisticas['archivados'] }}</span> Archivados
-                        </span>
                     </div>
                 </div>
             </div>
@@ -660,7 +707,6 @@ new #[Title(' - Reportes')] class extends Component {
                                     <th class="text-center font-semibold">En Revisión</th>
                                     <th class="text-center font-semibold">Aprobados</th>
                                     <th class="text-center font-semibold">Rechazados</th>
-                                    <th class="text-center font-semibold">Archivados</th>
                                     <th class="text-center font-semibold">Total</th>
                                     <th class="text-right font-semibold">Monto Contratado</th>
                                     <th class="text-right font-semibold">Monto Aprobado</th>
@@ -687,10 +733,6 @@ new #[Title(' - Reportes')] class extends Component {
                                                 <span
                                                     class="badge badge-outline badge-sm border-error text-error">{{ $fila['rechazados'] }}</span>
                                             </td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="badge badge-ghost badge-sm">{{ $fila['archivados'] }}</span>
-                                            </td>
                                             <td class="text-center font-bold">{{ $fila['total'] }}</td>
                                             <td class="text-right text-sm">
                                                 {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
@@ -700,7 +742,7 @@ new #[Title(' - Reportes')] class extends Component {
                                     @endif
                                 @empty
                                     <tr>
-                                        <td colspan="11" class="text-center py-8 text-base-content/40">
+                                        <td colspan="8" class="text-center py-8 text-base-content/40">
                                             No hay datos para el período seleccionado
                                         </td>
                                     </tr>
@@ -715,7 +757,6 @@ new #[Title(' - Reportes')] class extends Component {
                                         </td>
                                         <td class="text-center">{{ $this->datosPorMunicipio->sum('aprobados') }}</td>
                                         <td class="text-center">{{ $this->datosPorMunicipio->sum('rechazados') }}</td>
-                                        <td class="text-center">{{ $this->datosPorMunicipio->sum('archivados') }}</td>
                                         <td class="text-center">{{ $this->datosPorMunicipio->sum('total') }}</td>
                                         <td class="text-right">
                                             {{ $this->formatoMoneda($this->datosPorMunicipio->sum('monto_contratado')) }}
@@ -769,11 +810,11 @@ new #[Title(' - Reportes')] class extends Component {
                             <thead>
                                 <tr class="bg-base-200/50">
                                     <th class="font-semibold">Tipo de Solicitud</th>
-                                    <th class="text-center font-semibold">Total</th>
+                                    <th class="text-center font-semibold">Expedientes Únicos</th>
+                                    <th class="text-center font-semibold">Revisiones</th>
                                     <th class="text-center font-semibold">Aprobados</th>
                                     <th class="text-center font-semibold">Pendientes</th>
                                     <th class="text-center font-semibold">Rechazados</th>
-                                    <th class="text-right font-semibold">Monto Contratado</th>
                                     <th class="text-right font-semibold">Monto Aprobado</th>
                                     <th class="text-center font-semibold">% Aprobación</th>
                                 </tr>
@@ -783,6 +824,7 @@ new #[Title(' - Reportes')] class extends Component {
                                     <tr>
                                         <td class="font-medium">{{ $fila['nombre'] }}</td>
                                         <td class="text-center font-bold">{{ $fila['total'] }}</td>
+                                        <td class="text-center">{{ $fila['revisiones'] }}</td>
                                         <td class="text-center">
                                             <span class="badge badge-success badge-sm">{{ $fila['aprobados'] }}</span>
                                         </td>
@@ -793,8 +835,6 @@ new #[Title(' - Reportes')] class extends Component {
                                         <td class="text-center">
                                             <span class="badge badge-error badge-sm">{{ $fila['rechazados'] }}</span>
                                         </td>
-                                        <td class="text-right text-sm">
-                                            {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
                                         <td class="text-right text-sm">
                                             {{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
                                         <td class="text-center">
@@ -823,14 +863,12 @@ new #[Title(' - Reportes')] class extends Component {
                             @if ($this->datosPorTipo->sum('total') > 0)
                                 <tfoot>
                                     <tr class="font-bold bg-base-200/50">
-                                        <td>TOTAL</td>
+                                        <td>ACUMULADO POR TIPO</td>
                                         <td class="text-center">{{ $this->datosPorTipo->sum('total') }}</td>
+                                        <td class="text-center">{{ $this->datosPorTipo->sum('revisiones') }}</td>
                                         <td class="text-center">{{ $this->datosPorTipo->sum('aprobados') }}</td>
                                         <td class="text-center">{{ $this->datosPorTipo->sum('pendientes') }}</td>
                                         <td class="text-center">{{ $this->datosPorTipo->sum('rechazados') }}</td>
-                                        <td class="text-right">
-                                            {{ $this->formatoMoneda($this->datosPorTipo->sum('monto_contratado')) }}
-                                        </td>
                                         <td class="text-right">
                                             {{ $this->formatoMoneda($this->datosPorTipo->sum('monto_aprobado')) }}</td>
                                         <td class="text-center">
@@ -847,6 +885,60 @@ new #[Title(' - Reportes')] class extends Component {
                             @endif
                         </table>
                     </div>
+
+                    <div class="alert mt-4 text-sm">
+                        <x-heroicon-o-information-circle class="w-5 h-5" />
+                        <div>
+                            <div class="font-semibold">Interpretación de la tabla por tipo</div>
+                            <div class="text-base-content/70">
+                                Un expediente puede aparecer en más de un tipo de solicitud. Por eso, el acumulado por
+                                tipo
+                                no equivale al total real de expedientes únicos del período.
+                                <span class="font-semibold">Total real actual: {{ $this->estadisticas['total'] }}
+                                    expedientes.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow-lg border border-base-300 mt-6">
+                <div class="card-body p-4">
+                    <h3 class="font-semibold flex items-center gap-2 mb-4">
+                        <x-heroicon-o-banknotes class="w-5 h-5 text-primary" />
+                        Monto Contratado Real por Estado
+                    </h3>
+
+                    <div class="overflow-x-auto">
+                        <table class="table table-sm table-zebra">
+                            <thead>
+                                <tr class="bg-base-200/50">
+                                    <th class="font-semibold">Estado</th>
+                                    <th class="text-center font-semibold">Expedientes</th>
+                                    <th class="text-right font-semibold">Monto Contratado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($this->montoContratadoPorEstado['porEstado'] as $fila)
+                                    <tr>
+                                        <td class="font-medium">{{ $fila['estado'] }}</td>
+                                        <td class="text-center font-bold">{{ $fila['expedientes'] }}</td>
+                                        <td class="text-right text-sm">
+                                            {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-bold bg-base-200/50">
+                                    <td>TOTAL REAL</td>
+                                    <td class="text-center">{{ $this->montoContratadoPorEstado['totalExpedientes'] }}
+                                    </td>
+                                    <td class="text-right">
+                                        {{ $this->formatoMoneda($this->montoContratadoPorEstado['totalMonto']) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -858,7 +950,7 @@ new #[Title(' - Reportes')] class extends Component {
     @if ($tab === 'financiero')
         <div wire:loading.remove>
             {{-- Stats Financieros --}}
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
                 <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
                     <div class="stat-title text-xs">Monto Contratado</div>
                     <div class="stat-value text-lg text-primary">
@@ -879,18 +971,6 @@ new #[Title(' - Reportes')] class extends Component {
                         {{ $this->resumenFinanciero['variacion'] >= 0 ? '+' : '' }}{{ $this->resumenFinanciero['variacion'] }}%
                     </div>
                 </div>
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
-                    <div class="stat-title text-xs">Promedio/Exp.</div>
-                    <div class="stat-value text-lg">
-                        {{ $this->formatoMoneda($this->resumenFinanciero['promedioMonto']) }}</div>
-                    <div class="stat-desc text-xs">Monto promedio</div>
-                </div>
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3 col-span-2">
-                    <div class="stat-title text-xs">Promedio Días Trámite</div>
-                    <div class="stat-value text-lg text-info">{{ $this->resumenFinanciero['promedioDias'] }} días
-                    </div>
-                    <div class="stat-desc text-xs">De recibido a aprobado</div>
-                </div>
             </div>
 
             {{-- Tabla detalle financiero --}}
@@ -908,6 +988,7 @@ new #[Title(' - Reportes')] class extends Component {
                                 <tr class="bg-base-200/50">
                                     <th class="font-semibold">SNIP</th>
                                     <th class="font-semibold">Municipio</th>
+                                    <th class="text-center font-semibold">Revisión Financiera</th>
                                     <th class="text-right font-semibold">Monto Contratado</th>
                                     <th class="text-right font-semibold">Monto Aprobado</th>
                                     <th class="text-right font-semibold">Diferencia</th>
@@ -916,28 +997,45 @@ new #[Title(' - Reportes')] class extends Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($this->datosFinancieros as $fila)
-                                    <tr>
-                                        <td class="font-mono text-sm">{{ $fila['codigo_snip'] }}</td>
-                                        <td>{{ $fila['municipio'] }}</td>
-                                        <td class="text-right text-sm">
-                                            {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
-                                        <td class="text-right text-sm">
-                                            {{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
-                                        <td
-                                            class="text-right text-sm {{ $fila['diferencia'] >= 0 ? 'text-success' : 'text-error' }}">
-                                            {{ $this->formatoMoneda($fila['diferencia']) }}
-                                        </td>
-                                        <td class="text-center">{{ $fila['dias_tramite'] }}</td>
-                                        <td class="text-center">
+                                @forelse ($this->datosFinancierosAgrupados as $municipio => $filasMunicipio)
+                                    <tr class="bg-base-200/70">
+                                        <td colspan="8" class="font-semibold">
+                                            {{ $municipio }}
                                             <span
-                                                class="badge {{ $fila['estado_badge'] }} badge-sm">{{ $fila['estado'] }}</span>
+                                                class="text-base-content/60 font-normal">({{ $filasMunicipio->count() }}
+                                                expedientes)</span>
                                         </td>
                                     </tr>
+
+                                    @foreach ($filasMunicipio as $fila)
+                                        <tr>
+                                            <td class="font-mono text-sm">{{ $fila['codigo_snip'] }}</td>
+                                            <td>{{ $fila['municipio'] }}</td>
+                                            <td class="text-center">
+                                                <span
+                                                    class="badge badge-sm {{ $fila['tiene_revision'] ? 'badge-success' : 'badge-ghost' }}">
+                                                    {{ $fila['tiene_revision'] ? 'Con revisión' : 'Sin revisión' }}
+                                                </span>
+                                            </td>
+                                            <td class="text-right text-sm">
+                                                {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
+                                            <td class="text-right text-sm">
+                                                {{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
+                                            <td
+                                                class="text-right text-sm {{ $fila['diferencia'] >= 0 ? 'text-success' : 'text-error' }}">
+                                                {{ $this->formatoMoneda($fila['diferencia']) }}
+                                            </td>
+                                            <td class="text-center">{{ (int) $fila['dias_tramite'] }}</td>
+                                            <td class="text-center">
+                                                <span
+                                                    class="badge {{ $fila['estado_badge'] }} badge-sm">{{ $fila['estado'] }}</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 @empty
                                     <tr>
                                         <td colspan="8" class="text-center py-8 text-base-content/40">
-                                            No hay expedientes con revisión financiera en este período
+                                            No hay expedientes en este período
                                         </td>
                                     </tr>
                                 @endforelse

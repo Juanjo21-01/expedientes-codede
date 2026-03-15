@@ -32,7 +32,8 @@ new #[Title('Dashboard')] class extends Component {
 
     private function expedienteBase()
     {
-        return Expediente::query()->accesiblesPor($this->user);
+        // excluir los expedientes con estado archivado
+        return Expediente::query()->accesiblesPor($this->user)->where('estado', '!=', Expediente::ESTADO_ARCHIVADO);
     }
 
     // ===============================================================

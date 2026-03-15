@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <title>Reporte - Por Municipio</title>
     <style>
+        @page {
+            margin: 38px 24px 26px 24px;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,87 +16,139 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 10.5px;
-            color: #1e293b;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10px;
+            color: #1f2937;
             line-height: 1.45;
-            background: #fff;
+            background: #ffffff;
+        }
+
+        .page-wrapper {
+            width: 100%;
         }
 
         .header {
-            background-color: #1e3a5f;
+            background-color: #163a63;
             color: #ffffff;
-            padding: 20px 30px;
-            margin: -10px -10px 0;
+            padding: 16px 20px;
         }
 
-        .header h1 {
-            font-size: 19px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-            margin-bottom: 2px;
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .header-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 6px;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            line-height: 1.1;
+            margin-bottom: 3px;
         }
 
         .header-subtitle {
-            font-size: 10px;
-            color: #94b8d6;
+            font-size: 9px;
+            color: #c7d8ea;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+        }
+
+        .header-right-label {
+            font-size: 9px;
+            color: #c7d8ea;
+            text-align: right;
+            margin-bottom: 3px;
+        }
+
+        .header-right-value {
+            font-size: 12px;
+            font-weight: bold;
+            color: #ffffff;
+            text-align: right;
         }
 
         .accent-line {
-            height: 3px;
+            height: 4px;
             background-color: #3b82f6;
-            margin: 0 -10px;
+            border-radius: 0 0 10px 10px;
+            margin-bottom: 16px;
         }
 
         .content {
-            padding: 18px 16px 14px;
+            padding: 18px 20px 14px;
+        }
+
+        .block {
+            margin-bottom: 16px;
         }
 
         .report-meta {
-            background-color: #eff6ff;
-            border: 1px solid #bfdbfe;
+            border: 1px solid #cfe0f2;
+            background-color: #f5f9ff;
             border-radius: 8px;
-            padding: 12px 16px;
-            margin: 18px 0;
+            padding: 10px 12px;
         }
 
         .report-meta table {
             width: 100%;
+            border-collapse: collapse;
         }
 
         .report-meta td {
-            padding: 2px 8px;
-            font-size: 10px;
+            padding: 5px 6px;
+            vertical-align: top;
         }
 
         .report-meta .label {
-            color: #64748b;
-            font-weight: 600;
+            width: 125px;
+            color: #5b6b7c;
+            font-size: 9px;
+            font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            width: 130px;
+            letter-spacing: 0.4px;
         }
 
         .report-meta .value {
-            color: #1e293b;
-            font-weight: 600;
+            color: #1f2937;
+            font-size: 10px;
+            font-weight: bold;
         }
 
         .section-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #1e3a5f;
-            border-bottom: 2px solid #3b82f6;
-            padding-bottom: 6px;
-            margin: 18px 0 11px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #163a63;
+            margin-bottom: 8px;
+        }
+
+        .section-line {
+            height: 2px;
+            background-color: #60a5fa;
+            margin-bottom: 12px;
+        }
+
+        .table-wrapper {
+            border: none;
+            border-radius: 0;
+            overflow: visible;
         }
 
         .data-table {
             width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: fixed;
+            border: 1px solid #d7e0ea;
+            border-radius: 8px;
         }
 
         .data-table thead {
@@ -104,165 +160,251 @@
         }
 
         .data-table th {
-            background-color: #1e3a5f;
+            background-color: #163a63;
             color: #ffffff;
             font-size: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.6px;
-            padding: 6px 5px;
+            letter-spacing: 0.5px;
+            padding: 8px 6px;
             text-align: center;
+            border-right: 1px solid #2a4d73;
+            line-height: 1.25;
+            border-top: 1px solid #163a63;
+        }
+
+        .data-table th:last-child {
+            border-right: none;
         }
 
         .data-table th:first-child {
             text-align: left;
-            border-radius: 4px 0 0 0;
-            padding-left: 8px;
+            padding-left: 10px;
+            border-top-left-radius: 8px;
         }
 
         .data-table th:last-child {
-            border-radius: 0 4px 0 0;
+            border-top-right-radius: 8px;
+        }
+
+        /* Espacio visual repetible cuando la tabla continua en una nueva pagina. */
+        .data-table thead .thead-spacer th {
+            background: #ffffff !important;
+            border: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            height: 12px;
+            line-height: 12px;
+            font-size: 0;
+            color: transparent;
+        }
+
+        .data-table thead tr:not(.thead-spacer) th {
+            border-top: 0 !important;
         }
 
         .data-table td {
-            padding: 5px 5px;
+            padding: 7px 6px;
             text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 10px;
+            border-top: 1px solid #e5edf5;
+            border-right: 1px solid #e5edf5;
+            font-size: 9.5px;
+            vertical-align: middle;
+            line-height: 1.35;
+            word-wrap: break-word;
+        }
+
+        .data-table td:last-child {
+            border-right: none;
         }
 
         .data-table td:first-child {
             text-align: left;
-            font-weight: 600;
-            padding-left: 8px;
+            font-weight: bold;
+            padding-left: 10px;
         }
 
-        .data-table tr:nth-child(even) {
-            background-color: #f8fafc;
+        .data-table tbody tr:nth-child(even) {
+            background-color: #f8fbff;
         }
 
         .data-table tfoot td {
-            font-weight: 700;
-            background-color: #eff6ff;
-            border-top: 2px solid #3b82f6;
-            font-size: 10px;
+            background-color: #eef5ff;
+            font-weight: bold;
+            border-top: 2px solid #60a5fa;
+            border-right: 1px solid #e5edf5;
+            font-size: 9.5px;
+        }
+
+        .data-table tfoot td:last-child {
+            border-right: none;
+        }
+
+        .data-table tfoot tr:last-child td:first-child {
+            border-bottom-left-radius: 8px;
+        }
+
+        .data-table tfoot tr:last-child td:last-child {
+            border-bottom-right-radius: 8px;
+        }
+
+        .data-table tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 8px;
+        }
+
+        .data-table tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 8px;
+        }
+
+        .col-municipio {
+            width: 20%;
+        }
+
+        .col-small {
+            width: 9%;
+        }
+
+        .col-total {
+            width: 8%;
+        }
+
+        .col-money {
+            width: 18%;
         }
 
         .text-right {
             text-align: right !important;
         }
 
+        .text-center {
+            text-align: center !important;
+        }
+
+        .total-highlight {
+            font-weight: bold;
+            color: #163a63;
+        }
+
         .footer {
-            margin-top: 26px;
+            margin-top: 22px;
             padding-top: 10px;
-            border-top: 1px solid #cbd5e1;
+            border-top: 1px solid #d7e0ea;
             text-align: center;
-            color: #94a3b8;
-            font-size: 9.5px;
+            font-size: 9px;
+            color: #7b8794;
         }
 
         .footer strong {
-            color: #64748b;
+            color: #4b5563;
         }
     </style>
 </head>
 
 <body>
-    {{-- Header --}}
-    <div class="header">
-        <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-                <td width="55">
-                    <img src="{{ public_path('img/logo.png') }}" style="width: 45px; height: 45px; border-radius: 6px;"
-                        alt="CODEDE">
-                </td>
-                <td>
-                    <h1>CODEDE San Marcos</h1>
-                    <div class="header-subtitle">Sistema de Gestión de Expedientes</div>
-                </td>
-                <td style="text-align: right; vertical-align: top;">
-                    <div style="font-size: 9px; color: #94b8d6;">Reporte generado</div>
-                    <div style="font-size: 11px; font-weight: 600; color: #fff;">{{ $fechaGeneracion }}</div>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="accent-line"></div>
+    <div class="page-wrapper">
 
-    <div class="content">
-
-        {{-- Meta --}}
-        <div class="report-meta">
-            <table>
+        {{-- Header --}}
+        <div class="header">
+            <table class="header-table" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td class="label">Tipo de Reporte:</td>
-                    <td class="value">Comparativo por Municipio</td>
-                    <td class="label">Período:</td>
-                    <td class="value">{{ $periodoTexto }}</td>
-                </tr>
-                <tr>
-                    <td class="label">Filtro Municipio:</td>
-                    <td class="value">{{ $municipioNombre }}</td>
-                    <td class="label">Generado por:</td>
-                    <td class="value">{{ $generadoPor }}</td>
+                    <td width="56">
+                        <img src="{{ public_path('img/logo.png') }}" class="header-logo" alt="CODEDE">
+                    </td>
+                    <td>
+                        <div class="header-title">CODEDE San Marcos</div>
+                        <div class="header-subtitle">Sistema de Gestión de Expedientes</div>
+                    </td>
+                    <td width="170">
+                        <div class="header-right-label">Reporte generado</div>
+                        <div class="header-right-value">{{ $fechaGeneracion }}</div>
+                    </td>
                 </tr>
             </table>
         </div>
+        <div class="accent-line"></div>
 
-        {{-- Tabla principal --}}
-        <div class="section-title">Expedientes por Municipio</div>
+        <div class="content">
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Municipio</th>
-                    <th>Recibidos</th>
-                    <th>En Revisión</th>
-                    <th>Aprobados</th>
-                    <th>Rechazados</th>
-                    <th>Archivados</th>
-                    <th>Total</th>
-                    <th>Monto Contratado</th>
-                    <th>Monto Aprobado</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($datos as $fila)
-                    @if ($fila['total'] > 0)
+            {{-- Meta --}}
+            <div class="block">
+                <div class="report-meta">
+                    <table cellpadding="0" cellspacing="0">
                         <tr>
-                            <td>{{ $fila['nombre'] }}</td>
-                            <td>{{ $fila['recibidos'] }}</td>
-                            <td>{{ $fila['en_revision'] }}</td>
-                            <td>{{ $fila['aprobados'] }}</td>
-                            <td>{{ $fila['rechazados'] }}</td>
-                            <td>{{ $fila['archivados'] }}</td>
-                            <td style="font-weight: 700;">{{ $fila['total'] }}</td>
-                            <td class="text-right">Q {{ number_format($fila['monto_contratado'], 2) }}</td>
-                            <td class="text-right">Q {{ number_format($fila['monto_aprobado'], 2) }}</td>
+                            <td class="label">Tipo de Reporte:</td>
+                            <td class="value">Comparativo por Municipio</td>
+                            <td class="label">Período:</td>
+                            <td class="value">{{ $periodoTexto }}</td>
                         </tr>
-                    @endif
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td>TOTAL</td>
-                    <td>{{ $datos->sum('recibidos') }}</td>
-                    <td>{{ $datos->sum('en_revision') }}</td>
-                    <td>{{ $datos->sum('aprobados') }}</td>
-                    <td>{{ $datos->sum('rechazados') }}</td>
-                    <td>{{ $datos->sum('archivados') }}</td>
-                    <td>{{ $datos->sum('total') }}</td>
-                    <td class="text-right">Q {{ number_format($datos->sum('monto_contratado'), 2) }}</td>
-                    <td class="text-right">Q {{ number_format($datos->sum('monto_aprobado'), 2) }}</td>
-                </tr>
-            </tfoot>
-        </table>
+                        <tr>
+                            <td class="label">Filtro Municipio:</td>
+                            <td class="value">{{ $municipioNombre }}</td>
+                            <td class="label">Rol emisor:</td>
+                            <td class="value">{{ $generadoPor }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
-        {{-- Footer --}}
-        <div class="footer">
-            <strong>CODEDE San Marcos</strong> · Sistema de Gestión de Expedientes<br>
-            Este documento fue generado automáticamente · {{ $fechaGeneracion }}
+            {{-- Tabla principal --}}
+            <div class="block">
+                <div class="section-title">Expedientes por Municipio</div>
+                <div class="section-line"></div>
+
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr class="thead-spacer">
+                                <th colspan="8">&nbsp;</th>
+                            </tr>
+                            <tr>
+                                <th class="col-municipio">Municipio</th>
+                                <th class="col-small">Recibidos</th>
+                                <th class="col-small">En Revisión</th>
+                                <th class="col-small">Aprobados</th>
+                                <th class="col-small">Rechazados</th>
+                                <th class="col-total">Total</th>
+                                <th class="col-money">Monto Contratado</th>
+                                <th class="col-money">Monto Aprobado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($datos as $fila)
+                                @if ($fila['total'] > 0)
+                                    <tr>
+                                        <td>{{ $fila['nombre'] }}</td>
+                                        <td>{{ $fila['recibidos'] }}</td>
+                                        <td>{{ $fila['en_revision'] }}</td>
+                                        <td>{{ $fila['aprobados'] }}</td>
+                                        <td>{{ $fila['rechazados'] }}</td>
+                                        <td class="total-highlight">{{ $fila['total'] }}</td>
+                                        <td class="text-right">Q {{ number_format($fila['monto_contratado'], 2) }}</td>
+                                        <td class="text-right">Q {{ number_format($fila['monto_aprobado'], 2) }}</td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>TOTAL</td>
+                                <td>{{ $datos->sum('recibidos') }}</td>
+                                <td>{{ $datos->sum('en_revision') }}</td>
+                                <td>{{ $datos->sum('aprobados') }}</td>
+                                <td>{{ $datos->sum('rechazados') }}</td>
+                                <td>{{ $datos->sum('total') }}</td>
+                                <td class="text-right">Q {{ number_format($datos->sum('monto_contratado'), 2) }}</td>
+                                <td class="text-right">Q {{ number_format($datos->sum('monto_aprobado'), 2) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Footer --}}
+            <div class="footer">
+                <strong>CODEDE San Marcos</strong> · Sistema de Gestión de Expedientes<br>
+                Este documento fue generado automáticamente · {{ $fechaGeneracion }}
+            </div>
+
         </div>
-
     </div>
 </body>
 
