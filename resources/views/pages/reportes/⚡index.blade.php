@@ -25,6 +25,12 @@ new #[Title(' - Reportes')] class extends Component {
     public function mount(): void
     {
         $this->setFechasPeriodo();
+        $this->asegurarTabPermitida();
+    }
+
+    public function hydrate(): void
+    {
+        $this->asegurarTabPermitida();
     }
 
     // ---- Watchers ----
@@ -52,7 +58,32 @@ new #[Title(' - Reportes')] class extends Component {
 
     public function updatedTab(): void
     {
+        $this->asegurarTabPermitida();
         $this->resetComputadas();
+    }
+
+    // ---- Reglas de Acceso por Rol ----
+
+    #[Computed]
+    public function soloReporteFinanciero(): bool
+    {
+        return Auth::user()->isJefeFinanciero();
+    }
+
+    private function tabsPermitidas(): array
+    {
+        if ($this->soloReporteFinanciero) {
+            return ['financiero'];
+        }
+
+        return ['resumen', 'municipio', 'tipo', 'financiero'];
+    }
+
+    private function asegurarTabPermitida(): void
+    {
+        if (!in_array($this->tab, $this->tabsPermitidas(), true)) {
+            $this->tab = $this->tabsPermitidas()[0];
+        }
     }
 
     // ---- Helpers de Período ----
@@ -358,6 +389,10 @@ new #[Title(' - Reportes')] class extends Component {
 
     public function exportarPdf(): void
     {
+        if ($this->soloReporteFinanciero && $this->tab !== 'financiero') {
+            abort(403, 'Acceso Denegado');
+        }
+
         $vista = match ($this->tab) {
             'resumen' => 'pdf.reportes.resumen-general',
             'municipio' => 'pdf.reportes.por-municipio',
@@ -546,26 +581,34 @@ new #[Title(' - Reportes')] class extends Component {
 
     {{-- Pestañas --}}
     <div role="tablist" class="tabs tabs-border mb-6">
-        <button wire:click="$set('tab', 'resumen')" role="tab"
-            class="tab gap-2 {{ $tab === 'resumen' ? 'tab-active font-semibold' : '' }}">
-            <x-heroicon-o-chart-pie class="w-4 h-4" />
-            Resumen General
-        </button>
-        <button wire:click="$set('tab', 'municipio')" role="tab"
-            class="tab gap-2 {{ $tab === 'municipio' ? 'tab-active font-semibold' : '' }}">
-            <x-heroicon-o-building-library class="w-4 h-4" />
-            Por Municipio
-        </button>
-        <button wire:click="$set('tab', 'tipo')" role="tab"
-            class="tab gap-2 {{ $tab === 'tipo' ? 'tab-active font-semibold' : '' }}">
-            <x-heroicon-o-clipboard-document-list class="w-4 h-4" />
-            Por Tipo de Solicitud
-        </button>
-        <button wire:click="$set('tab', 'financiero')" role="tab"
-            class="tab gap-2 {{ $tab === 'financiero' ? 'tab-active font-semibold' : '' }}">
-            <x-heroicon-o-banknotes class="w-4 h-4" />
-            Financiero
-        </button>
+        @if ($this->soloReporteFinanciero)
+            <button wire:click="$set('tab', 'financiero')" role="tab"
+                class="tab gap-2 {{ $tab === 'financiero' ? 'tab-active font-semibold' : '' }}">
+                <x-heroicon-o-banknotes class="w-4 h-4" />
+                Financiero
+            </button>
+        @else
+            <button wire:click="$set('tab', 'resumen')" role="tab"
+                class="tab gap-2 {{ $tab === 'resumen' ? 'tab-active font-semibold' : '' }}">
+                <x-heroicon-o-chart-pie class="w-4 h-4" />
+                Resumen General
+            </button>
+            <button wire:click="$set('tab', 'municipio')" role="tab"
+                class="tab gap-2 {{ $tab === 'municipio' ? 'tab-active font-semibold' : '' }}">
+                <x-heroicon-o-building-library class="w-4 h-4" />
+                Por Municipio
+            </button>
+            <button wire:click="$set('tab', 'tipo')" role="tab"
+                class="tab gap-2 {{ $tab === 'tipo' ? 'tab-active font-semibold' : '' }}">
+                <x-heroicon-o-clipboard-document-list class="w-4 h-4" />
+                Por Tipo de Solicitud
+            </button>
+            <button wire:click="$set('tab', 'financiero')" role="tab"
+                class="tab gap-2 {{ $tab === 'financiero' ? 'tab-active font-semibold' : '' }}">
+                <x-heroicon-o-banknotes class="w-4 h-4" />
+                Financiero
+            </button>
+        @endif
     </div>
 
     {{-- Loading overlay --}}
@@ -576,7 +619,7 @@ new #[Title(' - Reportes')] class extends Component {
     {{-- ============================================================ --}}
     {{-- TAB: RESUMEN GENERAL --}}
     {{-- ============================================================ --}}
-    @if ($tab === 'resumen')
+    @if ($tab === 'resumen' && !$this->soloReporteFinanciero)
         <div wire:loading.remove>
             {{-- Stats Cards --}}
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
@@ -687,7 +730,7 @@ new #[Title(' - Reportes')] class extends Component {
     {{-- ============================================================ --}}
     {{-- TAB: POR MUNICIPIO --}}
     {{-- ============================================================ --}}
-    @if ($tab === 'municipio')
+    @if ($tab === 'municipio' && !$this->soloReporteFinanciero)
         <div wire:loading.remove>
             {{-- Tabla comparativa --}}
             <div class="card bg-base-100 shadow-lg border border-base-300 mb-6">
@@ -796,7 +839,7 @@ new #[Title(' - Reportes')] class extends Component {
     {{-- ============================================================ --}}
     {{-- TAB: POR TIPO DE SOLICITUD --}}
     {{-- ============================================================ --}}
-    @if ($tab === 'tipo')
+    @if ($tab === 'tipo' && !$this->soloReporteFinanciero)
         <div wire:loading.remove>
             <div class="card bg-base-100 shadow-lg border border-base-300">
                 <div class="card-body p-4">
@@ -1001,9 +1044,10 @@ new #[Title(' - Reportes')] class extends Component {
                                     <tr class="bg-base-200/70">
                                         <td colspan="8" class="font-semibold">
                                             {{ $municipio }}
-                                            <span
-                                                class="text-base-content/60 font-normal">({{ $filasMunicipio->count() }}
-                                                expedientes)</span>
+                                            <span class="text-base-content/60 font-normal">
+                                                ({{ $filasMunicipio->count() }}
+                                                {{ Str::plural('expediente', $filasMunicipio->count()) }})
+                                            </span>
                                         </td>
                                     </tr>
 
