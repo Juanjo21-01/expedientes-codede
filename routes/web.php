@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use App\Models\Expediente;
 use App\Models\Municipio;
@@ -174,6 +175,21 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     Route::livewire('/admin/notificaciones', 'pages::admin.notificaciones.index')
         ->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero')
         ->name('admin.notificaciones.index');
+
+    /*
+    |----------------------------------------------------------------------
+    | Utilidad Técnica - Generar enlace simbólico de storage (solo Admin)
+    |----------------------------------------------------------------------
+    */
+    Route::get('/admin/storage-link', function () {
+        Artisan::call('storage:link');
+
+        return response(
+            trim(Artisan::output()) ?: 'Comando storage:link ejecutado.',
+            200,
+            ['Content-Type' => 'text/plain; charset=UTF-8']
+        );
+    })->middleware('role:Administrador')->name('admin.storage-link');
 
 });
 
