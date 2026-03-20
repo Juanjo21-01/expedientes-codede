@@ -75,6 +75,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
             ->when($this->anioFiltro, fn($q) => $q->whereYear('fecha_recibido', $this->anioFiltro))
             ->with(['responsable'])
             ->orderBy('fecha_recibido', 'desc')
+            ->limit(10)
             ->get();
     }
 

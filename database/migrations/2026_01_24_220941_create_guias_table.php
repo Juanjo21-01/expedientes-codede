@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('categoria', 100);
             $table->boolean('estado')->default(true);
             $table->date('fecha_publicacion');
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

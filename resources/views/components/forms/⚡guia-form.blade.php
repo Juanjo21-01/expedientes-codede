@@ -201,6 +201,7 @@ new class extends Component {
                 'categoria' => $categoria,
                 'estado' => true,
                 'fecha_publicacion' => $this->fecha_publicacion,
+                'user_id' => auth()->id(),
             ]);
 
             $this->redirectRoute('admin.guias.index', navigate: true);
@@ -342,8 +343,11 @@ new class extends Component {
                         @endif
                     </legend>
 
+                    @php
+                        $archivoBorderClass = $errors->has('archivo_pdf') ? 'border-error' : 'border-base-content/10';
+                    @endphp
                     <div
-                        class="border-2 border-dashed border-base-content/10 rounded-lg p-6 text-center hover:border-primary/50 transition-colors @error('archivo_pdf') border-error @enderror">
+                        class="border-2 border-dashed {{ $archivoBorderClass }} rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                         <x-heroicon-o-cloud-arrow-up class="w-10 h-10 mx-auto text-base-content/30 mb-3" />
 
                         <input type="file" wire:model="archivo_pdf" accept=".pdf"

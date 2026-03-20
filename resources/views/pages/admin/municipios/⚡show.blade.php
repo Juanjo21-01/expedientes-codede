@@ -120,6 +120,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
             ->when($this->anioFiltro, fn($q) => $q->whereYear('fecha_recibido', $this->anioFiltro))
             ->with(['responsable'])
             ->orderBy('fecha_recibido', 'desc')
+            ->limit(10)
             ->get();
     }
 
@@ -203,9 +204,9 @@ new #[Title('- Detalle Municipio')] class extends Component {
     </div>
 
     {{-- Tarjeta Principal del Municipio --}}
-    <div class="card bg-gradient-to-br from-base-100 to-base-200 shadow-xl border border-base-300 overflow-hidden">
+    <div class="card bg-linear-to-br from-base-100 to-base-200 shadow-xl border border-base-300 overflow-hidden">
         {{-- Header decorativo --}}
-        <div class="h-20 bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20"></div>
+        <div class="h-20 bg-linear-to-r from-primary/20 via-accent/20 to-secondary/20"></div>
 
         <div class="card-body -mt-12">
             <div class="flex flex-col sm:flex-row items-center gap-6">
@@ -447,7 +448,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {{-- Total Expedientes --}}
         <div
-            class="stat bg-gradient-to-br from-primary/5 to-primary/10 rounded-box shadow border border-primary/20 hover:shadow-lg transition-shadow">
+            class="stat bg-linear-to-br from-primary/5 to-primary/10 rounded-box shadow border border-primary/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-primary opacity-80">
                 <x-heroicon-o-folder-open class="w-10 h-10" />
             </div>
@@ -458,7 +459,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
         {{-- Aprobados --}}
         <div
-            class="stat bg-gradient-to-br from-success/5 to-success/10 rounded-box shadow border border-success/20 hover:shadow-lg transition-shadow">
+            class="stat bg-linear-to-br from-success/5 to-success/10 rounded-box shadow border border-success/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-success opacity-80">
                 <x-heroicon-o-check-circle class="w-10 h-10" />
             </div>
@@ -469,7 +470,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
         {{-- En proceso --}}
         <div
-            class="stat bg-gradient-to-br from-warning/5 to-warning/10 rounded-box shadow border border-warning/20 hover:shadow-lg transition-shadow">
+            class="stat bg-linear-to-br from-warning/5 to-warning/10 rounded-box shadow border border-warning/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-warning opacity-80">
                 <x-heroicon-o-clock class="w-10 h-10" />
             </div>
@@ -482,7 +483,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
         {{-- Rechazados --}}
         <div
-            class="stat bg-gradient-to-br from-error/5 to-error/10 rounded-box shadow border border-error/20 hover:shadow-lg transition-shadow">
+            class="stat bg-linear-to-br from-error/5 to-error/10 rounded-box shadow border border-error/20 hover:shadow-lg transition-shadow">
             <div class="stat-figure text-error opacity-80">
                 <x-heroicon-o-x-circle class="w-10 h-10" />
             </div>
@@ -598,17 +599,20 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                     </td>
                                     <td>
                                         <span
-                                            class="badge badge-outline badge-xs">{{ $expediente->ordinario_extraordinario ?? '—' }}</span>
+                                            class="badge badge-outline badge-xs">{{ $expediente->tipo_asignacion ?? '—' }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <span
-                                            class="badge badge-sm gap-1
-                                            @if ($expediente->estado === 'Aprobado') badge-success
-                                            @elseif($expediente->estado === 'Rechazado') badge-error
-                                            @elseif($expediente->estado === 'En Revisión') badge-warning
-                                            @elseif($expediente->estado === 'Recibido') badge-info
-                                            @elseif($expediente->estado === 'Archivado') badge-ghost
-                                            @else badge-ghost @endif">
+                                        @php
+                                            $estadoBadgeClass = match ($expediente->estado) {
+                                                'Aprobado' => 'badge-success',
+                                                'Rechazado' => 'badge-error',
+                                                'En Revisión' => 'badge-warning',
+                                                'Recibido' => 'badge-info',
+                                                'Archivado' => 'badge-ghost',
+                                                default => 'badge-ghost',
+                                            };
+                                        @endphp
+                                        <span class="badge badge-sm gap-1 {{ $estadoBadgeClass }}">
                                             @if ($expediente->estado === 'Aprobado')
                                                 <x-heroicon-o-check class="w-3 h-3" />
                                             @elseif($expediente->estado === 'Rechazado')

@@ -47,7 +47,7 @@ class Expediente extends Model
         'nombre_proyecto',
         'municipio_id',
         'responsable_id',
-        'ordinario_extraordinario',
+        'tipo_asignacion',
         'fecha_recibido',
         'estado',
         'fecha_aprobacion',
@@ -194,7 +194,7 @@ class Expediente extends Model
      */
     public function scopeDeTipo(Builder $query, string $tipo): Builder
     {
-        return $query->where('ordinario_extraordinario', $tipo);
+        return $query->where('tipo_asignacion', $tipo);
     }
 
     /**
@@ -238,6 +238,14 @@ class Expediente extends Model
      */
     public function scopeAccesiblesPor(Builder $query, User $user): Builder
     {
+        if ($user->isJefeFinanciero()) {
+            return $query->whereIn('estado', [
+                self::ESTADO_EN_REVISION,
+                self::ESTADO_APROBADO,
+                self::ESTADO_RECHAZADO,
+            ]);
+        }
+
         if ($user->hasGlobalAccess()) {
             return $query;
         }
@@ -286,12 +294,12 @@ class Expediente extends Model
 
     public function esOrdinario(): bool
     {
-        return $this->ordinario_extraordinario === self::TIPO_ORDINARIO;
+        return $this->tipo_asignacion === self::TIPO_ORDINARIO;
     }
 
     public function esExtraordinario(): bool
     {
-        return $this->ordinario_extraordinario === self::TIPO_EXTRAORDINARIO;
+        return $this->tipo_asignacion === self::TIPO_EXTRAORDINARIO;
     }
 
     // ---- Métodos de Cambio de Estado ----

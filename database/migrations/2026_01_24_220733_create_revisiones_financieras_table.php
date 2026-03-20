@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('revisiones_financieras', function (Blueprint $table) {
             $table->id();
             $table->foreignId('expediente_id')->constrained('expedientes')->onDelete('cascade');
+            $table->foreignId('tipo_solicitud_id')->nullable()->constrained('tipo_solicitudes');
+            $table->unsignedTinyInteger('numero_revision')->default(1);
             $table->foreignId('revisor_id')->constrained('users');
             $table->enum('estado', ['Completo', 'Incompleto']);
-            $table->enum('accion', ['Aprobar', 'Rechazar', 'SolicitarCorrecciones'])->nullable();
+            $table->enum('accion', ['Aprobar', 'Rechazar', 'SolicitarCorrecciones', 'Reactivar'])->nullable();
             $table->decimal('monto_aprobado', 15, 2)->nullable();
             $table->string('observaciones')->nullable();
             $table->dateTime('fecha_revision');

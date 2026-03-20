@@ -101,14 +101,14 @@ new #[Title('- Detalle Expediente')] class extends Component {
                                     {{ $expediente->estado }}
                                 </span>
                                 @php
-                                    $tipoBadge = match ($expediente->ordinario_extraordinario) {
+                                    $tipoBadge = match ($expediente->tipo_asignacion) {
                                         'ORDINARIO' => 'badge-ghost',
                                         'EXTRAORDINARIO' => 'badge-accent badge-outline',
                                         default => 'badge-ghost',
                                     };
                                 @endphp
-                                <span class="badge badge-lg {{ $tipoBadge }} tooltip" data-tip="Tipo de solicitud">
-                                    {{ $expediente->ordinario_extraordinario }}
+                                <span class="badge badge-lg {{ $tipoBadge }} tooltip" data-tip="Tipo de Asignación">
+                                    {{ $expediente->tipo_asignacion }}
                                 </span>
                             </div>
                             <h2 class="text-lg mt-1">{{ $expediente->nombre_proyecto }}</h2>
@@ -208,7 +208,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
                         </div>
                         <div>
                             <span class="text-xs text-base-content/50 uppercase">Tipo de Asignación</span>
-                            <p>{{ ucfirst(strtolower($expediente->ordinario_extraordinario)) }}</p>
+                            <p>{{ ucfirst(strtolower($expediente->tipo_asignacion)) }}</p>
                         </div>
                         @if ($expediente->observaciones)
                             <div class="sm:col-span-2">

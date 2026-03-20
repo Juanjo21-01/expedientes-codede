@@ -104,7 +104,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
                         </div>
                         <div class="flex justify-between">
                             <span class="text-base-content/60">Tipo</span>
-                            <span>{{ ucfirst(strtolower($expediente->ordinario_extraordinario)) }}</span>
+                            <span>{{ ucfirst(strtolower($expediente->tipo_asignacion)) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-base-content/60">Monto Contrato</span>

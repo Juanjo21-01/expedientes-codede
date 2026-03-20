@@ -153,7 +153,7 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
 
     /*
     |----------------------------------------------------------------------
-    | Gestión de Guías - Admin (CRUD), Director y Jefe Financiero (solo crear)
+    | Gestión de Guías - Admin (CRUD), Director y Jefe Financiero (crear y editar propias)
     |----------------------------------------------------------------------
     */
     Route::prefix('admin/guias')->name('admin.guias.')->middleware('role:Administrador,Director General,Jefe Administrativo-Financiero')->group(function () {

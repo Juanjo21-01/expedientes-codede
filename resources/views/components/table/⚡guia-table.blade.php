@@ -86,13 +86,13 @@ new class extends Component {
         <table class="table table-zebra table-sm">
             <thead>
                 <tr class="bg-base-200">
-                    <th class="min-w-[200px]">Título</th>
-                    <th class="min-w-[150px]">Categoría</th>
+                    <th class="min-w-50">Título</th>
+                    <th class="min-w-37.5">Categoría</th>
                     <th class="text-center whitespace-nowrap">Versión</th>
                     <th class="whitespace-nowrap">Fecha</th>
                     <th class="text-center whitespace-nowrap">Tamaño</th>
                     <th class="text-center whitespace-nowrap">Estado</th>
-                    <th class="text-center whitespace-nowrap min-w-[150px]">Acciones</th>
+                    <th class="text-center whitespace-nowrap min-w-37.5">Acciones</th>
                 </tr>
             </thead>
             <tbody>

@@ -138,6 +138,11 @@ class User extends Authenticatable
         return $this->hasMany(NotificacionEnviada::class, 'remitente_id');
     }
 
+    public function guiasCreadas(): HasMany
+    {
+        return $this->hasMany(Guia::class, 'user_id');
+    }
+    
     // ---- Scopes ----
 
     /**

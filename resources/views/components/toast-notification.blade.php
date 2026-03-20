@@ -32,7 +32,7 @@
             }, 300);
         }
     }
-}" class="toast toast-bottom toast-end z-[100] pointer-events-none">
+}" class="toast toast-bottom toast-end z-100 pointer-events-none">
 
     <template x-for="toast in toasts" :key="toast.id">
         <div x-show="toast.visible" x-transition:enter="transition ease-out duration-300"

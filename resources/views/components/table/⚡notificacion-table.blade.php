@@ -100,12 +100,12 @@ new class extends Component {
             <tr class="bg-base-200">
                 <th class="whitespace-nowrap">Estado</th>
                 <th class="whitespace-nowrap">Tipo</th>
-                <th class="min-w-[200px]">Asunto</th>
-                <th class="min-w-[150px]">Destinatario</th>
+                <th class="min-w-50">Asunto</th>
+                <th class="min-w-37.5">Destinatario</th>
                 <th class="whitespace-nowrap">Contexto</th>
                 <th class="whitespace-nowrap">Remitente</th>
                 <th class="whitespace-nowrap">Fecha</th>
-                <th class="text-center whitespace-nowrap min-w-[100px]">Acciones</th>
+                <th class="text-center whitespace-nowrap min-w-25">Acciones</th>
             </tr>
             </thead>
             <tbody>

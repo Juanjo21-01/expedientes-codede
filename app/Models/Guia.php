@@ -6,6 +6,7 @@ use App\Observers\GuiaObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,7 @@ class Guia extends Model
         'categoria',
         'estado',
         'fecha_publicacion',
+        'user_id',
     ];
 
     // Casts
@@ -100,6 +102,14 @@ class Guia extends Model
     public function scopeDeAnio(Builder $query, int $anio): Builder
     {
         return $query->whereYear('fecha_publicacion', $anio);
+    }
+
+    /**
+     * Usuario que creó la guía
+     */
+    public function creador(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     // ---- Accesores ----

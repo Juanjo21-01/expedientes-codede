@@ -44,11 +44,21 @@ class GuiaPolicy
     }
 
     /**
-     * Editar guías (solo Admin)
+     * Editar guías:
+     * - Admin: cualquier guía
+     * - Director/Jefe Financiero: solo las que creó
      */
     public function update(User $user, Guia $guia): bool
     {
-        return $user->isAdmin();
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if ($user->isDirector() || $user->isJefeFinanciero()) {
+            return !is_null($guia->user_id) && (int) $guia->user_id === (int) $user->id;
+        }
+
+        return false;
     }
 
     /**

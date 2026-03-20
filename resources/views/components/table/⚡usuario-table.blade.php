@@ -192,13 +192,16 @@ new class extends Component {
                             <span class="text-sm">{{ $usuario->email }}</span>
                         </td>
                         <td class="text-center">
-                            <span
-                                class="badge badge-sm badge-soft badge-outline 
-                                    @if ($usuario->isAdmin()) badge-secondary
-                                    @elseif($usuario->isDirector()) badge-primary
-                                    @elseif($usuario->isJefeFinanciero()) badge-warning
-                                    @elseif($usuario->isTecnico()) badge-info
-                                    @else badge-ghost @endif">
+                            @php
+                                $rolBadgeClass = match (true) {
+                                    $usuario->isAdmin() => 'badge-secondary',
+                                    $usuario->isDirector() => 'badge-primary',
+                                    $usuario->isJefeFinanciero() => 'badge-warning',
+                                    $usuario->isTecnico() => 'badge-info',
+                                    default => 'badge-ghost',
+                                };
+                            @endphp
+                            <span class="badge badge-sm badge-outline {{ $rolBadgeClass }}">
                                 {{ $usuario->role->nombre }}
                             </span>
                         </td>

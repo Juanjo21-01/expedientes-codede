@@ -17,7 +17,7 @@ new class extends Component {
     public string $nombre_proyecto = '';
     public $municipio_id = '';
     public $responsable_id = '';
-    public string $ordinario_extraordinario = '';
+    public string $tipo_asignacion = '';
     public string $fecha_recibido = '';
     public $monto_contrato = '';
     public $aporte_municipalidad = '';
@@ -58,7 +58,7 @@ new class extends Component {
         $this->nombre_proyecto = $expediente->nombre_proyecto;
         $this->municipio_id = $expediente->municipio_id;
         $this->responsable_id = $expediente->responsable_id;
-        $this->ordinario_extraordinario = $expediente->ordinario_extraordinario;
+        $this->tipo_asignacion = $expediente->tipo_asignacion;
         $this->fecha_recibido = $expediente->fecha_recibido->format('Y-m-d');
         $this->monto_contrato = $expediente->monto_contrato ?? '';
         $this->aporte_municipalidad = $expediente->aporte_municipalidad ?? '';
@@ -122,7 +122,7 @@ new class extends Component {
             'nombre_proyecto' => 'required|string|max:255',
             'municipio_id' => 'required|exists:municipios,id',
             'responsable_id' => 'required|exists:users,id',
-            'ordinario_extraordinario' => 'required|in:ORDINARIO,EXTRAORDINARIO',
+            'tipo_asignacion' => 'required|in:ORDINARIO,EXTRAORDINARIO',
             'fecha_recibido' => 'required|date',
             'monto_contrato' => 'nullable|numeric|min:0|max:999999999999.99',
             'aporte_municipalidad' => 'nullable|numeric|min:0|max:999999999999.99',
@@ -135,7 +135,7 @@ new class extends Component {
             'nombre_proyecto.required' => 'El nombre del proyecto es obligatorio.',
             'municipio_id.required' => 'Debes seleccionar un municipio.',
             'responsable_id.required' => 'Debes seleccionar un responsable.',
-            'ordinario_extraordinario.required' => 'Debes seleccionar el tipo de asignación.',
+            'tipo_asignacion.required' => 'Debes seleccionar el tipo de asignación.',
             'fecha_recibido.required' => 'La fecha de recibido es obligatoria.',
             'monto_contrato.numeric' => 'El monto del contrato debe ser un número válido.',
             'aporte_municipalidad.numeric' => 'El aporte de la municipalidad debe ser un número válido.',
@@ -149,7 +149,7 @@ new class extends Component {
             'nombre_proyecto' => $this->nombre_proyecto,
             'municipio_id' => $this->municipio_id,
             'responsable_id' => $this->responsable_id,
-            'ordinario_extraordinario' => $this->ordinario_extraordinario,
+            'tipo_asignacion' => $this->tipo_asignacion,
             'fecha_recibido' => $this->fecha_recibido,
             'monto_contrato' => $this->monto_contrato ?: null,
             'aporte_municipalidad' => $this->aporte_municipalidad ?: null,
@@ -257,14 +257,14 @@ new class extends Component {
                     {{-- Ordinario/Extraordinario --}}
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Tipo de Asignación <span class="text-error">*</span></legend>
-                        <select wire:model="ordinario_extraordinario"
-                            class="select w-full @error('ordinario_extraordinario') select-error @enderror">
+                        <select wire:model="tipo_asignacion"
+                            class="select w-full @error('tipo_asignacion') select-error @enderror">
                             <option value="" selected disabled>Seleccionar asignación...</option>
                             @foreach (Expediente::getTipos() as $tipo)
                                 <option value="{{ $tipo }}">{{ ucfirst(strtolower($tipo)) }}</option>
                             @endforeach
                         </select>
-                        @error('ordinario_extraordinario')
+                        @error('tipo_asignacion')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
                     </fieldset>

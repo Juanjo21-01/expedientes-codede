@@ -17,23 +17,18 @@ return new class extends Migration
             $table->string('nombre_proyecto');
             $table->foreignId('municipio_id')->constrained('municipios');
             $table->foreignId('responsable_id')->constrained('users');
-            $table->foreignId('tipo_solicitud_id')->constrained('tipo_solicitudes');
             $table->enum('tipo_asignacion', ['ORDINARIO', 'EXTRAORDINARIO']);
             $table->date('fecha_recibido');
             
             // Estados del expediente:
             // - Recibido: Expediente ingresado al sistema
             // - En Revisión: Siendo revisado por el área técnica o financiera
-            // - Completo: Revisión financiera completada, documentación correcta
-            // - Incompleto: Falta documentación o hay observaciones pendientes
             // - Aprobado: Expediente aprobado para pago/desembolso
             // - Rechazado: Expediente rechazado definitivamente
             // - Archivado: Expediente cerrado y archivado
             $table->enum('estado', [
                 'Recibido',
                 'En Revisión',
-                'Completo',
-                'Incompleto', 
                 'Aprobado',
                 'Rechazado',
                 'Archivado'
@@ -41,7 +36,7 @@ return new class extends Migration
             
             $table->date('fecha_aprobacion')->nullable();
             $table->decimal('monto_contrato', 15, 2)->nullable();
-            $table->string('adjudicatario', 100)->nullable();
+            $table->decimal('aporte_municipalidad', 15, 2)->nullable();
             $table->string('observaciones')->nullable();
             $table->json('etiquetas')->nullable();
             
