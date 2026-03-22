@@ -84,7 +84,8 @@ new class extends Component {
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
-                        <div class="bg-warning/10 text-warning rounded-lg w-10 h-10 flex items-center justify-center">
+                        <div
+                            class="bg-warning/10 text-warning rounded-lg w-10 h-10 flex items-center justify-center border border-warning/20">
                             <x-heroicon-o-exclamation-triangle class="w-5 h-5" />
                         </div>
                     </div>
@@ -97,7 +98,7 @@ new class extends Component {
                 </div>
 
                 {{-- Info del expediente --}}
-                <div class="bg-base-200 rounded-lg p-3 mb-4">
+                <div class="bg-base-200/70 border border-base-content/10 rounded-lg p-3 mb-4">
                     <div class="space-y-1 text-sm">
                         <div class="flex justify-between">
                             <span class="text-base-content/60">Código SNIP</span>
@@ -123,7 +124,8 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Monto del Contrato (Q) <span class="text-error">*</span>
                         </legend>
-                        <label class="input flex items-center gap-2 @error('monto_contrato') input-error @enderror">
+                        <label
+                            class="input border-base-content/20 flex items-center gap-2 @error('monto_contrato') input-error @enderror">
                             <span class="text-base-content/60 font-bold">Q</span>
                             <input type="number" wire:model="monto_contrato" step="0.01" min="0"
                                 class="grow" placeholder="0.00" />
@@ -137,7 +139,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Aporte de la Municipalidad (Q)</legend>
                         <label
-                            class="input flex items-center gap-2 @error('aporte_municipalidad') input-error @enderror">
+                            class="input border-base-content/20 flex items-center gap-2 @error('aporte_municipalidad') input-error @enderror">
                             <span class="text-base-content/60 font-bold">Q</span>
                             <input type="number" wire:model="aporte_municipalidad" step="0.01" min="0"
                                 class="grow" placeholder="0.00" />

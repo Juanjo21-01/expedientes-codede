@@ -347,18 +347,18 @@ new class extends Component {
 
         {{-- Resumen de montos --}}
         @if ($this->expediente->monto_contrato)
-            <div class="mt-4 space-y-3">
+            <div class="mt-4 space-y-3 rounded-box border border-base-content/10 bg-base-100 p-4">
                 <div class="grid grid-cols-3 gap-3">
-                    <div class="bg-base-200 rounded-lg p-3 text-center">
+                    <div class="rounded-box border border-base-content/10 bg-base-200/70 p-3 text-center">
                         <p class="text-xs text-base-content/50">Monto del Contrato</p>
                         <p class="font-bold text-sm">{{ $this->expediente->monto_formateado }}</p>
                     </div>
-                    <div class="bg-success/10 rounded-lg p-3 text-center">
+                    <div class="rounded-box border border-success/20 bg-success/10 p-3 text-center">
                         <p class="text-xs text-base-content/50">Total Aprobado</p>
                         <p class="font-bold text-sm text-success">Q {{ number_format($this->montoTotalAprobado, 2) }}
                         </p>
                     </div>
-                    <div class="bg-warning/10 rounded-lg p-3 text-center">
+                    <div class="rounded-box border border-warning/20 bg-warning/10 p-3 text-center">
                         <p class="text-xs text-base-content/50">Restante</p>
                         <p class="font-bold text-sm text-warning">Q {{ number_format($this->montoRestante ?? 0, 2) }}
                         </p>
@@ -409,7 +409,7 @@ new class extends Component {
                 <fieldset class="fieldset w-full">
                     <legend class="fieldset-legend">Fase de Desembolso <span class="text-error">*</span></legend>
                     <select wire:model.live="tipo_solicitud_id" id="tipo_solicitud_id"
-                        class="select w-full @error('tipo_solicitud_id') select-error @enderror">
+                        class="select w-full border-base-content/20 @error('tipo_solicitud_id') select-error @enderror">
                         <option value="" selected disabled>Seleccionar fase...</option>
                         @foreach ($this->tiposSolicitud as $ts)
                             @php
@@ -438,7 +438,7 @@ new class extends Component {
                     <legend class="fieldset-legend">Estado de la documentación <span class="text-error">*</span>
                     </legend>
                     <select wire:model.live="estado" id="estado"
-                        class="select w-full @error('estado') select-error @enderror">
+                        class="select w-full border-base-content/20 @error('estado') select-error @enderror">
                         <option value="" selected disabled>Seleccionar estado...</option>
                         @foreach (RevisionFinanciera::getEstados() as $est)
                             <option value="{{ $est }}">{{ $est }}</option>
@@ -454,26 +454,26 @@ new class extends Component {
             </div>
 
             {{-- Acción y Monto --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
                 {{-- Completo: la acción es automática (Aprobar), se muestra solo informativo --}}
                 @if ($estado === RevisionFinanciera::ESTADO_COMPLETO)
-                    <fieldset class="fieldset w-full">
+                    <fieldset class="fieldset w-full min-w-0">
                         <legend class="fieldset-legend">Acción</legend>
                         <div
                             class="flex items-center gap-2 bg-success/10 border border-success/30 rounded-btn px-4 py-3">
                             <x-heroicon-s-check-badge class="w-5 h-5 text-success" />
                             <span class="font-medium text-success">Aprobar fase</span>
                         </div>
-                        <p class="label text-base-content/50">
+                        <p class="mt-1 text-xs text-base-content/50 leading-relaxed whitespace-normal wrap-break-word">
                             La aprobación del expediente es automática al completar todas las fases
                         </p>
                     </fieldset>
                     {{-- Incompleto: el usuario elige la acción --}}
                 @elseif ($estado === RevisionFinanciera::ESTADO_INCOMPLETO)
-                    <fieldset class="fieldset w-full">
+                    <fieldset class="fieldset w-full min-w-0">
                         <legend class="fieldset-legend">Acción <span class="text-error">*</span></legend>
                         <select wire:model.live="accion" id="accion"
-                            class="select w-full @error('accion') select-error @enderror">
+                            class="select w-full border-base-content/20 @error('accion') select-error @enderror">
                             <option value="{{ RevisionFinanciera::ACCION_SOLICITAR_CORRECCIONES }}">⚠️ Solicitar
                                 correcciones</option>
                             <option value="{{ RevisionFinanciera::ACCION_RECHAZAR }}">❌ Rechazar revisión</option>
@@ -481,7 +481,7 @@ new class extends Component {
                         @error('accion')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
-                        <p class="label text-base-content/50">
+                        <p class="mt-1 text-xs text-base-content/50 leading-relaxed whitespace-normal wrap-break-word">
                             Seleccione la acción a tomar sobre la documentación
                         </p>
                     </fieldset>
@@ -489,9 +489,10 @@ new class extends Component {
 
                 {{-- Monto aprobado (visible cuando el estado es Completo) --}}
                 @if ($estado === RevisionFinanciera::ESTADO_COMPLETO)
-                    <fieldset class="fieldset w-full">
+                    <fieldset class="fieldset w-full min-w-0">
                         <legend class="fieldset-legend">Monto Aprobado <span class="text-error">*</span></legend>
-                        <label class="input flex items-center gap-2 @error('monto_aprobado') input-error @enderror">
+                        <label
+                            class="input border-base-content/20 flex items-center gap-2 @error('monto_aprobado') input-error @enderror">
                             <span class="text-base-content/60 font-bold">Q</span>
                             <input type="number" wire:model="monto_aprobado" id="monto_aprobado" step="0.01"
                                 min="0"
@@ -502,7 +503,8 @@ new class extends Component {
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
                         @if ($this->montoRestante !== null)
-                            <p class="label text-base-content/50">
+                            <p
+                                class="mt-1 text-xs text-base-content/50 leading-relaxed whitespace-normal wrap-break-word">
                                 Máximo disponible: Q {{ number_format($this->montoRestante, 2) }}
                             </p>
                         @endif
@@ -544,7 +546,7 @@ new class extends Component {
             <fieldset class="fieldset w-full">
                 <legend class="fieldset-legend">Observaciones <span class="text-error">*</span></legend>
                 <textarea wire:model="observaciones" id="observaciones" rows="5"
-                    class="textarea w-full @error('observaciones') textarea-error @enderror"
+                    class="textarea w-full border-base-content/20 @error('observaciones') textarea-error @enderror"
                     placeholder="Detalle los hallazgos de la revisión financiera, documentos faltantes o correcciones necesarias..."
                     maxlength="2000"></textarea>
                 @error('observaciones')

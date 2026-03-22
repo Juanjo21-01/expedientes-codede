@@ -313,9 +313,11 @@ new class extends Component {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Nombres -->
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Nombres <span class="text-error">*</span></legend>
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Nombres <span class="text-error">*</span>
+                </legend>
                 <input type="text" wire:model="nombres" wire:keydown="clearError('nombres')"
-                    placeholder="Ingrese los nombres" class="input w-full @error('nombres') input-error @enderror" />
+                    placeholder="Ingrese los nombres"
+                    class="input input-bordered w-full @error('nombres') input-error @enderror" />
                 @error('nombres')
                     <p class="label text-error">{{ $message }}</p>
                 @enderror
@@ -323,10 +325,11 @@ new class extends Component {
 
             <!-- Apellidos -->
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Apellidos <span class="text-error">*</span></legend>
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Apellidos <span
+                        class="text-error">*</span></legend>
                 <input type="text" wire:model="apellidos" wire:keydown="clearError('apellidos')"
                     placeholder="Ingrese los apellidos"
-                    class="input w-full @error('apellidos') input-error @enderror" />
+                    class="input input-bordered w-full @error('apellidos') input-error @enderror" />
                 @error('apellidos')
                     <p class="label text-error">{{ $message }}</p>
                 @enderror
@@ -334,24 +337,25 @@ new class extends Component {
 
             <!-- Cargo -->
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Cargo</legend>
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Cargo</legend>
                 <input type="text" wire:model="cargo" placeholder="Ej: Coordinador de Proyectos"
-                    class="input w-full" />
+                    class="input input-bordered w-full" />
                 <p class="label text-base-content/50">Opcional</p>
             </fieldset>
 
             <!-- Teléfono -->
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Teléfono</legend>
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Teléfono</legend>
                 <input type="text" wire:model="telefono" maxlength="8" placeholder="12345678"
-                    class="input w-full" />
+                    class="input input-bordered w-full" />
                 <p class="label text-base-content/50">8 dígitos</p>
             </fieldset>
 
             <!-- Email -->
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">Correo Electrónico <span class="text-error">*</span></legend>
-                <label class="input w-full @error('email') input-error @enderror">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Correo Electrónico <span
+                        class="text-error">*</span></legend>
+                <label class="input input-bordered w-full @error('email') input-error @enderror">
                     <x-heroicon-o-envelope class="h-[1em] opacity-50" />
                     <input type="email" wire:model="email" wire:keydown="clearError('email')" class="grow"
                         placeholder="correo@ejemplo.com" />
@@ -364,13 +368,13 @@ new class extends Component {
             @if (!$this->rolSeleccionado?->esAdmin())
                 <!-- Contraseña -->
                 <fieldset class="fieldset">
-                    <legend class="fieldset-legend">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">
                         Contraseña
                         @if (!$usuarioId)
                             <span class="text-error">*</span>
                         @endif
                     </legend>
-                    <label class="input w-full @error('password') input-error @enderror">
+                    <label class="input input-bordered w-full @error('password') input-error @enderror">
                         <x-heroicon-o-key class="h-[1em] opacity-50" />
                         <input type="password" wire:model="password" wire:keydown="clearError('password')"
                             class="grow" placeholder="Mínimo 8 caracteres" />
@@ -386,15 +390,16 @@ new class extends Component {
 
             <!-- Rol -->
             <fieldset class="fieldset">
-                <legend class="fieldset-legend">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">
                     Rol<span class="text-error">*</span>
                 </legend>
 
                 @if ($usuarioId)
-                    <input type="text" class="input w-full" value="{{ $this->rolSeleccionado?->nombre }}" readonly disabled />
+                    <input type="text" class="input input-bordered w-full"
+                        value="{{ $this->rolSeleccionado?->nombre }}" readonly disabled />
                 @else
                     <select wire:model.live="roleId" wire:change="clearError('roleId')"
-                        class="select w-full @error('roleId') select-error @enderror">
+                        class="select select-bordered w-full @error('roleId') select-error @enderror">
                         <option value="" disabled selected>Seleccione un rol</option>
                         @foreach ($this->roles as $rol)
                             <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
@@ -413,11 +418,11 @@ new class extends Component {
             <fieldset class="fieldset mt-4">
                 @if ($this->rolSeleccionado->esMunicipal())
                     {{-- Select simple para Municipal --}}
-                    <legend class="fieldset-legend">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">
                         Municipio <span class="text-error">*</span>
                     </legend>
                     <select wire:model="municipioSeleccionado"
-                        class="select w-full @error('municipioSeleccionado') select-error @enderror">
+                        class="select select-bordered w-full @error('municipioSeleccionado') select-error @enderror">
                         <option value="" selected disabled>Seleccione un municipio</option>
                         @foreach ($this->municipiosDisponiblesMunicipal as $municipio)
                             <option value="{{ $municipio->id }}">{{ $municipio->nombre }}</option>
@@ -435,16 +440,17 @@ new class extends Component {
                     @endif
                 @else
                     {{-- Checkboxes para Técnico --}}
-                    <legend class="fieldset-legend">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">
                         Municipios Asignados <span class="text-error">*</span>
                     </legend>
 
                     {{-- Badges de municipios seleccionados --}}
                     @if (!empty($this->nombresMunicipiosSeleccionados))
-                        <div class="flex flex-wrap gap-2 mb-3 p-3 bg-base-200 rounded-lg">
+                        <div
+                            class="flex flex-wrap gap-2 mb-3 p-3 bg-base-200/50 border border-base-content/10 rounded-lg">
                             <span class="text-sm text-base-content/70 mr-2">Seleccionados:</span>
                             @foreach ($this->nombresMunicipiosSeleccionados as $id => $nombre)
-                                <span class="badge badge-primary gap-1">
+                                <span class="badge badge-soft badge-primary gap-1">
                                     {{ $nombre }}
                                     {{-- pendiente --}}
                                     <button type="button" wire:click="quitarMunicipio({{ $id }})"
@@ -457,8 +463,11 @@ new class extends Component {
                     @endif
 
                     {{-- Grid de checkboxes --}}
-                    <div
-                        class="border border-base-300 rounded-lg p-3 max-h-48 overflow-y-auto @error('municipiosSeleccionados') border-error @enderror">
+                    <div @class([
+                        'border rounded-lg p-3 max-h-48 overflow-y-auto',
+                        'border-error' => $errors->has('municipiosSeleccionados'),
+                        'border-base-content/10' => !$errors->has('municipiosSeleccionados'),
+                    ])>
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                             @foreach ($this->municipiosConEstadoTecnico as $municipio)
                                 <label
@@ -493,10 +502,10 @@ new class extends Component {
         <!-- Botones -->
         <div class="divider"></div>
         <div class="modal-action mt-0">
-            <button type="button" wire:click="cancelar" class="btn btn-ghost">
+            <button type="button" wire:click="cancelar" class="btn btn-ghost btn-sm">
                 Cancelar
             </button>
-            <button type="submit" class="btn {{ $usuarioId ? 'btn-warning' : 'btn-primary' }}"
+            <button type="submit" class="btn btn-sm {{ $usuarioId ? 'btn-warning' : 'btn-primary' }}"
                 wire:loading.attr="disabled">
                 @if ($usuarioId)
                     <span wire:loading.remove wire:target="guardar">

@@ -6,21 +6,25 @@
         <!-- Estado de sesión -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
-        <form method="POST" action="{{ route('password.email') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('password.email') }}"
+            class="card border border-base-content/10 bg-base-100/60 shadow-sm">
             @csrf
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Correo electrónico</legend>
-                <input id="email" name="email" type="email" required autofocus placeholder="correo@ejemplo.com"
-                    class="input w-full" />
-                @error('email')
-                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+            <div class="card-body gap-5 p-5">
 
-            <button type="submit" class="btn btn-primary w-full" data-test="email-password-reset-link-button">
-                Enviar enlace de restablecimiento
-            </button>
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Correo electrónico</legend>
+                    <input id="email" name="email" type="email" required autofocus
+                        placeholder="correo@ejemplo.com" class="input input-bordered w-full border-base-content/20" />
+                    @error('email')
+                        <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
+
+                <button type="submit" class="btn btn-primary w-full" data-test="email-password-reset-link-button">
+                    Enviar enlace de restablecimiento
+                </button>
+            </div>
         </form>
 
         <div class="text-center text-sm text-base-content/70">

@@ -147,7 +147,7 @@ new class extends Component {
         <div class="flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
             @if ($twoFactorEnabled)
                 <div class="space-y-4">
-                    <div class="badge badge-success badge-outline">Habilitada</div>
+                    <div class="badge badge-success badge-soft badge-outline">Habilitada</div>
 
                     <p class="text-sm text-base-content/70">
                         Con la autenticación en dos pasos habilitada, se te pedirá un código seguro durante el inicio de
@@ -165,7 +165,7 @@ new class extends Component {
                 </div>
             @else
                 <div class="space-y-4">
-                    <div class="badge badge-error badge-outline">Deshabilitada</div>
+                    <div class="badge badge-warning badge-soft badge-outline">Deshabilitada</div>
 
                     <p class="text-sm text-base-content/70">
                         Cuando habilites la autenticación en dos pasos, se te pedirá un código seguro durante el inicio
@@ -192,7 +192,9 @@ new class extends Component {
                 @if ($showVerificationStep)
                     <div class="space-y-4" x-data="{ otp: @entangle('code').live }">
                         <input type="text" wire:model.live="code" x-model="otp" maxlength="6" inputmode="numeric"
-                            pattern="[0-9]*" class="input w-full text-center tracking-[0.35em]" placeholder="000000" />
+                            pattern="[0-9]*"
+                            class="input input-bordered w-full border-base-content/20 text-center tracking-[0.35em]"
+                            placeholder="000000" />
                         @error('code')
                             <p class="text-sm text-error">{{ $message }}</p>
                         @enderror
@@ -207,12 +209,13 @@ new class extends Component {
                     </div>
                 @else
                     @error('setupData')
-                        <div class="alert alert-error text-sm"><span>{{ $message }}</span></div>
+                        <div class="alert alert-error border border-error/20 text-sm shadow-sm">
+                            <span>{{ $message }}</span></div>
                     @enderror
 
                     <div class="flex justify-center">
                         <div
-                            class="relative w-64 overflow-hidden border rounded-lg border-base-300 aspect-square bg-base-100">
+                            class="relative aspect-square w-64 overflow-hidden rounded-lg border border-base-content/10 bg-base-100">
                         @empty($qrCodeSvg)
                             <div class="absolute inset-0 flex items-center justify-center">
                                 <span class="loading loading-spinner loading-md"></span>
@@ -235,7 +238,7 @@ new class extends Component {
 
                     <div class="join w-full">
                         <input type="text" readonly value="{{ $manualSetupKey }}"
-                            class="input join-item w-full" />
+                            class="input input-bordered join-item w-full border-base-content/20" />
                         <button type="button" class="btn join-item" x-data="{ copied: false }"
                             @click="navigator.clipboard.writeText('{{ $manualSetupKey }}'); copied = true; setTimeout(() => copied = false, 1500)">
                             <span x-show="!copied">Copiar</span>

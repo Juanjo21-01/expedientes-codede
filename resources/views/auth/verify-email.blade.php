@@ -10,20 +10,22 @@
             </div>
         @endif
 
-        <div class="flex flex-col items-center justify-between gap-3">
-            <form method="POST" action="{{ route('verification.send') }}">
-                @csrf
-                <button type="submit" class="btn btn-primary w-full">
-                    Reenviar correo de verificación
-                </button>
-            </form>
+        <div class="card border border-base-content/10 bg-base-100/60 shadow-sm">
+            <div class="card-body gap-4 p-5">
+                <form method="POST" action="{{ route('verification.send') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary w-full">
+                        Reenviar correo de verificación
+                    </button>
+                </form>
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="btn btn-ghost btn-sm" data-test="logout-button">
-                    Cerrar sesión
-                </button>
-            </form>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-outline btn-sm w-full" data-test="logout-button">
+                        Cerrar sesión
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </x-layouts::auth>

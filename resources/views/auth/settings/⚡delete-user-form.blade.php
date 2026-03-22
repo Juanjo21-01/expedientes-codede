@@ -49,7 +49,8 @@ new class extends Component {
 
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Contraseña</legend>
-                    <input id="delete_password" wire:model="password" type="password" class="input w-full" />
+                    <input id="delete_password" wire:model="password" type="password"
+                        class="input input-bordered w-full border-base-content/20" />
                     @error('password')
                         <p class="mt-1 text-sm text-error">{{ $message }}</p>
                     @enderror

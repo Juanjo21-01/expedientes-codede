@@ -33,11 +33,19 @@ new class extends Component {
         <div class="modal-box w-11/12 max-w-xl" wire:click.stop>
             @if ($show)
                 <!-- Header -->
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg flex items-center gap-2 text-warning">
-                        <x-heroicon-o-pencil-square class="w-6 h-6" />
-                        Editar Municipio
-                    </h3>
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div
+                                class="bg-warning/10 text-warning rounded-lg w-10 h-10 flex items-center justify-center">
+                                <x-heroicon-o-pencil-square class="w-5 h-5" />
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg">Editar Municipio</h3>
+                            <p class="text-xs text-base-content/50">Actualiza datos de contacto y observaciones</p>
+                        </div>
+                    </div>
                     <button wire:click="cerrarModal" class="btn btn-sm btn-circle btn-ghost">
                         <x-heroicon-o-x-mark class="h-5 w-5" />
                     </button>

@@ -114,7 +114,7 @@ new class extends Component {
                 $municipiosUsuario = $usuario->municipios()->pluck('municipios.id')->toArray();
 
                 if (!empty($municipiosUsuario)) {
-                    $municipiosOcupados = \DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::TECNICO)->where('users.estado', true)->where('usuario_municipio.estado', true)->where('users.id', '!=', $usuario->id)->whereIn('usuario_municipio.municipio_id', $municipiosUsuario)->pluck('usuario_municipio.municipio_id')->toArray();
+                    $municipiosOcupados = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::TECNICO)->where('users.estado', true)->where('usuario_municipio.estado', true)->where('users.id', '!=', $usuario->id)->whereIn('usuario_municipio.municipio_id', $municipiosUsuario)->pluck('usuario_municipio.municipio_id')->toArray();
 
                     if (!empty($municipiosOcupados)) {
                         $nombresMunicipios = Municipio::whereIn('id', $municipiosOcupados)->pluck('nombre')->join(', ');
@@ -154,144 +154,140 @@ new class extends Component {
 ?>
 
 <div>
-    <!-- Tabla -->
-    <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-        <table class="table table-zebra table-sm">
-            <thead>
-                <tr class="bg-base-200">
-                    <th class="text-center w-12">No.</th>
-                    <th class="min-w-48">Usuario</th>
-                    <th class="min-w-40">Correo Electrónico</th>
-                    <th class="text-center whitespace-nowrap">Rol</th>
-                    <th class="text-center min-w-32">Municipios</th>
-                    <th class="text-center whitespace-nowrap">Estado</th>
-                    <th class="text-center whitespace-nowrap">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($this->usuarios as $index => $usuario)
-                    <tr class="hover">
-                        <td class="text-center font-medium">{{ $this->usuarios->firstItem() + $index }}</td>
-                        <td>
-                            <div class="flex items-center gap-3">
-                                <div class="avatar placeholder">
-                                    <div
-                                        class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
-                                        <span class="text-sm">{{ $usuario->iniciales }}</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="font-bold">{{ $usuario->nombre_completo }}</div>
-                                    @if ($usuario->cargo)
-                                        <div class="text-sm opacity-60">{{ $usuario->cargo }}</div>
-                                    @endif
-                                </div>
+    <x-patterns.responsive-table title="Listado de Usuarios" :count="$this->usuarios->total()">
+        <x-slot:head>
+            <tr class="bg-base-200/70 text-xs uppercase tracking-wide text-base-content/70">
+                <th class="text-center w-12">No.</th>
+                <th class="min-w-48">Usuario</th>
+                <th class="min-w-40">Correo Electrónico</th>
+                <th class="text-center whitespace-nowrap">Rol</th>
+                <th class="text-center min-w-32">Municipios</th>
+                <th class="text-center whitespace-nowrap">Estado</th>
+                <th class="text-center whitespace-nowrap">Acciones</th>
+            </tr>
+        </x-slot:head>
+
+        @forelse ($this->usuarios as $index => $usuario)
+            <tr class="hover">
+                <td class="text-center font-medium">{{ $this->usuarios->firstItem() + $index }}</td>
+                <td>
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div
+                                class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
+                                <span class="text-sm">{{ $usuario->iniciales }}</span>
                             </div>
-                        </td>
-                        <td class="whitespace-nowrap">
-                            <span class="text-sm">{{ $usuario->email }}</span>
-                        </td>
-                        <td class="text-center">
-                            @php
-                                $rolBadgeClass = match (true) {
-                                    $usuario->isAdmin() => 'badge-secondary',
-                                    $usuario->isDirector() => 'badge-primary',
-                                    $usuario->isJefeFinanciero() => 'badge-warning',
-                                    $usuario->isTecnico() => 'badge-info',
-                                    default => 'badge-ghost',
-                                };
-                            @endphp
-                            <span class="badge badge-sm badge-outline {{ $rolBadgeClass }}">
-                                {{ $usuario->role->nombre }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            @if ($usuario->municipios->isNotEmpty())
-                                <span
-                                    class="text-xs max-w-40 truncate inline-block">{{ $usuario->municipios->pluck('nombre')->join(', ') }}</span>
-                            @else
-                                <span class="text-base-content/40">—</span>
+                        </div>
+                        <div>
+                            <div class="font-bold">{{ $usuario->nombre_completo }}</div>
+                            @if ($usuario->cargo)
+                                <div class="text-sm opacity-60">{{ $usuario->cargo }}</div>
                             @endif
-                        </td>
-                        <td class="text-center">
-                            @if ($this->canManageUsuarios)
-                                <div class="tooltip" data-tip="Cambiar estado">
-                                    @if ($usuario->isAdmin())
-                                        <span class="badge badge-success badge-sm gap-1">
-                                            <div class="status status-success status-xs"></div>
-                                            Activo
-                                        </span>
-                                    @else
-                                        <button wire:click="cambiarEstado({{ $usuario->id }})"
-                                            class="badge badge-sm cursor-pointer transition-all hover:scale-105 gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
-                                            <div
-                                                class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
-                                            </div>
-                                            {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
-                                        </button>
-                                    @endif
-                                </div>
+                        </div>
+                    </div>
+                </td>
+                <td class="whitespace-nowrap">
+                    <span class="text-sm">{{ $usuario->email }}</span>
+                </td>
+                <td class="text-center">
+                    @php
+                        $rolBadgeClass = match (true) {
+                            $usuario->isAdmin() => 'badge-secondary',
+                            $usuario->isDirector() => 'badge-primary',
+                            $usuario->isJefeFinanciero() => 'badge-warning',
+                            $usuario->isTecnico() => 'badge-info',
+                            default => 'badge-ghost',
+                        };
+                    @endphp
+                    <span class="badge badge-sm badge-soft badge-outline {{ $rolBadgeClass }}">
+                        {{ $usuario->role->nombre }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    @if ($usuario->municipios->isNotEmpty())
+                        <span
+                            class="text-xs max-w-40 truncate inline-block">{{ $usuario->municipios->pluck('nombre')->join(', ') }}</span>
+                    @else
+                        <span class="text-base-content/40">—</span>
+                    @endif
+                </td>
+                <td class="text-center">
+                    @if ($this->canManageUsuarios)
+                        <div class="tooltip" data-tip="Cambiar estado">
+                            @if ($usuario->isAdmin())
+                                <span class="badge badge-soft badge-success badge-sm gap-1">
+                                    <div class="status status-success status-xs"></div>
+                                    Activo
+                                </span>
                             @else
-                                <span
-                                    class="badge badge-sm gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                                <button wire:click="cambiarEstado({{ $usuario->id }})"
+                                    class="badge badge-soft badge-sm cursor-pointer transition-all hover:scale-105 gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
                                     <div
                                         class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
                                     </div>
                                     {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
-                                </span>
+                                </button>
                             @endif
-                        </td>
-                        <td>
-                            <div class="flex justify-center items-center gap-1">
-                                <!-- Ver -->
-                                <div class="tooltip" data-tip="Ver detalles">
-                                    <a href="{{ route('admin.usuarios.show', $usuario->id) }}"
-                                        class="btn btn-ghost btn-sm btn-square text-info" wire:navigate>
-                                        <x-heroicon-o-eye class="w-5 h-5" />
-                                    </a>
+                        </div>
+                    @else
+                        <span
+                            class="badge badge-soft badge-sm gap-1 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                            <div
+                                class="status {{ $usuario->estaActivo() ? 'status-success' : 'status-error' }} status-xs">
+                            </div>
+                            {{ $usuario->estaActivo() ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    @endif
+                </td>
+                <td class="text-center">
+                    <div class="flex items-center justify-center gap-1">
+                        <div class="tooltip" data-tip="Ver detalles">
+                            <a href="{{ route('admin.usuarios.show', $usuario->id) }}"
+                                class="btn btn-ghost btn-xs btn-square text-info hover:bg-info/10" wire:navigate>
+                                <x-heroicon-o-eye class="w-5 h-5" />
+                            </a>
+                        </div>
+
+                        @if ($this->canManageUsuarios)
+                            <div class="tooltip" data-tip="Editar">
+                                <button @click="$dispatch('abrir-modal-usuario', { usuarioId: {{ $usuario->id }} })"
+                                    class="btn btn-ghost btn-xs btn-square text-warning hover:bg-warning/10">
+                                    <x-heroicon-o-pencil-square class="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            @if (!$usuario->isAdmin())
+                                <div class="tooltip" data-tip="Eliminar">
+                                    <button
+                                        @click="$dispatch('abrir-modal-eliminar', { usuarioId: {{ $usuario->id }} })"
+                                        class="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10">
+                                        <x-heroicon-o-trash class="w-5 h-5" />
+                                    </button>
                                 </div>
+                            @endif
+                        @endif
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="7" class="text-center py-12">
+                    <div class="flex flex-col items-center gap-2">
+                        <x-heroicon-o-users class="w-12 h-12 text-base-content/30" />
+                        <span class="text-base-content/50">No se encontraron usuarios</span>
+                    </div>
+                </td>
+            </tr>
+        @endforelse
 
-                                @if ($this->canManageUsuarios)
-                                    <!-- Editar -->
-                                    <div class="tooltip" data-tip="Editar">
-                                        <button
-                                            @click="$dispatch('abrir-modal-usuario', { usuarioId: {{ $usuario->id }} })"
-                                            class="btn btn-ghost btn-sm btn-square text-warning">
-                                            <x-heroicon-o-pencil-square class="w-5 h-5" />
-                                        </button>
-                                    </div>
-
-                                    <!-- Eliminar (solo si no es Admin) -->
-                                    @if (!$usuario->isAdmin())
-                                        <div class="tooltip" data-tip="Eliminar">
-                                            <button
-                                                @click="$dispatch('abrir-modal-eliminar', { usuarioId: {{ $usuario->id }} })"
-                                                class="btn btn-ghost btn-sm btn-square text-error">
-                                                <x-heroicon-o-trash class="w-5 h-5" />
-                                            </button>
-                                        </div>
-                                    @endif
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center py-12">
-                            <div class="flex flex-col items-center gap-2">
-                                <x-heroicon-o-users class="w-12 h-12 text-base-content/30" />
-                                <span class="text-base-content/50">No se encontraron usuarios</span>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Paginación -->
-    @if ($this->usuarios->hasPages())
-        <div class="px-4 py-3">
-            {{ $this->usuarios->links() }}
-        </div>
-    @endif
+        <x-slot:foot>
+            @if ($this->usuarios->hasPages())
+                <tr>
+                    <td colspan="7" class="border-t border-base-content/10 px-4 py-3">
+                        {{ $this->usuarios->links() }}
+                    </td>
+                </tr>
+            @endif
+        </x-slot:foot>
+    </x-patterns.responsive-table>
+</div>

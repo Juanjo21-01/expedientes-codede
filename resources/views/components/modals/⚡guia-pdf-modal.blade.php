@@ -36,12 +36,13 @@ new class extends Component {
 
 <div x-on:keydown.escape.window="if ($wire.mostrar) $wire.cerrar()">
     <div class="modal" :class="{ 'modal-open': $wire.mostrar }">
-        <div class="modal-box max-w-6xl w-11/12 h-[90vh] flex flex-col p-0">
+        <div class="modal-box h-[90vh] w-11/12 max-w-6xl overflow-hidden p-0">
             @if ($mostrar)
                 {{-- Header --}}
-                <div class="flex items-center justify-between px-5 py-3 border-b border-base-content/5">
+                <div class="flex items-center justify-between border-b border-base-content/10 bg-base-100 px-5 py-3">
                     <div class="flex items-center gap-3 min-w-0">
-                        <div class="bg-error/10 text-error rounded-lg w-8 h-8 flex items-center justify-center shrink-0">
+                        <div
+                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-error/20 bg-error/10 text-error">
                             <x-heroicon-o-document class="w-4 h-4" />
                         </div>
                         <div class="min-w-0">
@@ -56,7 +57,7 @@ new class extends Component {
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <a href="{{ $urlPdf }}" download class="btn btn-sm btn-ghost gap-2">
+                        <a href="{{ $urlPdf }}" download class="btn btn-sm btn-outline gap-2">
                             <x-heroicon-o-arrow-down-tray class="w-4 h-4" />
                             Descargar
                         </a>
@@ -71,7 +72,7 @@ new class extends Component {
                 </div>
 
                 {{-- Visor PDF --}}
-                <div class="flex-1 bg-base-200">
+                <div class="h-[calc(90vh-64px)] bg-base-200">
                     <embed src="{{ $urlPdf }}" type="application/pdf" class="w-full h-full" />
                 </div>
             @endif

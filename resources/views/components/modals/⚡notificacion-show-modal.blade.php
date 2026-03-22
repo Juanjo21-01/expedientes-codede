@@ -64,7 +64,7 @@ new class extends Component {
                 {{-- Header --}}
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-center gap-2 min-w-0">
-                        <div class="rounded-btn bg-info/10 p-2">
+                        <div class="rounded-btn bg-info/10 border border-info/20 p-2">
                             <x-heroicon-o-envelope class="w-5 h-5 text-info" />
                         </div>
                         <h3 class="font-bold text-base truncate">{{ $asunto }}</h3>
@@ -81,7 +81,7 @@ new class extends Component {
                 </div>
 
                 {{-- Destinatario --}}
-                <div class="bg-base-200/50 rounded-lg p-3 mb-4">
+                <div class="bg-base-200/50 border border-base-content/10 rounded-lg p-3 mb-4">
                     <p class="text-xs text-base-content/50 uppercase tracking-wide font-semibold mb-1">Destinatario</p>
                     <p class="text-sm font-medium">{{ $destinatarioNombre }}</p>
                     <p class="text-xs text-base-content/60">{{ $destinatarioEmail }}</p>
@@ -90,14 +90,15 @@ new class extends Component {
                 {{-- Mensaje --}}
                 <div class="mb-4">
                     <p class="text-xs text-base-content/50 uppercase tracking-wide font-semibold mb-1">Mensaje</p>
-                    <div class="bg-base-200/50 rounded-lg p-3 border-l-3 border-primary">
+                    <div
+                        class="bg-base-200/50 rounded-lg p-3 border border-base-content/10 border-l-3 border-l-primary">
                         <p class="text-sm whitespace-pre-line leading-relaxed">{{ $mensaje }}</p>
                     </div>
                 </div>
 
                 {{-- Contexto --}}
                 @if ($contexto)
-                    <div class="bg-base-200/50 rounded-lg p-3 mb-4">
+                    <div class="bg-base-200/50 border border-base-content/10 rounded-lg p-3 mb-4">
                         <p class="text-xs text-base-content/50 uppercase tracking-wide font-semibold mb-1">Contexto</p>
                         <p class="text-sm">{{ $contexto }}</p>
                     </div>

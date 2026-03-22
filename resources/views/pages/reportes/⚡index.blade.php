@@ -486,125 +486,111 @@ new #[Title(' - Reportes')] class extends Component {
     }
 }; ?>
 
-<div>
+<div class="space-y-6">
     {{-- Encabezado --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-            <h1 class="text-2xl font-bold flex items-center gap-3">
-                <div class="bg-primary/10 text-primary rounded-btn p-2">
-                    <x-heroicon-o-chart-bar class="w-6 h-6" />
-                </div>
-                Reportes
-            </h1>
-            <p class="text-base-content/60 text-sm mt-1">Informes y estadísticas del sistema de expedientes</p>
-        </div>
-    </div>
+    <x-patterns.page-header title="Reportes" subtitle="Informes y estadísticas del sistema de expedientes" tone="primary"
+        badge="Análisis Operativo">
+        <x-slot:icon>
+            <x-heroicon-o-chart-bar class="w-6 h-6" />
+        </x-slot:icon>
+    </x-patterns.page-header>
 
     {{-- Barra de Filtros --}}
-    <div class="card bg-base-100 shadow-lg border border-base-300 mb-6">
-        <div class="card-body p-4">
-            <div class="flex flex-wrap items-end gap-3">
-                {{-- Período --}}
-                <div class="form-control w-full sm:w-auto">
-                    <label class="label py-1">
-                        <span class="label-text text-xs font-semibold uppercase tracking-wider">Período</span>
-                    </label>
-                    <select wire:model.live="periodo" class="select select-bordered select-sm w-full sm:w-48">
-                        <option value="mes_actual">Mes Actual</option>
-                        <option value="este_anio">Este Año</option>
-                        <option value="personalizado">Rango Personalizado</option>
-                    </select>
-                </div>
+    <x-patterns.filter-card title="Filtros de reporte"
+        description="Selecciona período y municipio para actualizar métricas y exportaciones" tone="primary">
+        <div class="flex flex-wrap items-end gap-3">
+            {{-- Período --}}
+            <fieldset class="fieldset w-full sm:w-auto">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Período</legend>
+                <select wire:model.live="periodo" class="select select-sm w-full sm:w-48">
+                    <option value="mes_actual">Mes Actual</option>
+                    <option value="este_anio">Este Año</option>
+                    <option value="personalizado">Rango Personalizado</option>
+                </select>
+            </fieldset>
 
-                {{-- Fecha Desde --}}
-                @if ($periodo === 'personalizado')
-                    <div class="form-control w-full sm:w-auto">
-                        <label class="label py-1">
-                            <span class="label-text text-xs font-semibold uppercase tracking-wider">Desde</span>
-                        </label>
-                        <input type="date" wire:model.live.debounce.300ms="fecha_desde"
-                            class="input input-bordered input-sm w-full sm:w-44" />
-                    </div>
+            {{-- Fecha Desde --}}
+            @if ($periodo === 'personalizado')
+                <fieldset class="fieldset w-full sm:w-auto">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Desde</legend>
+                    <input type="date" wire:model.live.debounce.300ms="fecha_desde"
+                        class="input input-sm w-full sm:w-44" />
+                </fieldset>
 
-                    {{-- Fecha Hasta --}}
-                    <div class="form-control w-full sm:w-auto">
-                        <label class="label py-1">
-                            <span class="label-text text-xs font-semibold uppercase tracking-wider">Hasta</span>
-                        </label>
-                        <input type="date" wire:model.live.debounce.300ms="fecha_hasta"
-                            class="input input-bordered input-sm w-full sm:w-44" />
-                    </div>
-                @endif
+                {{-- Fecha Hasta --}}
+                <fieldset class="fieldset w-full sm:w-auto">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Hasta</legend>
+                    <input type="date" wire:model.live.debounce.300ms="fecha_hasta"
+                        class="input input-sm w-full sm:w-44" />
+                </fieldset>
+            @endif
 
-                {{-- Municipio --}}
-                <div class="form-control w-full sm:w-auto">
-                    <label class="label py-1">
-                        <span class="label-text text-xs font-semibold uppercase tracking-wider">Municipio</span>
-                    </label>
-                    <select wire:model.live="municipio_id" class="select select-bordered select-sm w-full sm:w-56">
-                        <option value="">Todos los municipios</option>
-                        @foreach ($this->municipiosDisponibles as $mun)
-                            <option value="{{ $mun->id }}">{{ $mun->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            {{-- Municipio --}}
+            <fieldset class="fieldset w-full sm:w-auto">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Municipio</legend>
+                <select wire:model.live="municipio_id" class="select select-sm w-full sm:w-56">
+                    <option value="">Todos los municipios</option>
+                    @foreach ($this->municipiosDisponibles as $mun)
+                        <option value="{{ $mun->id }}">{{ $mun->nombre }}</option>
+                    @endforeach
+                </select>
+            </fieldset>
 
-                {{-- Botones --}}
-                <div class="flex gap-2 ml-auto">
-                    <button wire:click="limpiarFiltros" class="btn btn-ghost btn-sm gap-1">
-                        <x-heroicon-o-arrow-path class="w-4 h-4" />
-                        Limpiar
-                    </button>
-                    <button wire:click="exportarPdf" class="btn btn-primary btn-sm gap-1">
-                        <x-heroicon-o-document-arrow-down class="w-4 h-4" />
-                        Exportar PDF
-                    </button>
-                </div>
-            </div>
-
-            {{-- Período activo --}}
-            <div class="flex items-center gap-2 mt-2 text-xs text-base-content/50">
-                <x-heroicon-o-calendar-days class="w-3.5 h-3.5" />
-                <span>
-                    {{ $fecha_desde ? \Carbon\Carbon::parse($fecha_desde)->format('d/m/Y') : '--' }}
-                    al
-                    {{ $fecha_hasta ? \Carbon\Carbon::parse($fecha_hasta)->format('d/m/Y') : '--' }}
-                </span>
-                @if ($municipio_id)
-                    <span class="badge badge-primary badge-xs">
-                        {{ $this->municipiosDisponibles->firstWhere('id', $municipio_id)?->nombre }}
-                    </span>
-                @endif
+            {{-- Botones --}}
+            <div class="flex gap-2 ml-auto">
+                <button wire:click="limpiarFiltros" class="btn btn-ghost btn-sm gap-1">
+                    <x-heroicon-o-arrow-path class="w-4 h-4" />
+                    Limpiar
+                </button>
+                <button wire:click="exportarPdf" class="btn btn-primary btn-sm gap-1">
+                    <x-heroicon-o-document-arrow-down class="w-4 h-4" />
+                    Exportar PDF
+                </button>
             </div>
         </div>
-    </div>
+
+        {{-- Período activo --}}
+        <div class="flex items-center gap-2 mt-3 pt-3 border-t border-base-content/5 text-xs text-base-content/50">
+            <x-heroicon-o-calendar-days class="w-3.5 h-3.5" />
+            <span>
+                {{ $fecha_desde ? \Carbon\Carbon::parse($fecha_desde)->format('d/m/Y') : '--' }}
+                al
+                {{ $fecha_hasta ? \Carbon\Carbon::parse($fecha_hasta)->format('d/m/Y') : '--' }}
+            </span>
+            @if ($municipio_id)
+                <span class="badge badge-primary badge-xs">
+                    {{ $this->municipiosDisponibles->firstWhere('id', $municipio_id)?->nombre }}
+                </span>
+            @endif
+        </div>
+    </x-patterns.filter-card>
 
     {{-- Pestañas --}}
-    <div role="tablist" class="tabs tabs-border mb-6">
+    <div role="tablist" class="tabs tabs-box bg-base-100 border border-base-content/5 p-1 justify-around">
         @if ($this->soloReporteFinanciero)
             <button wire:click="$set('tab', 'financiero')" role="tab"
-                class="tab gap-2 {{ $tab === 'financiero' ? 'tab-active font-semibold' : '' }}">
+                class="tab gap-2 rounded-lg border border-transparent transition-colors {{ $tab === 'financiero' ? 'border-primary/20 bg-primary/10 font-semibold text-primary' : 'text-base-content/75 hover:bg-base-200/70 hover:text-base-content' }}">
                 <x-heroicon-o-banknotes class="w-4 h-4" />
                 Financiero
             </button>
         @else
             <button wire:click="$set('tab', 'resumen')" role="tab"
-                class="tab gap-2 {{ $tab === 'resumen' ? 'tab-active font-semibold' : '' }}">
+                class="tab gap-2 rounded-lg border transition-colors {{ $tab === 'resumen' ? 'border border-primary/20 bg-primary/10 font-semibold text-primary' : 'text-base-content/75 hover:bg-base-200/70 hover:text-base-content' }}">
                 <x-heroicon-o-chart-pie class="w-4 h-4" />
                 Resumen General
             </button>
             <button wire:click="$set('tab', 'municipio')" role="tab"
-                class="tab gap-2 {{ $tab === 'municipio' ? 'tab-active font-semibold' : '' }}">
+                class="tab gap-2 rounded-lg border transition-colors {{ $tab === 'municipio' ? 'border-primary/20 bg-primary/10 font-semibold text-primary' : 'text-base-content/75 hover:bg-base-200/70 hover:text-base-content' }}">
                 <x-heroicon-o-building-library class="w-4 h-4" />
                 Por Municipio
             </button>
             <button wire:click="$set('tab', 'tipo')" role="tab"
-                class="tab gap-2 {{ $tab === 'tipo' ? 'tab-active font-semibold' : '' }}">
+                class="tab gap-2 rounded-lg border transition-colors {{ $tab === 'tipo' ? 'border-primary/20 bg-primary/10 font-semibold text-primary' : 'text-base-content/75 hover:bg-base-200/70 hover:text-base-content' }}">
                 <x-heroicon-o-clipboard-document-list class="w-4 h-4" />
                 Por Tipo de Solicitud
             </button>
             <button wire:click="$set('tab', 'financiero')" role="tab"
-                class="tab gap-2 {{ $tab === 'financiero' ? 'tab-active font-semibold' : '' }}">
+                class="tab gap-2 rounded-lg border transition-colors {{ $tab === 'financiero' ? 'border-primary/20 bg-primary/10 font-semibold text-primary' : 'text-base-content/75 hover:bg-base-200/70 hover:text-base-content' }}">
                 <x-heroicon-o-banknotes class="w-4 h-4" />
                 Financiero
             </button>
@@ -624,7 +610,7 @@ new #[Title(' - Reportes')] class extends Component {
             {{-- Stats Cards --}}
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
                 {{-- Total --}}
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-figure text-primary">
                         <x-heroicon-o-folder-open class="w-6 h-6" />
                     </div>
@@ -634,7 +620,7 @@ new #[Title(' - Reportes')] class extends Component {
                 </div>
 
                 {{-- En Proceso --}}
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-figure text-warning">
                         <x-heroicon-o-clock class="w-6 h-6" />
                     </div>
@@ -644,7 +630,7 @@ new #[Title(' - Reportes')] class extends Component {
                 </div>
 
                 {{-- Aprobados --}}
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-figure text-success">
                         <x-heroicon-o-check-circle class="w-6 h-6" />
                     </div>
@@ -654,7 +640,7 @@ new #[Title(' - Reportes')] class extends Component {
                 </div>
 
                 {{-- Rechazados --}}
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-figure text-error">
                         <x-heroicon-o-x-circle class="w-6 h-6" />
                     </div>
@@ -664,7 +650,7 @@ new #[Title(' - Reportes')] class extends Component {
                 </div>
 
                 {{-- Monto Contratado --}}
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-figure text-info">
                         <x-heroicon-o-currency-dollar class="w-6 h-6" />
                     </div>
@@ -675,7 +661,7 @@ new #[Title(' - Reportes')] class extends Component {
                 </div>
 
                 {{-- Monto Aprobado --}}
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-figure text-accent">
                         <x-heroicon-o-banknotes class="w-6 h-6" />
                     </div>
@@ -687,28 +673,104 @@ new #[Title(' - Reportes')] class extends Component {
             </div>
 
             {{-- Desglose por Estado --}}
-            <div class="card bg-base-100 shadow-lg border border-base-300 mb-6">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
                 <div class="card-body p-4">
-                    <h3 class="font-semibold text-sm text-base-content/70 mb-3">Desglose por Estado</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="badge badge-info gap-1 p-3">
-                            <span class="font-bold">{{ $this->estadisticas['recibidos'] }}</span> Recibidos
-                        </span>
-                        <span class="badge badge-warning gap-1 p-3">
-                            <span class="font-bold">{{ $this->estadisticas['enRevision'] }}</span> En Revisión
-                        </span>
-                        <span class="badge badge-accent gap-1 p-3">
-                            <span class="font-bold">{{ $this->estadisticas['aprobados'] }}</span> Aprobados
-                        </span>
-                        <span class="badge gap-1 p-3 badge-outline border-error text-error">
-                            <span class="font-bold">{{ $this->estadisticas['rechazados'] }}</span> Rechazados
-                        </span>
+                    @php
+                        $totalResumen = max(1, (int) $this->estadisticas['total']);
+                        $desgloseEstados = [
+                            [
+                                'label' => 'Recibidos',
+                                'value' => (int) $this->estadisticas['recibidos'],
+                                'icon' => 'inbox-arrow-down',
+                                'box' => 'bg-info/5 border-info/15',
+                                'text' => 'text-info',
+                                'progress' => 'progress-info',
+                            ],
+                            [
+                                'label' => 'En Revisión',
+                                'value' => (int) $this->estadisticas['enRevision'],
+                                'icon' => 'clock',
+                                'box' => 'bg-warning/5 border-warning/15',
+                                'text' => 'text-warning',
+                                'progress' => 'progress-warning',
+                            ],
+                            [
+                                'label' => 'Aprobados',
+                                'value' => (int) $this->estadisticas['aprobados'],
+                                'icon' => 'check-circle',
+                                'box' => 'bg-success/5 border-success/15',
+                                'text' => 'text-success',
+                                'progress' => 'progress-success',
+                            ],
+                            [
+                                'label' => 'Rechazados',
+                                'value' => (int) $this->estadisticas['rechazados'],
+                                'icon' => 'x-circle',
+                                'box' => 'bg-error/5 border-error/15',
+                                'text' => 'text-error',
+                                'progress' => 'progress-error',
+                            ],
+                        ];
+                    @endphp
+
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h3 class="font-semibold text-sm text-base-content/70">Desglose por Estado</h3>
+                        <span class="badge badge-sm badge-primary">Total: {{ $this->estadisticas['total'] }}</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                        @foreach ($desgloseEstados as $estado)
+                            @php
+                                $porcentaje = round(($estado['value'] / $totalResumen) * 100, 1);
+                            @endphp
+                            <div class="rounded-box border p-3 {{ $estado['box'] }}">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div>
+                                        <p class="text-xs uppercase tracking-wide text-base-content/55">
+                                            {{ $estado['label'] }}
+                                        </p>
+                                        <p class="text-2xl font-semibold {{ $estado['text'] }} leading-tight">
+                                            {{ $estado['value'] }}
+                                        </p>
+                                    </div>
+                                    <div class="{{ $estado['text'] }} opacity-70">
+                                        @switch($estado['icon'])
+                                            @case('inbox-arrow-down')
+                                                <x-heroicon-o-inbox-arrow-down class="w-5 h-5" />
+                                            @break
+
+                                            @case('clock')
+                                                <x-heroicon-o-clock class="w-5 h-5" />
+                                            @break
+
+                                            @case('check-circle')
+                                                <x-heroicon-o-check-circle class="w-5 h-5" />
+                                            @break
+
+                                            @case('x-circle')
+                                                <x-heroicon-o-x-circle class="w-5 h-5" />
+                                            @break
+                                        @endswitch
+                                    </div>
+                                </div>
+
+                                <div class="mt-2">
+                                    <div
+                                        class="flex items-center justify-between text-[11px] text-base-content/60 mb-1">
+                                        <span>Participación</span>
+                                        <span>{{ $porcentaje }}%</span>
+                                    </div>
+                                    <progress class="progress {{ $estado['progress'] }} w-full"
+                                        value="{{ $porcentaje }}" max="100"></progress>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
 
             {{-- Gráfica de Estados (Pie) --}}
-            <div class="card bg-base-100 shadow-lg border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm text-base-content/70 mb-3">Distribución por Estado</h3>
                     @if ($this->estadisticas['total'] > 0)
@@ -733,90 +795,73 @@ new #[Title(' - Reportes')] class extends Component {
     @if ($tab === 'municipio' && !$this->soloReporteFinanciero)
         <div wire:loading.remove>
             {{-- Tabla comparativa --}}
-            <div class="card bg-base-100 shadow-lg border border-base-300 mb-6">
-                <div class="card-body p-4">
-                    <h3 class="font-semibold flex items-center gap-2 mb-4">
-                        <x-heroicon-o-building-library class="w-5 h-5 text-primary" />
-                        Comparativo por Municipio
-                        <span class="badge badge-neutral badge-sm">{{ $this->datosPorMunicipio->count() }}</span>
-                    </h3>
+            <x-patterns.responsive-table title="Comparativo por Municipio" :count="$this->datosPorMunicipio->count()" tone="primary"
+                class="mb-6">
+                <x-slot:head>
+                    <tr class="bg-base-200/50 text-xs uppercase tracking-wide text-base-content/70">
+                        <th>Municipio</th>
+                        <th class="text-center">Recibidos</th>
+                        <th class="text-center">En Revisión</th>
+                        <th class="text-center">Aprobados</th>
+                        <th class="text-center">Rechazados</th>
+                        <th class="text-center">Total</th>
+                        <th class="text-right">Monto Contratado</th>
+                        <th class="text-right">Monto Aprobado</th>
+                    </tr>
+                </x-slot:head>
 
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm table-zebra">
-                            <thead>
-                                <tr class="bg-base-200/50">
-                                    <th class="font-semibold">Municipio</th>
-                                    <th class="text-center font-semibold">Recibidos</th>
-                                    <th class="text-center font-semibold">En Revisión</th>
-                                    <th class="text-center font-semibold">Aprobados</th>
-                                    <th class="text-center font-semibold">Rechazados</th>
-                                    <th class="text-center font-semibold">Total</th>
-                                    <th class="text-right font-semibold">Monto Contratado</th>
-                                    <th class="text-right font-semibold">Monto Aprobado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($this->datosPorMunicipio as $fila)
-                                    @if ($fila['total'] > 0)
-                                        <tr>
-                                            <td class="font-medium">{{ $fila['nombre'] }}</td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="badge badge-info badge-sm">{{ $fila['recibidos'] }}</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="badge badge-warning badge-sm">{{ $fila['en_revision'] }}</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="badge badge-accent badge-sm">{{ $fila['aprobados'] }}</span>
-                                            </td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="badge badge-outline badge-sm border-error text-error">{{ $fila['rechazados'] }}</span>
-                                            </td>
-                                            <td class="text-center font-bold">{{ $fila['total'] }}</td>
-                                            <td class="text-right text-sm">
-                                                {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
-                                            <td class="text-right text-sm">
-                                                {{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
-                                        </tr>
-                                    @endif
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center py-8 text-base-content/40">
-                                            No hay datos para el período seleccionado
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                            @if ($this->datosPorMunicipio->sum('total') > 0)
-                                <tfoot>
-                                    <tr class="font-bold bg-base-200/50">
-                                        <td>TOTAL</td>
-                                        <td class="text-center">{{ $this->datosPorMunicipio->sum('recibidos') }}</td>
-                                        <td class="text-center">{{ $this->datosPorMunicipio->sum('en_revision') }}
-                                        </td>
-                                        <td class="text-center">{{ $this->datosPorMunicipio->sum('aprobados') }}</td>
-                                        <td class="text-center">{{ $this->datosPorMunicipio->sum('rechazados') }}</td>
-                                        <td class="text-center">{{ $this->datosPorMunicipio->sum('total') }}</td>
-                                        <td class="text-right">
-                                            {{ $this->formatoMoneda($this->datosPorMunicipio->sum('monto_contratado')) }}
-                                        </td>
-                                        <td class="text-right">
-                                            {{ $this->formatoMoneda($this->datosPorMunicipio->sum('monto_aprobado')) }}
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            @endif
-                        </table>
-                    </div>
-                </div>
-            </div>
+                @forelse ($this->datosPorMunicipio as $fila)
+                    @if ($fila['total'] > 0)
+                        <tr class="hover">
+                            <td class="font-medium">{{ $fila['nombre'] }}</td>
+                            <td class="text-center">
+                                <span class="badge badge-info badge-soft badge-sm">{{ $fila['recibidos'] }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span
+                                    class="badge badge-warning badge-soft badge-sm">{{ $fila['en_revision'] }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-accent badge-soft badge-sm">{{ $fila['aprobados'] }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-error badge-soft badge-sm">{{ $fila['rechazados'] }}</span>
+                            </td>
+                            <td class="text-center font-bold">{{ $fila['total'] }}</td>
+                            <td class="text-right text-sm">{{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
+                            <td class="text-right text-sm">{{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
+                        </tr>
+                    @endif
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-base-content/40">
+                            No hay datos para el período seleccionado
+                        </td>
+                    </tr>
+                @endforelse
+
+                @if ($this->datosPorMunicipio->sum('total') > 0)
+                    <x-slot:foot>
+                        <tr class="font-bold bg-base-200/60 text-xs uppercase tracking-wide text-base-content/80">
+                            <td>TOTAL</td>
+                            <td class="text-center">{{ $this->datosPorMunicipio->sum('recibidos') }}</td>
+                            <td class="text-center">{{ $this->datosPorMunicipio->sum('en_revision') }}</td>
+                            <td class="text-center">{{ $this->datosPorMunicipio->sum('aprobados') }}</td>
+                            <td class="text-center">{{ $this->datosPorMunicipio->sum('rechazados') }}</td>
+                            <td class="text-center">{{ $this->datosPorMunicipio->sum('total') }}</td>
+                            <td class="text-right">
+                                {{ $this->formatoMoneda($this->datosPorMunicipio->sum('monto_contratado')) }}
+                            </td>
+                            <td class="text-right">
+                                {{ $this->formatoMoneda($this->datosPorMunicipio->sum('monto_aprobado')) }}
+                            </td>
+                        </tr>
+                    </x-slot:foot>
+                @endif
+            </x-patterns.responsive-table>
 
             {{-- Gráfica barras apiladas por municipio --}}
-            <div class="card bg-base-100 shadow-lg border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm text-base-content/70 mb-3">Composición de Estados por Municipio
                     </h3>
@@ -841,149 +886,121 @@ new #[Title(' - Reportes')] class extends Component {
     {{-- ============================================================ --}}
     @if ($tab === 'tipo' && !$this->soloReporteFinanciero)
         <div wire:loading.remove>
-            <div class="card bg-base-100 shadow-lg border border-base-300">
-                <div class="card-body p-4">
-                    <h3 class="font-semibold flex items-center gap-2 mb-4">
-                        <x-heroicon-o-clipboard-document-list class="w-5 h-5 text-primary" />
-                        Desglose por Tipo de Solicitud
-                    </h3>
+            <x-patterns.responsive-table title="Desglose por Tipo de Solicitud" tone="primary">
+                <x-slot:head>
+                    <tr class="bg-base-200/50 text-xs uppercase tracking-wide text-base-content/70">
+                        <th>Tipo de Solicitud</th>
+                        <th class="text-center">Expedientes Únicos</th>
+                        <th class="text-center">Revisiones</th>
+                        <th class="text-center">Aprobados</th>
+                        <th class="text-center">Pendientes</th>
+                        <th class="text-center">Rechazados</th>
+                        <th class="text-right">Monto Aprobado</th>
+                        <th class="text-center">% Aprobación</th>
+                    </tr>
+                </x-slot:head>
 
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm table-zebra">
-                            <thead>
-                                <tr class="bg-base-200/50">
-                                    <th class="font-semibold">Tipo de Solicitud</th>
-                                    <th class="text-center font-semibold">Expedientes Únicos</th>
-                                    <th class="text-center font-semibold">Revisiones</th>
-                                    <th class="text-center font-semibold">Aprobados</th>
-                                    <th class="text-center font-semibold">Pendientes</th>
-                                    <th class="text-center font-semibold">Rechazados</th>
-                                    <th class="text-right font-semibold">Monto Aprobado</th>
-                                    <th class="text-center font-semibold">% Aprobación</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($this->datosPorTipo as $fila)
-                                    <tr>
-                                        <td class="font-medium">{{ $fila['nombre'] }}</td>
-                                        <td class="text-center font-bold">{{ $fila['total'] }}</td>
-                                        <td class="text-center">{{ $fila['revisiones'] }}</td>
-                                        <td class="text-center">
-                                            <span class="badge badge-success badge-sm">{{ $fila['aprobados'] }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span
-                                                class="badge badge-warning badge-sm">{{ $fila['pendientes'] }}</span>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge badge-error badge-sm">{{ $fila['rechazados'] }}</span>
-                                        </td>
-                                        <td class="text-right text-sm">
-                                            {{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
-                                        <td class="text-center">
-                                            @if ($fila['total'] > 0)
-                                                <div class="flex items-center gap-2 justify-center">
-                                                    <progress
-                                                        class="progress w-16 {{ $fila['porcentaje_aprobacion'] >= 70 ? 'progress-success' : ($fila['porcentaje_aprobacion'] >= 40 ? 'progress-warning' : 'progress-error') }}"
-                                                        value="{{ $fila['porcentaje_aprobacion'] }}"
-                                                        max="100"></progress>
-                                                    <span
-                                                        class="text-xs font-semibold">{{ $fila['porcentaje_aprobacion'] }}%</span>
-                                                </div>
-                                            @else
-                                                <span class="text-base-content/30">—</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center py-8 text-base-content/40">
-                                            No hay tipos de solicitud registrados
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                            @if ($this->datosPorTipo->sum('total') > 0)
-                                <tfoot>
-                                    <tr class="font-bold bg-base-200/50">
-                                        <td>ACUMULADO POR TIPO</td>
-                                        <td class="text-center">{{ $this->datosPorTipo->sum('total') }}</td>
-                                        <td class="text-center">{{ $this->datosPorTipo->sum('revisiones') }}</td>
-                                        <td class="text-center">{{ $this->datosPorTipo->sum('aprobados') }}</td>
-                                        <td class="text-center">{{ $this->datosPorTipo->sum('pendientes') }}</td>
-                                        <td class="text-center">{{ $this->datosPorTipo->sum('rechazados') }}</td>
-                                        <td class="text-right">
-                                            {{ $this->formatoMoneda($this->datosPorTipo->sum('monto_aprobado')) }}</td>
-                                        <td class="text-center">
-                                            @php
-                                                $totalTipo = $this->datosPorTipo->sum('total');
-                                                $aprobadosTipo = $this->datosPorTipo->sum('aprobados');
-                                                $pctGlobal =
-                                                    $totalTipo > 0 ? round(($aprobadosTipo / $totalTipo) * 100, 1) : 0;
-                                            @endphp
-                                            <span class="text-xs font-semibold">{{ $pctGlobal }}%</span>
-                                        </td>
-                                    </tr>
-                                </tfoot>
+                @forelse ($this->datosPorTipo as $fila)
+                    <tr class="hover">
+                        <td class="font-medium">{{ $fila['nombre'] }}</td>
+                        <td class="text-center font-bold">{{ $fila['total'] }}</td>
+                        <td class="text-center">{{ $fila['revisiones'] }}</td>
+                        <td class="text-center">
+                            <span class="badge badge-success badge-soft badge-sm">{{ $fila['aprobados'] }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-warning badge-soft badge-sm">{{ $fila['pendientes'] }}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-error badge-soft badge-sm">{{ $fila['rechazados'] }}</span>
+                        </td>
+                        <td class="text-right text-sm">{{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
+                        <td class="text-center">
+                            @if ($fila['total'] > 0)
+                                <div class="flex items-center gap-2 justify-center">
+                                    <progress
+                                        class="progress w-16 {{ $fila['porcentaje_aprobacion'] >= 70 ? 'progress-success' : ($fila['porcentaje_aprobacion'] >= 40 ? 'progress-warning' : 'progress-error') }}"
+                                        value="{{ $fila['porcentaje_aprobacion'] }}" max="100"></progress>
+                                    <span class="text-xs font-semibold">{{ $fila['porcentaje_aprobacion'] }}%</span>
+                                </div>
+                            @else
+                                <span class="text-base-content/30">—</span>
                             @endif
-                        </table>
-                    </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-base-content/40">
+                            No hay tipos de solicitud registrados
+                        </td>
+                    </tr>
+                @endforelse
 
-                    <div class="alert mt-4 text-sm">
-                        <x-heroicon-o-information-circle class="w-5 h-5" />
-                        <div>
-                            <div class="font-semibold">Interpretación de la tabla por tipo</div>
-                            <div class="text-base-content/70">
-                                Un expediente puede aparecer en más de un tipo de solicitud. Por eso, el acumulado por
-                                tipo
-                                no equivale al total real de expedientes únicos del período.
-                                <span class="font-semibold">Total real actual: {{ $this->estadisticas['total'] }}
-                                    expedientes.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                @if ($this->datosPorTipo->sum('total') > 0)
+                    <x-slot:foot>
+                        <tr class="font-bold bg-base-200/60 text-xs uppercase tracking-wide text-base-content/80">
+                            <td>ACUMULADO POR TIPO</td>
+                            <td class="text-center">{{ $this->datosPorTipo->sum('total') }}</td>
+                            <td class="text-center">{{ $this->datosPorTipo->sum('revisiones') }}</td>
+                            <td class="text-center">{{ $this->datosPorTipo->sum('aprobados') }}</td>
+                            <td class="text-center">{{ $this->datosPorTipo->sum('pendientes') }}</td>
+                            <td class="text-center">{{ $this->datosPorTipo->sum('rechazados') }}</td>
+                            <td class="text-right">
+                                {{ $this->formatoMoneda($this->datosPorTipo->sum('monto_aprobado')) }}
+                            </td>
+                            <td class="text-center">
+                                @php
+                                    $totalTipo = $this->datosPorTipo->sum('total');
+                                    $aprobadosTipo = $this->datosPorTipo->sum('aprobados');
+                                    $pctGlobal = $totalTipo > 0 ? round(($aprobadosTipo / $totalTipo) * 100, 1) : 0;
+                                @endphp
+                                <span class="text-xs font-semibold">{{ $pctGlobal }}%</span>
+                            </td>
+                        </tr>
+                    </x-slot:foot>
+                @endif
+            </x-patterns.responsive-table>
 
-            <div class="card bg-base-100 shadow-lg border border-base-300 mt-6">
-                <div class="card-body p-4">
-                    <h3 class="font-semibold flex items-center gap-2 mb-4">
-                        <x-heroicon-o-banknotes class="w-5 h-5 text-primary" />
-                        Monto Contratado Real por Estado
-                    </h3>
-
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm table-zebra">
-                            <thead>
-                                <tr class="bg-base-200/50">
-                                    <th class="font-semibold">Estado</th>
-                                    <th class="text-center font-semibold">Expedientes</th>
-                                    <th class="text-right font-semibold">Monto Contratado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($this->montoContratadoPorEstado['porEstado'] as $fila)
-                                    <tr>
-                                        <td class="font-medium">{{ $fila['estado'] }}</td>
-                                        <td class="text-center font-bold">{{ $fila['expedientes'] }}</td>
-                                        <td class="text-right text-sm">
-                                            {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                            <tfoot>
-                                <tr class="font-bold bg-base-200/50">
-                                    <td>TOTAL REAL</td>
-                                    <td class="text-center">{{ $this->montoContratadoPorEstado['totalExpedientes'] }}
-                                    </td>
-                                    <td class="text-right">
-                                        {{ $this->formatoMoneda($this->montoContratadoPorEstado['totalMonto']) }}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
+            <div class="alert mt-4 text-sm">
+                <x-heroicon-o-information-circle class="w-5 h-5" />
+                <div>
+                    <div class="font-semibold">Interpretación de la tabla por tipo</div>
+                    <div class="text-base-content/70">
+                        Un expediente puede aparecer en más de un tipo de solicitud. Por eso, el acumulado por tipo no
+                        equivale al total real de expedientes únicos del período.
+                        <span class="font-semibold">Total real actual: {{ $this->estadisticas['total'] }}
+                            expedientes.</span>
                     </div>
                 </div>
             </div>
+
+            <x-patterns.responsive-table title="Monto Contratado Real por Estado" tone="primary" class="mt-6">
+                <x-slot:head>
+                    <tr class="bg-base-200/50 text-xs uppercase tracking-wide text-base-content/70">
+                        <th>Estado</th>
+                        <th class="text-center">Expedientes</th>
+                        <th class="text-right">Monto Contratado</th>
+                    </tr>
+                </x-slot:head>
+
+                @foreach ($this->montoContratadoPorEstado['porEstado'] as $fila)
+                    <tr class="hover">
+                        <td class="font-medium">{{ $fila['estado'] }}</td>
+                        <td class="text-center font-bold">{{ $fila['expedientes'] }}</td>
+                        <td class="text-right text-sm">
+                            {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
+                    </tr>
+                @endforeach
+
+                <x-slot:foot>
+                    <tr class="font-bold bg-base-200/60 text-xs uppercase tracking-wide text-base-content/80">
+                        <td>TOTAL REAL</td>
+                        <td class="text-center">{{ $this->montoContratadoPorEstado['totalExpedientes'] }}</td>
+                        <td class="text-right">
+                            {{ $this->formatoMoneda($this->montoContratadoPorEstado['totalMonto']) }}</td>
+                    </tr>
+                </x-slot:foot>
+            </x-patterns.responsive-table>
         </div>
     @endif
 
@@ -994,17 +1011,17 @@ new #[Title(' - Reportes')] class extends Component {
         <div wire:loading.remove>
             {{-- Stats Financieros --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-title text-xs">Monto Contratado</div>
                     <div class="stat-value text-lg text-primary">
                         {{ $this->formatoMoneda($this->resumenFinanciero['montoContratado']) }}</div>
                 </div>
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-title text-xs">Monto Aprobado</div>
                     <div class="stat-value text-lg text-success">
                         {{ $this->formatoMoneda($this->resumenFinanciero['montoAprobado']) }}</div>
                 </div>
-                <div class="stat bg-base-100 shadow border border-base-300 rounded-box p-3">
+                <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
                     <div class="stat-title text-xs">Diferencia</div>
                     <div
                         class="stat-value text-lg {{ $this->resumenFinanciero['diferencia'] >= 0 ? 'text-success' : 'text-error' }}">
@@ -1017,80 +1034,65 @@ new #[Title(' - Reportes')] class extends Component {
             </div>
 
             {{-- Tabla detalle financiero --}}
-            <div class="card bg-base-100 shadow-lg border border-base-300 mb-6">
-                <div class="card-body p-4">
-                    <h3 class="font-semibold flex items-center gap-2 mb-4">
-                        <x-heroicon-o-banknotes class="w-5 h-5 text-primary" />
-                        Detalle Financiero
-                        <span class="badge badge-neutral badge-sm">{{ $this->datosFinancieros->count() }}</span>
-                    </h3>
+            <x-patterns.responsive-table title="Detalle Financiero" :count="$this->datosFinancieros->count()" tone="primary" class="mb-6">
+                <x-slot:head>
+                    <tr class="bg-base-200/50 text-xs uppercase tracking-wide text-base-content/70">
+                        <th>SNIP</th>
+                        <th>Municipio</th>
+                        <th class="text-center">Revisión Financiera</th>
+                        <th class="text-right">Monto Contratado</th>
+                        <th class="text-right">Monto Aprobado</th>
+                        <th class="text-right">Diferencia</th>
+                        <th class="text-center">Días Trámite</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                </x-slot:head>
 
-                    <div class="overflow-x-auto">
-                        <table class="table table-sm table-zebra">
-                            <thead>
-                                <tr class="bg-base-200/50">
-                                    <th class="font-semibold">SNIP</th>
-                                    <th class="font-semibold">Municipio</th>
-                                    <th class="text-center font-semibold">Revisión Financiera</th>
-                                    <th class="text-right font-semibold">Monto Contratado</th>
-                                    <th class="text-right font-semibold">Monto Aprobado</th>
-                                    <th class="text-right font-semibold">Diferencia</th>
-                                    <th class="text-center font-semibold">Días Trámite</th>
-                                    <th class="text-center font-semibold">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($this->datosFinancierosAgrupados as $municipio => $filasMunicipio)
-                                    <tr class="bg-base-200/70">
-                                        <td colspan="8" class="font-semibold">
-                                            {{ $municipio }}
-                                            <span class="text-base-content/60 font-normal">
-                                                ({{ $filasMunicipio->count() }}
-                                                {{ Str::plural('expediente', $filasMunicipio->count()) }})
-                                            </span>
-                                        </td>
-                                    </tr>
+                @forelse ($this->datosFinancierosAgrupados as $municipio => $filasMunicipio)
+                    <tr class="bg-base-200/70">
+                        <td colspan="8" class="font-semibold">
+                            {{ $municipio }}
+                            <span class="text-base-content/60 font-normal">
+                                ({{ $filasMunicipio->count() }}
+                                {{ Str::plural('expediente', $filasMunicipio->count()) }})
+                            </span>
+                        </td>
+                    </tr>
 
-                                    @foreach ($filasMunicipio as $fila)
-                                        <tr>
-                                            <td class="font-mono text-sm">{{ $fila['codigo_snip'] }}</td>
-                                            <td>{{ $fila['municipio'] }}</td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="badge badge-sm {{ $fila['tiene_revision'] ? 'badge-success' : 'badge-ghost' }}">
-                                                    {{ $fila['tiene_revision'] ? 'Con revisión' : 'Sin revisión' }}
-                                                </span>
-                                            </td>
-                                            <td class="text-right text-sm">
-                                                {{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
-                                            <td class="text-right text-sm">
-                                                {{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
-                                            <td
-                                                class="text-right text-sm {{ $fila['diferencia'] >= 0 ? 'text-success' : 'text-error' }}">
-                                                {{ $this->formatoMoneda($fila['diferencia']) }}
-                                            </td>
-                                            <td class="text-center">{{ (int) $fila['dias_tramite'] }}</td>
-                                            <td class="text-center">
-                                                <span
-                                                    class="badge {{ $fila['estado_badge'] }} badge-sm">{{ $fila['estado'] }}</span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center py-8 text-base-content/40">
-                                            No hay expedientes en este período
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                    @foreach ($filasMunicipio as $fila)
+                        <tr class="hover">
+                            <td class="font-mono text-sm">{{ $fila['codigo_snip'] }}</td>
+                            <td>{{ $fila['municipio'] }}</td>
+                            <td class="text-center">
+                                <span
+                                    class="badge badge-sm badge-soft {{ $fila['tiene_revision'] ? 'badge-success' : 'badge-ghost' }}">
+                                    {{ $fila['tiene_revision'] ? 'Con revisión' : 'Sin revisión' }}
+                                </span>
+                            </td>
+                            <td class="text-right text-sm">{{ $this->formatoMoneda($fila['monto_contratado']) }}</td>
+                            <td class="text-right text-sm">{{ $this->formatoMoneda($fila['monto_aprobado']) }}</td>
+                            <td
+                                class="text-right text-sm {{ $fila['diferencia'] >= 0 ? 'text-success' : 'text-error' }}">
+                                {{ $this->formatoMoneda($fila['diferencia']) }}
+                            </td>
+                            <td class="text-center">{{ (int) $fila['dias_tramite'] }}</td>
+                            <td class="text-center">
+                                <span
+                                    class="badge badge-soft {{ $fila['estado_badge'] }} badge-sm">{{ $fila['estado'] }}</span>
+                            </td>
+                        </tr>
+                    @endforeach
+                @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-base-content/40">
+                            No hay expedientes en este período
+                        </td>
+                    </tr>
+                @endforelse
+            </x-patterns.responsive-table>
 
             {{-- Gráfica Monto Contratado vs Aprobado --}}
-            <div class="card bg-base-100 shadow-lg border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm text-base-content/70 mb-3">Monto Contratado vs Aprobado por
                         Municipio</h3>

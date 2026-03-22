@@ -183,8 +183,8 @@ new class extends Component {
 <div>
     <form wire:submit="guardar" class="space-y-6">
         {{-- Sección: Información General --}}
-        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
-            <div class="card-body">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
+            <div class="card-body p-4 sm:p-6">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-information-circle class="w-5 h-5 text-primary" />
                     Información del Proyecto
@@ -195,7 +195,8 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Código SNIP <span class="text-error">*</span></legend>
                         <input type="text" wire:model="codigo_snip"
-                            class="input w-full @error('codigo_snip') input-error @enderror" placeholder="Ej: 123456" />
+                            class="input w-full border-base-content/20 @error('codigo_snip') input-error @enderror"
+                            placeholder="Ej: 123456" />
                         @error('codigo_snip')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
@@ -205,7 +206,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Fecha de Recibido <span class="text-error">*</span></legend>
                         <input type="date" wire:model="fecha_recibido"
-                            class="input w-full @error('fecha_recibido') input-error @enderror" />
+                            class="input w-full border-base-content/20 @error('fecha_recibido') input-error @enderror" />
                         @error('fecha_recibido')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
@@ -215,7 +216,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full md:col-span-2">
                         <legend class="fieldset-legend">Nombre del Proyecto <span class="text-error">*</span></legend>
                         <input type="text" wire:model="nombre_proyecto"
-                            class="input w-full @error('nombre_proyecto') input-error @enderror"
+                            class="input w-full border-base-content/20 @error('nombre_proyecto') input-error @enderror"
                             placeholder="Nombre completo del proyecto" />
                         @error('nombre_proyecto')
                             <p class="label text-error">{{ $message }}</p>
@@ -226,11 +227,11 @@ new class extends Component {
 
         </div>
 
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
 
         {{-- Sección: Clasificación --}}
-        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
-            <div class="card-body">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
+            <div class="card-body p-4 sm:p-6">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-tag class="w-5 h-5 text-primary" />
                     Clasificación
@@ -241,7 +242,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Municipio <span class="text-error">*</span></legend>
                         <select wire:model.live="municipio_id"
-                            class="select w-full @error('municipio_id') select-error @enderror"
+                            class="select w-full border-base-content/20 @error('municipio_id') select-error @enderror"
                             {{ !auth()->user()->isAdmin() && $this->municipiosDisponibles->count() === 1 ? 'disabled' : '' }}>
                             <option value="" selected disabled>Seleccionar municipio...</option>
                             @foreach ($this->municipiosDisponibles as $mun)
@@ -258,7 +259,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Tipo de Asignación <span class="text-error">*</span></legend>
                         <select wire:model="tipo_asignacion"
-                            class="select w-full @error('tipo_asignacion') select-error @enderror">
+                            class="select w-full border-base-content/20 @error('tipo_asignacion') select-error @enderror">
                             <option value="" selected disabled>Seleccionar asignación...</option>
                             @foreach (Expediente::getTipos() as $tipo)
                                 <option value="{{ $tipo }}">{{ ucfirst(strtolower($tipo)) }}</option>
@@ -272,11 +273,11 @@ new class extends Component {
             </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
 
         {{-- Sección: Responsable (Admin puede elegir, Técnico se auto-asigna) --}}
-        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
-            <div class="card-body">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
+            <div class="card-body p-4 sm:p-6">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-user class="w-5 h-5 text-primary" />
                     Responsable
@@ -288,7 +289,7 @@ new class extends Component {
                         <legend class="fieldset-legend">Técnico Responsable <span class="text-error">*</span></legend>
                         @if (auth()->user()->isAdmin())
                             <select wire:model="responsable_id"
-                                class="select w-full @error('responsable_id') select-error @enderror">
+                                class="select w-full border-base-content/20 @error('responsable_id') select-error @enderror">
                                 <option value="" selected disabled>Seleccionar técnico...</option>
                                 @foreach ($this->responsablesDisponibles as $resp)
                                     <option value="{{ $resp->id }}">{{ $resp->nombre_completo }}</option>
@@ -299,7 +300,7 @@ new class extends Component {
                             @endif
                         @else
                             <input type="text" value="{{ auth()->user()->nombre_completo }}"
-                                class="input w-full bg-base-200" disabled />
+                                class="input w-full border-base-content/20 bg-base-200" disabled />
                         @endif
                         @error('responsable_id')
                             <p class="label text-error">{{ $message }}</p>
@@ -309,11 +310,11 @@ new class extends Component {
             </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
 
         {{-- Sección: Información Financiera (opcional) --}}
-        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
-            <div class="card-body">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
+            <div class="card-body p-4 sm:p-6">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-banknotes class="w-5 h-5 text-primary" />
                     Información Financiera
@@ -325,7 +326,8 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Monto del Contrato (Q)</legend>
                         <input type="number" wire:model="monto_contrato" step="0.01" min="0"
-                            class="input w-full @error('monto_contrato') input-error @enderror" placeholder="0.00" />
+                            class="input w-full border-base-content/20 @error('monto_contrato') input-error @enderror"
+                            placeholder="0.00" />
                         @error('monto_contrato')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
@@ -335,7 +337,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Aporte de la Municipalidad (Q)</legend>
                         <input type="number" wire:model="aporte_municipalidad" step="0.01" min="0"
-                            class="input w-full @error('aporte_municipalidad') input-error @enderror"
+                            class="input w-full border-base-content/20 @error('aporte_municipalidad') input-error @enderror"
                             placeholder="0.00" />
                         @error('aporte_municipalidad')
                             <p class="label text-error">{{ $message }}</p>
@@ -345,14 +347,15 @@ new class extends Component {
             </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
 
         {{-- Observaciones --}}
-        <div class="card bg-base-200/50 shadow-sm border border-base-content/5 rounded-lg">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
             <div class="card-body">
                 <fieldset class="fieldset w-full">
                     <legend class="fieldset-legend">Observaciones</legend>
-                    <textarea wire:model="observaciones" class="textarea w-full @error('observaciones') textarea-error @enderror"
+                    <textarea wire:model="observaciones"
+                        class="textarea w-full border-base-content/20 @error('observaciones') textarea-error @enderror"
                         placeholder="Observaciones adicionales..." rows="3" maxlength="1000"></textarea>
                     @error('observaciones')
                         <p class="label text-error">{{ $message }}</p>
@@ -363,7 +366,7 @@ new class extends Component {
         </div>
 
         {{-- Botones --}}
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
         <div class="flex justify-end gap-3">
             <button type="button" wire:click="cancelar" class="btn btn-ghost">
                 Cancelar

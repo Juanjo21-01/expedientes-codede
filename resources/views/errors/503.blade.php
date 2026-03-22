@@ -20,8 +20,8 @@
 </head>
 
 <body class="min-h-screen bg-base-200">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-lg w-full text-center">
+    <div class="min-h-screen flex items-center justify-center px-4 py-8">
+        <div class="w-full max-w-xl text-center">
 
             {{-- Ilustración SVG - Herramientas / mantenimiento --}}
             <div class="flex justify-center">
@@ -39,8 +39,9 @@
             <h1 class="text-9xl font-black text-secondary/80 leading-none tracking-tighter">503</h1>
 
             {{-- Card con detalles --}}
-            <div class="card bg-base-100 shadow-xl border border-base-300 mt-3">
+            <div class="card mt-3 border border-base-content/10 bg-base-100 shadow-lg">
                 <div class="card-body items-center text-center">
+                    <span class="badge badge-secondary badge-soft badge-sm">HTTP 503</span>
                     <h2 class="card-title text-2xl font-bold">Sistema en Mantenimiento</h2>
                     <div class="divider my-1"></div>
                     <p class="text-base-content/70">
@@ -48,7 +49,7 @@
                         Volveremos a estar en línea muy pronto.
                     </p>
 
-                    <div class="alert alert-soft mt-4">
+                    <div class="alert alert-secondary alert-soft mt-4">
                         <x-heroicon-o-information-circle class="w-5 h-5" />
                         <span class="text-sm">Agradecemos tu paciencia. El mantenimiento no debería tardar mucho.</span>
                     </div>

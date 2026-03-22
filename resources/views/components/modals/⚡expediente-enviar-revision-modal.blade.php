@@ -70,7 +70,8 @@ new class extends Component {
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
-                        <div class="bg-primary/10 text-primary rounded-lg w-10 h-10 flex items-center justify-center">
+                        <div
+                            class="bg-primary/10 text-primary rounded-lg w-10 h-10 flex items-center justify-center border border-primary/20">
                             <x-heroicon-o-paper-airplane class="w-5 h-5" />
                         </div>
                     </div>
@@ -83,7 +84,7 @@ new class extends Component {
                 </div>
 
                 {{-- Info del expediente --}}
-                <div class="bg-base-200 rounded-lg p-3 mb-4">
+                <div class="bg-base-200/70 border border-base-content/10 rounded-lg p-3 mb-4">
                     <div class="space-y-2 text-sm">
                         <div class="flex justify-between">
                             <span class="text-base-content/60">Proyecto</span>
@@ -109,7 +110,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Observaciones</legend>
                         <textarea wire:model="observaciones" rows="3"
-                            class="textarea w-full @error('observaciones') textarea-error @enderror"
+                            class="textarea w-full border-base-content/20 @error('observaciones') textarea-error @enderror"
                             placeholder="Notas adicionales para el revisor financiero..." maxlength="1000"></textarea>
                         @error('observaciones')
                             <p class="label text-error">{{ $message }}</p>

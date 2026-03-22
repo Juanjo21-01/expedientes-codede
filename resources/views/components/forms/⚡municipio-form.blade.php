@@ -92,7 +92,7 @@ new class extends Component {
 
 <div class="py-4">
     <!-- Info del municipio (solo lectura) -->
-    <div class="bg-base-200 rounded-lg p-4 mb-4">
+    <div class="bg-base-200/60 border border-base-content/10 rounded-lg p-4 mb-4">
         <div class="flex items-center gap-3">
             <div class="bg-primary/10 text-primary rounded-btn p-2">
                 <x-heroicon-o-building-office-2 class="w-5 h-5" />
@@ -113,9 +113,9 @@ new class extends Component {
     <form wire:submit="guardar" class="space-y-4">
         <!-- Nombre de contacto -->
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Nombre de Contacto</legend>
+            <legend class="fieldset-legend text-xs uppercase tracking-wide">Nombre de Contacto</legend>
             <input type="text" wire:model="contactoNombre"
-                class="input w-full @error('contactoNombre') input-error @enderror"
+                class="input input-bordered w-full @error('contactoNombre') input-error @enderror"
                 placeholder="Nombre del contacto municipal" maxlength="100" />
             @error('contactoNombre')
                 <p class="label text-error">{{ $message }}</p>
@@ -124,8 +124,8 @@ new class extends Component {
 
         <!-- Email de contacto -->
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Correo Electrónico</legend>
-            <label class="input w-full @error('contactoEmail') input-error @enderror">
+            <legend class="fieldset-legend text-xs uppercase tracking-wide">Correo Electrónico</legend>
+            <label class="input input-bordered w-full @error('contactoEmail') input-error @enderror">
                 <x-heroicon-o-envelope class="h-[1em] opacity-50" />
                 <input type="email" wire:model="contactoEmail" class="grow" placeholder="correo@ejemplo.com" />
             </label>
@@ -136,8 +136,8 @@ new class extends Component {
 
         <!-- Teléfono de contacto -->
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Teléfono</legend>
-            <label class="input w-full @error('contactoTelefono') input-error @enderror">
+            <legend class="fieldset-legend text-xs uppercase tracking-wide">Teléfono</legend>
+            <label class="input input-bordered w-full @error('contactoTelefono') input-error @enderror">
                 <x-heroicon-o-phone class="h-[1em] opacity-50" />
                 <input type="text" wire:model="contactoTelefono" class="grow" placeholder="12345678"
                     maxlength="8" />
@@ -149,8 +149,9 @@ new class extends Component {
 
         <!-- Observaciones -->
         <fieldset class="fieldset">
-            <legend class="fieldset-legend">Observaciones</legend>
-            <textarea wire:model="observaciones" class="textarea w-full h-24 @error('observaciones') textarea-error @enderror"
+            <legend class="fieldset-legend text-xs uppercase tracking-wide">Observaciones</legend>
+            <textarea wire:model="observaciones"
+                class="textarea textarea-bordered w-full h-24 @error('observaciones') textarea-error @enderror"
                 placeholder="Observaciones adicionales sobre el municipio..." rows="3" maxlength="1000"></textarea>
             @error('observaciones')
                 <p class="label text-error">{{ $message }}</p>

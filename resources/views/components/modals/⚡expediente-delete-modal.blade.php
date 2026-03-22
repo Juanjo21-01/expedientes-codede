@@ -81,7 +81,8 @@ new class extends Component {
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
-                        <div class="bg-error/10 text-error rounded-lg w-10 h-10 flex items-center justify-center">
+                        <div
+                            class="bg-error/10 text-error rounded-lg w-10 h-10 flex items-center justify-center border border-error/20">
                             <x-heroicon-o-trash class="w-5 h-5" />
                         </div>
                     </div>
@@ -96,7 +97,7 @@ new class extends Component {
                 </div>
 
                 {{-- Info del expediente --}}
-                <div class="bg-base-200 rounded-lg p-3 mb-4">
+                <div class="bg-base-200/70 border border-base-content/10 rounded-lg p-3 mb-4">
                     <p class="text-sm font-medium">{{ $nombreProyecto }}</p>
                     <p class="text-xs text-base-content/60 mt-1">
                         Estado: <span class="font-medium badge">{{ $estado }}</span>

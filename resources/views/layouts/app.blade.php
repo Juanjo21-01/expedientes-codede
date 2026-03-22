@@ -12,83 +12,27 @@
     <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
 
     {{-- Aplicar tema ANTES de cualquier renderizado para evitar flash --}}
-    <script>
-        (function() {
-            const theme = localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' :
-                'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        })();
-    </script>
+    @include('layouts.partials.theme-init')
 
     {{-- Scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
-    <script>
-        // Función para sincronizar todos los toggles de tema con el estado actual
-        function syncThemeToggles() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            document.querySelectorAll('.theme-toggle-checkbox').forEach(function(toggle) {
-                toggle.checked = isDark;
-            });
-        }
-
-        // Función para cambiar el tema
-        function toggleTheme() {
-            const html = document.documentElement;
-            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.theme = newTheme;
-            syncThemeToggles();
-        }
-
-        // Sincronizar toggles en carga inicial
-        document.addEventListener('DOMContentLoaded', function() {
-            syncThemeToggles();
-        });
-
-        // Re-aplicar tema y sincronizar toggles después de cada navegación con wire:navigate
-        document.addEventListener('livewire:navigated', function() {
-            const theme = localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ?
-                'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-            syncThemeToggles();
-            initSidebarState();
-        });
-
-        // Sidebar: recordar estado expandido/colapsado en desktop
-        function initSidebarState() {
-            if (window.innerWidth >= 1024) {
-                const toggle = document.getElementById('sidebar-drawer');
-                if (toggle && localStorage.getItem('sidebar-open') === 'true') {
-                    toggle.checked = true;
-                }
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initSidebarState();
-            const toggle = document.getElementById('sidebar-drawer');
-            if (toggle) {
-                toggle.addEventListener('change', function() {
-                    if (window.innerWidth >= 1024) {
-                        localStorage.setItem('sidebar-open', this.checked);
-                    }
-                });
-            }
-        });
-    </script>
+    @include('layouts.partials.theme-controller', ['withSidebarState' => true])
 </head>
 
-<body class="bg-base-200 min-h-screen">
+<body class="min-h-screen bg-base-200">
+    <div class="pointer-events-none fixed inset-0 bg-linear-to-b from-primary/5 via-transparent to-transparent"></div>
+
     <!-- Drawer Layout -->
     <div class="drawer lg:drawer-open">
         <input id="sidebar-drawer" type="checkbox" class="drawer-toggle" />
 
         <!-- Page Content -->
-        <div class="drawer-content flex flex-col">
+        <div class="drawer-content relative flex flex-col">
             <!-- Navbar -->
-            <nav class="navbar bg-base-100 shadow-md sticky top-0 z-30">
+            <nav
+                class="navbar sticky top-0 z-30 border-b border-base-content/10 bg-base-100/90 shadow-sm backdrop-blur">
                 <!-- Mobile menu button -->
                 <div class="flex-none lg:hidden">
                     <label for="sidebar-drawer" class="btn btn-square btn-ghost drawer-button">
@@ -96,8 +40,12 @@
                     </label>
                 </div>
 
-                {{-- Spacer / Breadcrumbs area --}}
-                <div class="flex-1 px-2"></div>
+                {{-- Brand / context --}}
+                <div class="flex min-w-0 flex-1 items-center gap-2 px-2">
+                    <div class="badge badge-outline badge-sm hidden sm:inline-flex">Panel</div>
+                    <p class="truncate text-sm font-semibold text-base-content/80">
+                        {{ auth()->user()->role->nombre ?? 'Usuario' }}</p>
+                </div>
 
                 <div class="flex-none gap-2">
                     <!-- Dark mode toggle -->
@@ -126,7 +74,7 @@
                             </div>
                         </label>
                         <ul tabindex="0"
-                            class="menu dropdown-content bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow-lg border border-base-300">
+                            class="menu dropdown-content z-50 mt-3 w-60 rounded-2xl border border-base-content/10 bg-base-100 p-2 shadow-lg">
                             <li class="menu-title">
                                 <span class="text-xs">{{ auth()->user()->nombres ?? 'Usuario' }}</span>
                             </li>
@@ -158,7 +106,7 @@
 
             <!-- Main Content -->
             <main class="flex-1 overflow-y-auto">
-                <div class="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="container mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
                     {{ $slot }}
                 </div>
             </main>

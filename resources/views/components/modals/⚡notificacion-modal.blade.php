@@ -182,7 +182,9 @@ new class extends Component {
                 {{-- Header --}}
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold flex items-center gap-2">
-                        <x-heroicon-o-envelope class="w-5 h-5 text-primary" />
+                        <span class="rounded-btn border border-primary/20 bg-primary/10 p-1.5">
+                            <x-heroicon-o-envelope class="w-5 h-5 text-primary" />
+                        </span>
                         Enviar Notificación
                     </h3>
                     <button wire:click="cerrar" class="btn btn-ghost btn-sm btn-circle">
@@ -192,7 +194,7 @@ new class extends Component {
 
                 {{-- Contexto (info del expediente o municipio) --}}
                 @if ($this->expediente)
-                    <div class="alert alert-info mb-4">
+                    <div class="alert alert-info mb-4 shadow-sm">
                         <x-heroicon-o-document-text class="w-5 h-5" />
                         <div>
                             <p class="font-semibold text-sm">Expediente: {{ $this->expediente->codigo_snip }}</p>
@@ -201,7 +203,7 @@ new class extends Component {
                         </div>
                     </div>
                 @elseif ($this->municipio)
-                    <div class="alert alert-info mb-4">
+                    <div class="alert alert-info mb-4 shadow-sm">
                         <x-heroicon-o-building-office-2 class="w-5 h-5" />
                         <div>
                             <p class="font-semibold text-sm">Municipio: {{ $this->municipio->nombre }}</p>
@@ -216,7 +218,7 @@ new class extends Component {
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Tipo de notificación <span class="text-error">*</span>
                             </legend>
-                            <select wire:model.live="tipo_notificacion_id" class="select w-full">
+                            <select wire:model.live="tipo_notificacion_id" class="select w-full border-base-content/20">
                                 <option value="" selected disabled>Seleccione un tipo...</option>
                                 @foreach ($this->tiposNotificacion as $tipo)
                                     <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
@@ -232,8 +234,8 @@ new class extends Component {
                             <fieldset class="fieldset">
                                 <legend class="fieldset-legend">Email destinatario <span class="text-error">*</span>
                                 </legend>
-                                <input type="email" wire:model="destinatario_email" class="input w-full"
-                                    placeholder="correo@ejemplo.com" />
+                                <input type="email" wire:model="destinatario_email"
+                                    class="input w-full border-base-content/20" placeholder="correo@ejemplo.com" />
                                 @error('destinatario_email')
                                     <p class="label text-error text-xs">{{ $message }}</p>
                                 @enderror
@@ -241,15 +243,15 @@ new class extends Component {
 
                             <fieldset class="fieldset">
                                 <legend class="fieldset-legend">Nombre destinatario</legend>
-                                <input type="text" wire:model="destinatario_nombre" class="input w-full"
-                                    placeholder="Nombre del destinatario" />
+                                <input type="text" wire:model="destinatario_nombre"
+                                    class="input w-full border-base-content/20" placeholder="Nombre del destinatario" />
                             </fieldset>
                         </div>
 
                         {{-- Asunto --}}
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Asunto <span class="text-error">*</span></legend>
-                            <input type="text" wire:model="asunto" class="input w-full"
+                            <input type="text" wire:model="asunto" class="input w-full border-base-content/20"
                                 placeholder="Asunto del correo" />
                             @error('asunto')
                                 <p class="label text-error text-xs">{{ $message }}</p>
@@ -259,7 +261,8 @@ new class extends Component {
                         {{-- Mensaje --}}
                         <fieldset class="fieldset">
                             <legend class="fieldset-legend">Mensaje <span class="text-error">*</span></legend>
-                            <textarea wire:model="mensaje" class="textarea w-full h-32" placeholder="Escriba el mensaje de la notificación..."></textarea>
+                            <textarea wire:model="mensaje" class="textarea w-full h-32 border-base-content/20"
+                                placeholder="Escriba el mensaje de la notificación..."></textarea>
                             @error('mensaje')
                                 <p class="label text-error text-xs">{{ $message }}</p>
                             @enderror

@@ -61,9 +61,9 @@ new #[Title('- Detalle Expediente')] class extends Component {
 };
 ?>
 
-<div>
+<div class="space-y-6">
     {{-- Breadcrumbs --}}
-    <div class="breadcrumbs text-sm mb-6">
+    <div class="breadcrumbs text-sm">
         <ul>
             <li>
                 <a href="{{ route('expedientes.index') }}" wire:navigate
@@ -79,7 +79,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
     </div>
 
     {{-- Header con estado y acciones --}}
-    <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
+    <div class="card border border-primary/20 bg-linear-to-br from-primary/10 via-base-100 to-base-100 shadow-sm">
         <div class="card-body">
             <div class="flex flex-col lg:flex-row justify-between gap-4">
                 {{-- Informacion inicial --}}
@@ -172,7 +172,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
                     @endif
 
                     {{-- Volver al listado --}}
-                    <a href="{{ route('expedientes.index') }}" wire:navigate class="btn btn-ghost btn-sm gap-2">
+                    <a href="{{ route('expedientes.index') }}" wire:navigate class="btn btn-outline btn-sm gap-2">
                         <x-heroicon-o-arrow-uturn-left class="w-4 h-4" />
                         Volver
                     </a>
@@ -186,7 +186,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
         {{-- Columna izquierda: Información del expediente --}}
         <div class="lg:col-span-2 space-y-6">
             {{-- Datos del Proyecto --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h3 class="card-title text-base gap-2">
                         <x-heroicon-o-information-circle class="w-5 h-5 text-primary" />
@@ -221,7 +221,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
             </div>
 
             {{-- Información Financiera --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h3 class="card-title text-base gap-2">
                         <x-heroicon-o-banknotes class="w-5 h-5 text-primary" />
@@ -249,7 +249,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
             </div>
 
             {{-- Revisiones Financieras --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h3 class="card-title text-base gap-2">
                         <x-heroicon-o-clipboard-document-list class="w-5 h-5 text-primary" />
@@ -353,7 +353,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
                     auth()->user()->isDirector() ||
                     auth()->user()->isJefeFinanciero() ||
                     auth()->user()->isTecnico())
-                <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                     <div class="card-body">
                         <div class="flex items-center justify-between">
                             <h3 class="card-title text-base gap-2">
@@ -417,7 +417,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
         {{-- Columna derecha: Sidebar --}}
         <div class="space-y-6">
             {{-- Municipio --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                         <x-heroicon-o-building-office-2 class="w-4 h-4 text-primary" />
@@ -449,7 +449,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
             </div>
 
             {{-- Responsable --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                         <x-heroicon-o-user class="w-4 h-4 text-primary" />
@@ -480,7 +480,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
             </div>
 
             {{-- Línea de Tiempo --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                         <x-heroicon-o-clock class="w-4 h-4 text-primary" />
@@ -532,7 +532,7 @@ new #[Title('- Detalle Expediente')] class extends Component {
             </div>
 
             {{-- Metadatos --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                         <x-heroicon-o-cog-6-tooth class="w-4 h-4 text-primary" />

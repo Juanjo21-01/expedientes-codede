@@ -10,36 +10,35 @@ new #[Title('- Municipios')] class extends Component {
 };
 ?>
 
-<div>
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-            <h1 class="text-2xl font-bold flex items-center gap-3">
-                <div class="bg-primary/10 text-primary rounded-btn p-2">
-                    <x-heroicon-o-building-library class="w-6 h-6" />
-                </div>
-                Gestión de Municipios
-            </h1>
-            <p class="text-base-content/60 text-sm mt-1">
-                {{ auth()->user()->isAdmin() ? 'Administra los municipios de San Marcos' : 'Información de los municipios de San Marcos' }}
-            </p>
-        </div>
+@php
+    $municipiosSubtitle = auth()->user()->isAdmin()
+        ? 'Administra los municipios de San Marcos'
+        : 'Información de los municipios de San Marcos';
+@endphp
 
-        <!-- Info: Total municipios -->
-        <div class="stats shadow-sm border border-base-300">
-            <div class="stat py-2 px-4">
-                <div class="stat-title text-xs">Total Municipios</div>
-                <div class="stat-value text-lg text-primary">30</div>
+<div class="space-y-6">
+    <!-- Header -->
+    <x-patterns.page-header title="Gestión de Municipios" tone="primary" :subtitle="$municipiosSubtitle" badge="Administración">
+        <x-slot:icon>
+            <x-heroicon-o-building-library class="w-6 h-6" />
+        </x-slot:icon>
+
+        <x-slot:actions>
+            <div class="rounded-box border border-base-content/10 bg-base-100/80 px-4 py-3 min-w-40 shadow-sm">
+                <p class="text-xs uppercase tracking-wide text-base-content/60">Total Municipios</p>
+                <p class="text-2xl font-semibold text-primary leading-tight">30</p>
             </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-patterns.page-header>
 
     <!-- Filtros -->
-    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
-        <div class="card-body p-4">
-            <div class="flex flex-col sm:flex-row gap-4">
-                <div class="flex-1">
-                    <label class="input flex items-center gap-2">
+    <x-patterns.filter-card title="Filtros" description="Busca por nombre de municipio y filtra por estado."
+        tone="base">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Buscar</legend>
+                    <label class="input input-sm flex items-center gap-2">
                         <x-heroicon-o-magnifying-glass class="h-[1em] opacity-50" />
                         <input type="text" wire:model.live.debounce.300ms="search" class="grow"
                             placeholder="Buscar municipio por nombre..." />
@@ -49,17 +48,20 @@ new #[Title('- Municipios')] class extends Component {
                             </button>
                         @endif
                     </label>
-                </div>
-                <div class="w-full sm:w-56">
-                    <select wire:model.live="estadoFiltro" class="select w-full">
+                </fieldset>
+            </div>
+            <div class="w-full sm:w-56">
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Estado</legend>
+                    <select wire:model.live="estadoFiltro" class="select select-sm w-full">
                         <option value="">Todos los estados</option>
                         <option value="activo">Activos</option>
                         <option value="inactivo">Inactivos</option>
                     </select>
-                </div>
+                </fieldset>
             </div>
         </div>
-    </div>
+    </x-patterns.filter-card>
 
     <!-- Tabla -->
     <livewire:table.municipio-table :search="$search" :estadoFiltro="$estadoFiltro" />

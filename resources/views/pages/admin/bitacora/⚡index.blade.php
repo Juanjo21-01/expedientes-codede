@@ -165,151 +165,151 @@ new #[Title(' - Bitácora')] class extends Component {
 };
 ?>
 
-<div>
+<div class="space-y-6">
     {{-- Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-            <h1 class="text-2xl font-bold">Bitácora de Actividades</h1>
-            <p class="text-base-content/60 text-sm mt-1">Registro de auditoría del sistema</p>
-        </div>
-    </div>
+    <x-patterns.page-header title="Bitácora de Actividades" subtitle="Registro de auditoría del sistema" tone="primary"
+        badge="Auditoría" class="mb-6">
+        <x-slot:icon>
+            <x-heroicon-o-clipboard-document-list class="w-6 h-6" />
+        </x-slot:icon>
+    </x-patterns.page-header>
 
     {{-- Estadísticas --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 p-4">
+        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-content/5 p-4">
+            <div class="stat-figure text-primary/40">
+                <x-heroicon-o-archive-box class="w-6 h-6" />
+            </div>
             <div class="stat-title text-xs">Total Registros (Filtros)</div>
             <div class="stat-value text-2xl text-primary">{{ number_format($this->estadisticas['total']) }}</div>
         </div>
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 p-4">
+        <div class="stat bg-success/5 rounded-box shadow-sm border border-success/15 p-4">
+            <div class="stat-figure text-success/40">
+                <x-heroicon-o-sparkles class="w-6 h-6" />
+            </div>
             <div class="stat-title text-xs">Hoy</div>
             <div class="stat-value text-2xl text-success">{{ $this->estadisticas['hoy'] }}</div>
         </div>
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 p-4">
+        <div class="stat bg-info/5 rounded-box shadow-sm border border-info/15 p-4">
+            <div class="stat-figure text-info/40">
+                <x-heroicon-o-calendar-days class="w-6 h-6" />
+            </div>
             <div class="stat-title text-xs">Este Mes</div>
             <div class="stat-value text-2xl text-info">{{ $this->estadisticas['este_mes'] }}</div>
         </div>
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 p-4">
+        <div class="stat bg-warning/5 rounded-box shadow-sm border border-warning/15 p-4">
+            <div class="stat-figure text-warning/40">
+                <x-heroicon-o-users class="w-6 h-6" />
+            </div>
             <div class="stat-title text-xs">Usuarios Activos (Mes)</div>
             <div class="stat-value text-2xl text-warning">{{ $this->estadisticas['usuarios_activos'] }}</div>
         </div>
     </div>
 
     {{-- Filtros --}}
-    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
-        <div class="card-body p-4">
-            <div class="flex flex-wrap items-end gap-3">
-                {{-- Período --}}
-                <div class="form-control w-full sm:w-auto">
-                    <label class="label py-1">
-                        <span class="label-text text-xs font-semibold uppercase tracking-wider">Período</span>
-                    </label>
-                    <select wire:model.live="filtro_periodo" class="select select-bordered select-sm w-full sm:w-48">
-                        <option value="mes_actual">Mes Actual</option>
-                        <option value="este_anio">Este Año</option>
-                        <option value="personalizado">Rango Personalizado</option>
-                    </select>
-                </div>
+    <x-patterns.filter-card title="Filtros de auditoría"
+        description="Define período, entidad, tipo y usuario para analizar actividad" tone="primary" class="mb-6">
+        <div class="flex flex-wrap items-end gap-3">
+            {{-- Período --}}
+            <fieldset class="fieldset w-full sm:w-auto">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Período</legend>
+                <select wire:model.live="filtro_periodo" class="select select-sm w-full sm:w-48">
+                    <option value="mes_actual">Mes Actual</option>
+                    <option value="este_anio">Este Año</option>
+                    <option value="personalizado">Rango Personalizado</option>
+                </select>
+            </fieldset>
 
-                {{-- Fecha Desde --}}
-                @if ($filtro_periodo === 'personalizado')
-                    <div class="form-control w-full sm:w-auto">
-                        <label class="label py-1">
-                            <span class="label-text text-xs font-semibold uppercase tracking-wider">Desde</span>
-                        </label>
-                        <input type="date" wire:model.defer="filtro_fecha_desde" class="input input-bordered input-sm w-full sm:w-44" />
-                    </div>
+            {{-- Fecha Desde --}}
+            @if ($filtro_periodo === 'personalizado')
+                <fieldset class="fieldset w-full sm:w-auto">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Desde</legend>
+                    <input type="date" wire:model.defer="filtro_fecha_desde" class="input input-sm w-full sm:w-44" />
+                </fieldset>
 
-                    {{-- Fecha Hasta --}}
-                    <div class="form-control w-full sm:w-auto">
-                        <label class="label py-1">
-                            <span class="label-text text-xs font-semibold uppercase tracking-wider">Hasta</span>
-                        </label>
-                        <input type="date" wire:model.defer="filtro_fecha_hasta" class="input input-bordered input-sm w-full sm:w-44" />
-                    </div>
-                @endif
+                {{-- Fecha Hasta --}}
+                <fieldset class="fieldset w-full sm:w-auto">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Hasta</legend>
+                    <input type="date" wire:model.defer="filtro_fecha_hasta" class="input input-sm w-full sm:w-44" />
+                </fieldset>
+            @endif
 
-                {{-- Búsqueda --}}
-                <div class="form-control w-full sm:w-auto sm:flex-1 min-w-55">
-                    <label class="label py-1">
-                        <span class="label-text text-xs font-semibold uppercase tracking-wider">Buscar</span>
-                    </label>
-                    <label class="input input-bordered input-sm flex items-center gap-2 w-full">
-                        <x-heroicon-o-magnifying-glass class="w-4 h-4 opacity-50" />
-                        <input type="text" wire:model.defer="filtro_search" wire:keydown.enter="aplicarFiltros" placeholder="Buscar en detalle..." class="grow" />
-                    </label>
-                </div>
+            {{-- Búsqueda --}}
+            <fieldset class="fieldset w-full sm:w-auto sm:flex-1 min-w-55">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Buscar</legend>
+                <label class="input input-sm flex items-center gap-2 w-full">
+                    <x-heroicon-o-magnifying-glass class="w-4 h-4 opacity-50" />
+                    <input type="text" wire:model.defer="filtro_search" wire:keydown.enter="aplicarFiltros"
+                        placeholder="Buscar en detalle..." class="grow" />
+                </label>
+            </fieldset>
 
-                {{-- Entidad --}}
-                <div class="form-control w-full sm:w-auto">
-                    <label class="label py-1">
-                        <span class="label-text text-xs font-semibold uppercase tracking-wider">Entidad</span>
-                    </label>
-                    <select wire:model.defer="filtro_entidad" class="select select-bordered select-sm w-full sm:w-44">
-                        <option value="">Todas las entidades</option>
-                        @foreach (Bitacora::getEntidades() as $ent)
-                            <option value="{{ $ent }}">{{ $ent }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            {{-- Entidad --}}
+            <fieldset class="fieldset w-full sm:w-auto">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Entidad</legend>
+                <select wire:model.defer="filtro_entidad" class="select select-sm w-full sm:w-44">
+                    <option value="">Todas las entidades</option>
+                    @foreach (Bitacora::getEntidades() as $ent)
+                        <option value="{{ $ent }}">{{ $ent }}</option>
+                    @endforeach
+                </select>
+            </fieldset>
 
-                {{-- Tipo --}}
-                <div class="form-control w-full sm:w-auto">
-                    <label class="label py-1">
-                        <span class="label-text text-xs font-semibold uppercase tracking-wider">Tipo</span>
-                    </label>
-                    <select wire:model.defer="filtro_tipo" class="select select-bordered select-sm w-full sm:w-44">
-                        <option value="">Todos los tipos</option>
-                        @foreach (Bitacora::getTipos() as $t)
-                            <option value="{{ $t }}">{{ $t }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            {{-- Tipo --}}
+            <fieldset class="fieldset w-full sm:w-auto">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Tipo</legend>
+                <select wire:model.defer="filtro_tipo" class="select select-sm w-full sm:w-44">
+                    <option value="">Todos los tipos</option>
+                    @foreach (Bitacora::getTipos() as $t)
+                        <option value="{{ $t }}">{{ $t }}</option>
+                    @endforeach
+                </select>
+            </fieldset>
 
-                {{-- Usuario --}}
-                <div class="form-control w-full sm:w-auto">
-                    <label class="label py-1">
-                        <span class="label-text text-xs font-semibold uppercase tracking-wider">Usuario</span>
-                    </label>
-                    <select wire:model.defer="filtro_usuario_id" class="select select-bordered select-sm w-full sm:w-52">
-                        <option value="">Todos los usuarios</option>
-                        @foreach ($this->usuarios as $u)
-                            <option value="{{ $u->id }}">{{ $u->nombre_completo }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            {{-- Usuario --}}
+            <fieldset class="fieldset w-full sm:w-auto">
+                <legend class="fieldset-legend text-xs uppercase tracking-wide">Usuario</legend>
+                <select wire:model.defer="filtro_usuario_id" class="select select-sm w-full sm:w-52">
+                    <option value="">Todos los usuarios</option>
+                    @foreach ($this->usuarios as $u)
+                        <option value="{{ $u->id }}">{{ $u->nombre_completo }}</option>
+                    @endforeach
+                </select>
+            </fieldset>
 
-                {{-- Botones --}}
-                <div class="flex gap-2 ml-auto w-full sm:w-auto">
-                    <button wire:click="limpiarFiltros" class="btn btn-ghost btn-sm gap-1">
-                        <x-heroicon-o-arrow-path class="w-4 h-4" />
-                        Limpiar
-                    </button>
-                    <button wire:click="aplicarFiltros" class="btn btn-outline btn-sm gap-1" wire:loading.attr="disabled" wire:target="aplicarFiltros">
-                        <x-heroicon-o-magnifying-glass class="w-4 h-4" />
-                        Buscar
-                    </button>
-                    <button wire:click="exportarPdf" class="btn btn-primary btn-sm gap-1" wire:loading.attr="disabled" wire:target="exportarPdf">
-                        <span wire:loading.remove wire:target="exportarPdf">
-                            <x-heroicon-o-document-arrow-down class="w-4 h-4" />
-                        </span>
-                        <span wire:loading wire:target="exportarPdf" class="loading loading-spinner loading-xs"></span>
-                        Exportar PDF
-                    </button>
-                </div>
-            </div>
-
-            {{-- Período aplicado --}}
-            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-base-300 text-xs text-base-content/50">
-                <x-heroicon-o-calendar-days class="w-3.5 h-3.5" />
-                <span>
-                    Período aplicado:
-                    {{ $fecha_desde ? \Carbon\Carbon::parse($fecha_desde)->format('d/m/Y') : '--' }}
-                    al
-                    {{ $fecha_hasta ? \Carbon\Carbon::parse($fecha_hasta)->format('d/m/Y') : '--' }}
-                </span>
+            {{-- Botones --}}
+            <div class="flex gap-2 ml-auto w-full sm:w-auto">
+                <button wire:click="limpiarFiltros" class="btn btn-ghost btn-sm gap-1">
+                    <x-heroicon-o-arrow-path class="w-4 h-4" />
+                    Limpiar
+                </button>
+                <button wire:click="aplicarFiltros" class="btn btn-secondary btn-sm gap-1" wire:loading.attr="disabled"
+                    wire:target="aplicarFiltros">
+                    <x-heroicon-o-magnifying-glass class="w-4 h-4" />
+                    Buscar
+                </button>
+                <button wire:click="exportarPdf" class="btn btn-primary btn-sm gap-1" wire:loading.attr="disabled"
+                    wire:target="exportarPdf">
+                    <span wire:loading.remove wire:target="exportarPdf">
+                        <x-heroicon-o-document-arrow-down class="w-4 h-4" />
+                    </span>
+                    <span wire:loading wire:target="exportarPdf" class="loading loading-spinner loading-xs"></span>
+                    Exportar PDF
+                </button>
             </div>
         </div>
-    </div>
+
+        {{-- Período aplicado --}}
+        <div class="flex items-center gap-2 mt-3 pt-3 border-t border-base-content/5 text-xs text-base-content/50">
+            <x-heroicon-o-calendar-days class="w-3.5 h-3.5" />
+            <span>
+                Período aplicado:
+                {{ $fecha_desde ? \Carbon\Carbon::parse($fecha_desde)->format('d/m/Y') : '--' }}
+                al
+                {{ $fecha_hasta ? \Carbon\Carbon::parse($fecha_hasta)->format('d/m/Y') : '--' }}
+            </span>
+        </div>
+    </x-patterns.filter-card>
 
     {{-- Tabla --}}
     <livewire:table.bitacora-table :search="$search" :entidad="$entidad" :tipo="$tipo" :usuario_id="$usuario_id"

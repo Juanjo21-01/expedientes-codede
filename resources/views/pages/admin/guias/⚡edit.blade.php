@@ -14,9 +14,9 @@ new #[Title('- Editar Guía')] class extends Component {
 };
 ?>
 
-<div>
+<div class="space-y-6">
     {{-- Breadcrumbs --}}
-    <div class="breadcrumbs text-sm mb-6">
+    <div class="breadcrumbs text-sm">
         <ul>
             <li>
                 <a href="{{ route('admin.guias.index') }}" wire:navigate
@@ -35,20 +35,23 @@ new #[Title('- Editar Guía')] class extends Component {
     </div>
 
     {{-- Header --}}
-    <div class="flex items-center gap-3 mb-6">
-        <div class="bg-warning/10 text-warning rounded-btn p-2">
-            <x-heroicon-o-pencil-square class="w-6 h-6" />
-        </div>
-        <div>
-            <h1 class="text-2xl font-bold">Editar Guía</h1>
-            <p class="text-base-content/60 text-sm">
-                {{ $guia->titulo }} · v{{ $guia->version }} · {{ $guia->categoria }}
-            </p>
+    <div
+        class="rounded-box border border-warning/20 bg-linear-to-br from-warning/10 via-base-100 to-base-100 p-5 sm:p-6">
+        <div class="flex items-center gap-3">
+            <div class="rounded-box border border-warning/20 bg-warning/15 p-2.5 text-warning">
+                <x-heroicon-o-pencil-square class="h-6 w-6" />
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">Editar Guía</h1>
+                <p class="text-sm text-base-content/70">
+                    {{ $guia->titulo }} · v{{ $guia->version }} · {{ $guia->categoria }}
+                </p>
+            </div>
         </div>
     </div>
 
     {{-- Formulario --}}
-    <div class="card bg-base-100 shadow-sm border border-base-content/5">
+    <div class="card border border-base-content/10 bg-base-100 shadow-sm">
         <div class="card-body">
             <livewire:forms.guia-form :guiaId="$guia->id" />
         </div>

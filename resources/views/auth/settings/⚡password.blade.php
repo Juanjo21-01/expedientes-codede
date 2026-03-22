@@ -44,11 +44,11 @@ new class extends Component {
 
     <x-auth.settings.layout heading="Contraseña"
         subheading="Asegúrate de usar una contraseña larga y segura para mantener tu cuenta protegida">
-        <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
+        <form method="POST" wire:submit="updatePassword" class="mt-1 space-y-6">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Contraseña actual <span class="text-error">*</span></legend>
                 <input id="current_password" wire:model="current_password" type="password" required
-                    autocomplete="current-password" class="input w-full" />
+                    autocomplete="current-password" class="input input-bordered w-full border-base-content/20" />
                 @error('current_password')
                     <p class="mt-1 text-sm text-error">{{ $message }}</p>
                 @enderror
@@ -57,7 +57,7 @@ new class extends Component {
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Nueva contraseña <span class="text-error">*</span></legend>
                 <input id="password" wire:model="password" type="password" required autocomplete="new-password"
-                    class="input w-full" />
+                    class="input input-bordered w-full border-base-content/20" />
                 @error('password')
                     <p class="mt-1 text-sm text-error">{{ $message }}</p>
                 @enderror
@@ -66,15 +66,13 @@ new class extends Component {
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Confirmar contraseña <span class="text-error">*</span></legend>
                 <input id="password_confirmation" wire:model="password_confirmation" type="password" required
-                    autocomplete="new-password" class="input w-full" />
+                    autocomplete="new-password" class="input input-bordered w-full border-base-content/20" />
             </fieldset>
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <button type="submit" class="btn btn-primary w-full" data-test="update-password-button">
-                        Guardar
-                    </button>
-                </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <button type="submit" class="btn btn-primary" data-test="update-password-button">
+                    Guardar
+                </button>
 
                 <x-action-message class="me-3" on="password-updated">
                     Guardado.

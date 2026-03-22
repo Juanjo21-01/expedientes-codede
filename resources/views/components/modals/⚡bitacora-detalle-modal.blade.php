@@ -48,11 +48,19 @@ new class extends Component {
     <div class="modal" :class="{ 'modal-open': $wire.mostrarDetalle }">
         <div class="modal-box max-w-lg" wire:click.stop>
             @if ($mostrarDetalle && $registroDetalle)
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <x-heroicon-o-information-circle class="w-5 h-5 text-primary" />
-                        Detalle del Registro
-                    </h3>
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div
+                                class="bg-primary/10 text-primary rounded-lg w-10 h-10 flex items-center justify-center">
+                                <x-heroicon-o-information-circle class="w-5 h-5" />
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold">Detalle del Registro</h3>
+                            <p class="text-xs text-base-content/50">Bitácora #{{ $registroDetalle['id'] }}</p>
+                        </div>
+                    </div>
                     <button wire:click="cerrarDetalle" class="btn btn-ghost btn-sm btn-circle">
                         <x-heroicon-o-x-mark class="w-5 h-5" />
                     </button>
@@ -60,10 +68,10 @@ new class extends Component {
 
                 <div class="space-y-4">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="badge {{ $registroDetalle['entidad_badge'] }} badge-outline">
+                        <span class="badge badge-soft {{ $registroDetalle['entidad_badge'] }} badge-outline">
                             {{ $registroDetalle['entidad'] }}
                         </span>
-                        <span class="badge {{ $registroDetalle['tipo_badge'] }}">
+                        <span class="badge badge-soft {{ $registroDetalle['tipo_badge'] }}">
                             {{ $registroDetalle['tipo'] }}
                         </span>
                         @if ($registroDetalle['entidad_id'])
@@ -72,17 +80,17 @@ new class extends Component {
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-base-200/50 rounded-lg p-3">
+                        <div class="bg-base-200/50 rounded-lg p-3 border border-base-content/5">
                             <p class="text-xs text-base-content/50 mb-1">Fecha</p>
                             <p class="font-medium text-sm">{{ $registroDetalle['fecha'] }}</p>
                         </div>
-                        <div class="bg-base-200/50 rounded-lg p-3">
+                        <div class="bg-base-200/50 rounded-lg p-3 border border-base-content/5">
                             <p class="text-xs text-base-content/50 mb-1">Hora</p>
                             <p class="font-medium text-sm">{{ $registroDetalle['hora'] }}</p>
                         </div>
                     </div>
 
-                    <div class="bg-base-200/50 rounded-lg p-3">
+                    <div class="bg-base-200/50 rounded-lg p-3 border border-base-content/5">
                         <p class="text-xs text-base-content/50 mb-1">Realizado por</p>
                         <div class="flex items-center gap-2">
                             <div class="avatar placeholder">
@@ -99,7 +107,7 @@ new class extends Component {
                         </div>
                     </div>
 
-                    <div class="bg-base-200/50 rounded-lg p-3">
+                    <div class="bg-base-200/50 rounded-lg p-3 border border-base-content/5">
                         <p class="text-xs text-base-content/50 mb-1">Detalle de la acción</p>
                         <p class="text-sm leading-relaxed">{{ $registroDetalle['detalle'] }}</p>
                     </div>

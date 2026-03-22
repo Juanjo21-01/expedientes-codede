@@ -93,7 +93,8 @@ new class extends Component {
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
-                        <div class="bg-info/10 text-info rounded-lg w-10 h-10 flex items-center justify-center">
+                        <div
+                            class="bg-info/10 text-info rounded-lg w-10 h-10 flex items-center justify-center border border-info/20">
                             <x-heroicon-o-arrows-right-left class="w-5 h-5" />
                         </div>
                     </div>
@@ -106,7 +107,7 @@ new class extends Component {
                 </div>
 
                 {{-- Estado Actual --}}
-                <div class="bg-base-200 rounded-lg p-3 mb-4">
+                <div class="bg-base-200/70 border border-base-content/10 rounded-lg p-3 mb-4">
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-base-content/60">Estado actual:</span>
                         @php
@@ -128,7 +129,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Nuevo Estado <span class="text-error">*</span></legend>
                         <select wire:model="nuevoEstado" id="nuevoEstado"
-                            class="select w-full @error('nuevoEstado') select-error @enderror">
+                            class="select w-full border-base-content/20 @error('nuevoEstado') select-error @enderror">
                             <option value="" selected disabled>Seleccionar nuevo estado...</option>
                             @foreach ($this->getTransicionesValidas() as $estado)
                                 <option value="{{ $estado }}">{{ $estado }}</option>
@@ -143,8 +144,8 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Observaciones</legend>
                         <textarea wire:model="observaciones" id="observaciones_estado" rows="3"
-                            class="textarea w-full @error('observaciones') textarea-error @enderror" placeholder="Razón del cambio de estado..."
-                            maxlength="1000"></textarea>
+                            class="textarea w-full border-base-content/20 @error('observaciones') textarea-error @enderror"
+                            placeholder="Razón del cambio de estado..." maxlength="1000"></textarea>
                         @error('observaciones')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror

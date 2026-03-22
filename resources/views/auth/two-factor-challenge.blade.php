@@ -29,14 +29,16 @@
                     description="Confirma el acceso a tu cuenta ingresando uno de tus códigos de recuperación de emergencia." />
             </div>
 
-            <form method="POST" action="{{ route('two-factor.login.store') }}">
+            <form method="POST" action="{{ route('two-factor.login.store') }}"
+                class="card border border-base-content/10 bg-base-100/60 shadow-sm">
                 @csrf
 
-                <div class="space-y-5 text-center">
+                <div class="card-body space-y-5 p-5 text-center">
                     <div x-show="!showRecoveryInput">
                         <div class="flex items-center justify-center my-5">
                             <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" name="code"
-                                x-model="code" class="input w-full max-w-xs text-center tracking-[0.35em]"
+                                x-model="code"
+                                class="input input-bordered w-full max-w-xs border-base-content/20 text-center tracking-[0.35em]"
                                 placeholder="000000" />
                         </div>
                         @error('code')
@@ -48,7 +50,7 @@
                         <div class="my-5">
                             <input type="text" name="recovery_code" x-ref="recovery_code"
                                 x-bind:required="showRecoveryInput" autocomplete="one-time-code" x-model="recovery_code"
-                                class="input w-full" />
+                                class="input input-bordered w-full border-base-content/20" />
                         </div>
 
                         @error('recovery_code')
@@ -61,7 +63,7 @@
                     </button>
                 </div>
 
-                <div class="mt-5 text-sm leading-5 text-center text-base-content/70">
+                <div class="mt-5 pb-5 text-sm leading-5 text-center text-base-content/70">
                     <span>o puedes</span>
                     <div class="inline font-medium underline cursor-pointer text-base-content/80">
                         <span x-show="!showRecoveryInput" @click="toggleInput()">iniciar sesión con un código de

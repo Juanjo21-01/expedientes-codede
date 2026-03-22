@@ -8,9 +8,9 @@ new #[Title('- Subir Guía')] class extends Component {
 };
 ?>
 
-<div>
+<div class="space-y-6">
     {{-- Breadcrumbs --}}
-    <div class="breadcrumbs text-sm mb-6">
+    <div class="breadcrumbs text-sm">
         <ul>
             <li>
                 <a href="{{ route('admin.guias.index') }}" wire:navigate
@@ -26,18 +26,22 @@ new #[Title('- Subir Guía')] class extends Component {
     </div>
 
     {{-- Header --}}
-    <div class="flex items-center gap-3 mb-6">
-        <div class="bg-primary/10 text-primary rounded-btn p-2">
-            <x-heroicon-o-arrow-up-tray class="w-6 h-6" />
-        </div>
-        <div>
-            <h1 class="text-2xl font-bold">Subir Nueva Guía</h1>
-            <p class="text-base-content/60 text-sm">Subir un documento PDF al repositorio de guías</p>
+    <div
+        class="rounded-box border border-primary/20 bg-linear-to-br from-primary/10 via-base-100 to-base-100 p-5 sm:p-6">
+        <div class="flex items-center gap-3">
+            <div class="rounded-box border border-primary/20 bg-primary/15 p-2.5 text-primary">
+                <x-heroicon-o-arrow-up-tray class="h-6 w-6" />
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">Subir Nueva Guía</h1>
+                <p class="text-sm text-base-content/70">Carga un documento PDF al repositorio institucional de guías.
+                </p>
+            </div>
         </div>
     </div>
 
     {{-- Formulario --}}
-    <div class="card bg-base-100 shadow-sm border border-base-content/5">
+    <div class="card border border-base-content/10 bg-base-100 shadow-sm">
         <div class="card-body">
             <livewire:forms.guia-form />
         </div>

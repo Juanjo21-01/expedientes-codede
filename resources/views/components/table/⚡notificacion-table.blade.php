@@ -94,10 +94,9 @@ new class extends Component {
 ?>
 
 <div>
-    <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-        <table class="table table-zebra table-sm">
-            <thead></thead>
-            <tr class="bg-base-200">
+    <x-patterns.responsive-table title="Notificaciones registradas" :count="$this->notificaciones->total()" tone="info">
+        <x-slot:head>
+            <tr class="bg-base-200/70 text-base-content/70 text-xs uppercase tracking-wide">
                 <th class="whitespace-nowrap">Estado</th>
                 <th class="whitespace-nowrap">Tipo</th>
                 <th class="min-w-50">Asunto</th>
@@ -107,116 +106,112 @@ new class extends Component {
                 <th class="whitespace-nowrap">Fecha</th>
                 <th class="text-center whitespace-nowrap min-w-25">Acciones</th>
             </tr>
-            </thead>
-            <tbody>
-                @forelse ($this->notificaciones as $noti)
-                    <tr class="hover" wire:key="noti-{{ $noti->id }}">
-                        {{-- Estado --}}
-                        <td>
-                            <span class="badge badge-sm {{ $noti->estado_badge_class }}">
-                                {{ $noti->estado }}
-                            </span>
-                        </td>
+        </x-slot:head>
 
-                        {{-- Tipo --}}
-                        <td>
-                            <span class="text-xs">
-                                {{ $noti->tipoNotificacion->nombre ?? 'N/A' }}
-                            </span>
-                        </td>
+        @forelse ($this->notificaciones as $noti)
+            <tr class="hover" wire:key="noti-{{ $noti->id }}">
+                {{-- Estado --}}
+                <td>
+                    <span class="badge badge-sm badge-soft {{ $noti->estado_badge_class }}">
+                        {{ $noti->estado }}
+                    </span>
+                </td>
 
-                        {{-- Asunto --}}
-                        <td>
-                            <div class="max-w-xs">
-                                <span class="text-sm font-medium truncate block" title="{{ $noti->asunto }}">
-                                    {{ Str::limit($noti->asunto, 40) }}
-                                </span>
+                {{-- Tipo --}}
+                <td>
+                    <span class="text-xs">
+                        {{ $noti->tipoNotificacion->nombre ?? 'N/A' }}
+                    </span>
+                </td>
+
+                {{-- Asunto --}}
+                <td>
+                    <div class="max-w-xs">
+                        <span class="text-sm font-medium truncate block" title="{{ $noti->asunto }}">
+                            {{ Str::limit($noti->asunto, 40) }}
+                        </span>
+                    </div>
+                </td>
+
+                {{-- Destinatario --}}
+                <td>
+                    <div>
+                        @if ($noti->destinatario_nombre)
+                            <p class="text-sm font-medium">{{ $noti->destinatario_nombre }}</p>
+                        @endif
+                        <p class="text-xs text-base-content/60">{{ $noti->destinatario_email }}</p>
+                    </div>
+                </td>
+
+                {{-- Contexto --}}
+                <td>
+                    @if ($noti->expediente)
+                        <a href="{{ route('expedientes.show', $noti->expediente->id) }}" wire:navigate
+                            class="link link-primary text-xs">
+                            {{ $noti->expediente->codigo_snip }}
+                        </a>
+                    @elseif ($noti->municipio)
+                        <span class="text-xs">{{ $noti->municipio->nombre }}</span>
+                    @else
+                        <span class="text-xs text-base-content/40">-</span>
+                    @endif
+                </td>
+
+                {{-- Remitente --}}
+                <td>
+                    <span class="text-xs">
+                        {{ $noti->remitente->nombre_completo ?? 'Sistema' }}
+                    </span>
+                </td>
+
+                {{-- Fecha --}}
+                <td class="text-sm text-base-content/70">
+                    {{ $noti->created_at->format('d/m/Y H:i') }}
+                </td>
+
+                {{-- Acciones --}}
+                <td>
+                    <div class="flex justify-center items-center gap-1">
+                        {{-- Ver detalle --}}
+                        <div class="tooltip" data-tip="Ver mensaje">
+                            <button type="button" class="btn btn-ghost btn-sm btn-square text-info hover:bg-info/10"
+                                @click="$dispatch('ver-detalle-notificacion', { notificacionId: {{ $noti->id }} })">
+                                <x-heroicon-o-eye class="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {{-- Reintentar (solo admin, solo fallidas) --}}
+                        @if (auth()->user()->isAdmin() && $noti->fallo())
+                            <div class="tooltip" data-tip="Reintentar envío">
+                                <button wire:click="reintentar({{ $noti->id }})"
+                                    wire:confirm="¿Reintentar el envío de esta notificación?"
+                                    class="btn btn-ghost btn-sm btn-square text-warning hover:bg-warning/10">
+                                    <x-heroicon-o-arrow-path class="w-5 h-5" />
+                                </button>
                             </div>
-                        </td>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="8" class="text-center py-12">
+                    <div class="flex flex-col items-center gap-2">
+                        <x-heroicon-o-envelope class="w-12 h-12 text-base-content/30" />
+                        <span class="text-base-content/50">No se encontraron notificaciones</span>
+                    </div>
+                </td>
+            </tr>
+        @endforelse
 
-                        {{-- Destinatario --}}
-                        <td>
-                            <div>
-                                @if ($noti->destinatario_nombre)
-                                    <p class="text-sm font-medium">{{ $noti->destinatario_nombre }}</p>
-                                @endif
-                                <p class="text-xs text-base-content/60">{{ $noti->destinatario_email }}</p>
-                            </div>
-                        </td>
-
-                        {{-- Contexto --}}
-                        <td>
-                            @if ($noti->expediente)
-                                <a href="{{ route('expedientes.show', $noti->expediente->id) }}" wire:navigate
-                                    class="link link-primary text-xs">
-                                    {{ $noti->expediente->codigo_snip }}
-                                </a>
-                            @elseif ($noti->municipio)
-                                <span class="text-xs">{{ $noti->municipio->nombre }}</span>
-                            @else
-                                <span class="text-xs text-base-content/40">-</span>
-                            @endif
-                        </td>
-
-                        {{-- Remitente --}}
-                        <td>
-                            <span class="text-xs">
-                                {{ $noti->remitente->nombre_completo ?? 'Sistema' }}
-                            </span>
-                        </td>
-
-                        {{-- Fecha --}}
-                        <td class="text-sm text-base-content/70">
-                            {{ $noti->created_at->format('d/m/Y H:i') }}
-                        </td>
-
-                        {{-- Acciones --}}
-                        <td>
-                            <div class="flex justify-center items-center gap-1">
-                                {{-- Ver detalle --}}
-                                <div class="tooltip" data-tip="Ver mensaje">
-                                    <button type="button" class="btn btn-ghost btn-sm btn-square text-info"
-                                        @click="$dispatch('ver-detalle-notificacion', { notificacionId: {{ $noti->id }} })">
-                                        <x-heroicon-o-eye class="w-5 h-5" />
-                                    </button>
-                                </div>
-
-                                {{-- Reintentar (solo admin, solo fallidas) --}}
-                                @if (auth()->user()->isAdmin() && $noti->fallo())
-                                    <div class="tooltip" data-tip="Reintentar envío">
-                                        <button wire:click="reintentar({{ $noti->id }})"
-                                            wire:confirm="¿Reintentar el envío de esta notificación?"
-                                            class="btn btn-ghost btn-sm btn-square text-warning">
-                                            <x-heroicon-o-arrow-path class="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center py-12">
-                            <div class="flex flex-col items-center gap-2">
-                                <x-heroicon-o-envelope class="w-12 h-12 text-base-content/30" />
-                                <span class="text-base-content/50">No se encontraron notificaciones</span>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{-- Paginación --}}
-    @if ($this->notificaciones->hasPages())
-        <div class="border-t border-base-content/5 px-4 py-3">
-            {{ $this->notificaciones->links() }}
-        </div>
-    @endif
-
-
-
-
-
+        @if ($this->notificaciones->hasPages())
+            <x-slot:foot>
+                <tr>
+                    <td colspan="8" class="border-t border-base-content/10 px-4 py-3">
+                        {{ $this->notificaciones->links() }}
+                    </td>
+                </tr>
+            </x-slot:foot>
+        @endif
+    </x-patterns.responsive-table>
 </div>

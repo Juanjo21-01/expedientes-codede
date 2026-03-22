@@ -45,7 +45,8 @@ new class extends Component {
     }
 }; ?>
 
-<div class="py-6 space-y-6 border shadow-sm rounded-xl border-base-300" wire:cloak x-data="{ showRecoveryCodes: false }">
+<div class="space-y-6 rounded-xl border border-base-content/10 bg-base-100/70 py-6 shadow-sm" wire:cloak
+    x-data="{ showRecoveryCodes: false }">
     <div class="px-6 space-y-2">
         <div class="flex items-center gap-2">
             <h3 class="text-lg font-semibold text-base-content">Códigos de recuperación 2FA</h3>
@@ -63,13 +64,13 @@ new class extends Component {
                 Ver códigos de recuperación
             </button>
 
-            <button x-show="showRecoveryCodes" class="btn btn-primary" @click="showRecoveryCodes = false"
+            <button x-show="showRecoveryCodes" class="btn btn-outline" @click="showRecoveryCodes = false"
                 aria-expanded="true" aria-controls="recovery-codes-section">
                 Ocultar códigos de recuperación
             </button>
 
             @if (filled($recoveryCodes))
-                <button x-show="showRecoveryCodes" class="btn" wire:click="regenerateRecoveryCodes">
+                <button x-show="showRecoveryCodes" class="btn btn-warning" wire:click="regenerateRecoveryCodes">
                     Regenerar códigos
                 </button>
             @endif
@@ -79,7 +80,8 @@ new class extends Component {
             x-bind:aria-hidden="!showRecoveryCodes">
             <div class="mt-3 space-y-3">
                 @error('recoveryCodes')
-                    <div class="alert alert-error text-sm"><span>{{ $message }}</span></div>
+                    <div class="alert alert-error border border-error/20 text-sm shadow-sm"><span>{{ $message }}</span>
+                    </div>
                 @enderror
 
                 @if (filled($recoveryCodes))

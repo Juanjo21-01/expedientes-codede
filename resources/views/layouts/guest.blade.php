@@ -12,43 +12,18 @@
     <link rel="icon" href="{{ asset('img/logo.png') }}" type="image/png">
 
     {{-- Aplicar tema ANTES de cualquier renderizado para evitar flash --}}
-    <script>
-        (function() {
-            const theme = localStorage.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' :
-                'light');
-            document.documentElement.setAttribute('data-theme', theme);
-        })();
-    </script>
+    @include('layouts.partials.theme-init')
 
     {{-- Scripts --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
-    <script>
-        function syncThemeToggles() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            document.querySelectorAll('.theme-toggle-checkbox').forEach(function(toggle) {
-                toggle.checked = isDark;
-            });
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.theme = newTheme;
-            syncThemeToggles();
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            syncThemeToggles();
-        });
-    </script>
+    @include('layouts.partials.theme-controller', ['withSidebarState' => false])
 </head>
 
 <body class="bg-base-200 min-h-screen">
     <!-- Background Pattern -->
-    <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-base-200 to-secondary/5"></div>
+    <div class="absolute inset-0 bg-linear-to-br from-primary/5 via-base-200 to-secondary/5"></div>
 
     <!-- Theme Toggle Button -->
     <div class="absolute top-4 right-4 z-10">
@@ -83,7 +58,7 @@
             </div>
 
             <!-- Card -->
-            <div class="card bg-base-100 shadow-xl border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/10">
                 <div class="card-body">
                     {{ $slot }}
                 </div>

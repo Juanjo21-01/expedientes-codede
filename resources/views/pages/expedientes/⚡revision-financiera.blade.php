@@ -22,9 +22,9 @@ new #[Title('- Revisión Financiera')] class extends Component {
 };
 ?>
 
-<div>
+<div class="space-y-6">
     {{-- Breadcrumbs --}}
-    <div class="breadcrumbs text-sm mb-6">
+    <div class="breadcrumbs text-sm">
         <ul>
             <li>
                 <a href="{{ route('expedientes.index') }}" wire:navigate
@@ -44,7 +44,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
     </div>
 
     {{-- Header --}}
-    <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
+    <div class="card border border-accent/20 bg-linear-to-br from-accent/10 via-base-100 to-base-100 shadow-sm">
         <div class="card-body p-4">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
@@ -67,7 +67,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
                 </div>
                 <div class="flex items-center gap-2">
                     <a href="{{ route('expedientes.show', $expediente->id) }}" wire:navigate
-                        class="btn btn-ghost btn-sm gap-2">
+                        class="btn btn-outline btn-sm gap-2">
                         <x-heroicon-o-arrow-uturn-left class="w-4 h-4" />
                         Volver
                     </a>
@@ -85,7 +85,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
         {{-- Columna izquierda: Info del expediente + Historial --}}
         <div class="lg:col-span-1 space-y-6">
             {{-- Resumen del Expediente --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                         <x-heroicon-o-document-text class="w-4 h-4 text-accent" />
@@ -127,7 +127,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
             </div>
 
             {{-- Historial de Revisiones --}}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body p-4">
                     <h3 class="font-semibold text-sm flex items-center gap-2">
                         <x-heroicon-o-clock class="w-4 h-4 text-accent" />
@@ -242,7 +242,7 @@ new #[Title('- Revisión Financiera')] class extends Component {
 
         {{-- Columna derecha: Formulario de Revisión --}}
         <div class="lg:col-span-2">
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card border border-base-content/10 bg-base-100 shadow-sm">
                 <div class="card-body">
                     <h3 class="card-title text-base gap-2">
                         <x-heroicon-o-pencil-square class="w-5 h-5 text-accent" />

@@ -204,9 +204,9 @@ new #[Title('- Detalle Municipio')] class extends Component {
     </div>
 
     {{-- Tarjeta Principal del Municipio --}}
-    <div class="card bg-linear-to-br from-base-100 to-base-200 shadow-xl border border-base-300 overflow-hidden">
+    <div class="card bg-base-100 shadow-sm border border-base-content/5 overflow-hidden">
         {{-- Header decorativo --}}
-        <div class="h-20 bg-linear-to-r from-primary/20 via-accent/20 to-secondary/20"></div>
+        <div class="h-16 bg-linear-to-r from-primary/10 to-info/10"></div>
 
         <div class="card-body -mt-12">
             <div class="flex flex-col sm:flex-row items-center gap-6">
@@ -223,19 +223,19 @@ new #[Title('- Detalle Municipio')] class extends Component {
                         </div>
                     </span>
                     <div
-                        class="bg-primary text-primary-content rounded-full w-24 h-24 ring-4 ring-base-100 shadow-lg flex justify-center items-center">
+                        class="bg-primary text-primary-content rounded-full w-20 h-20 ring-4 ring-base-100 shadow-md flex justify-center items-center">
                         <x-heroicon-o-building-office-2 class="w-12 h-12" />
                     </div>
                 </div>
 
                 {{-- Información principal --}}
                 <div class="flex-1 text-center sm:text-left">
-                    <h1 class="text-3xl font-bold tracking-tight">{{ $municipio->nombre }}</h1>
+                    <h1 class="text-3xl font-semibold tracking-tight">{{ $municipio->nombre }}</h1>
                     <p class="text-base-content/70 text-lg">{{ $municipio->departamento }}</p>
 
                     <div class="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
                         <div
-                            class="badge badge-lg gap-2 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                            class="badge badge-soft badge-lg gap-2 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
                             <div class="inline-grid *:[grid-area:1/1]">
                                 @if ($municipio->estaActivo())
                                     <div class="status status-success animate-ping"></div>
@@ -247,7 +247,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                             {{ $municipio->estaActivo() ? 'Activo' : 'Inactivo' }}
                         </div>
                         @if ($municipio->tieneContactoCompleto())
-                            <div class="badge badge-lg badge-outline badge-info gap-1">
+                            <div class="badge badge-soft badge-lg badge-outline badge-info gap-1">
                                 <x-heroicon-o-check class="w-3 h-3" />
                                 Contacto completo
                             </div>
@@ -301,7 +301,8 @@ new #[Title('- Detalle Municipio')] class extends Component {
             {{-- Detalles en grid --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {{-- Contacto --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-primary/10 text-primary rounded-btn p-3">
                             <x-heroicon-o-user class="w-5 h-5" />
@@ -314,7 +315,8 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 </div>
 
                 {{-- Email --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-info/10 text-info rounded-btn p-3">
                             <x-heroicon-o-envelope class="w-5 h-5" />
@@ -327,7 +329,8 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 </div>
 
                 {{-- Teléfono --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-success/10 text-success rounded-btn p-3">
                             <x-heroicon-o-phone class="w-5 h-5" />
@@ -340,7 +343,8 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 </div>
 
                 {{-- Observaciones --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-warning/10 text-warning rounded-btn p-3">
                             <x-heroicon-o-document-text class="w-5 h-5" />
@@ -357,7 +361,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
     </div>
 
     {{-- Usuarios Asignados --}}
-    <div class="card bg-base-100 shadow-lg border border-base-300">
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
         <div class="card-body">
             <h2 class="card-title text-lg gap-3">
                 <div class="bg-accent/10 text-accent rounded-btn p-2">
@@ -368,7 +372,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                 {{-- Usuario Municipal --}}
-                <div class="bg-base-200/30 rounded-box p-4 border border-base-300">
+                <div class="bg-base-200/30 rounded-box p-4 border border-base-content/5">
                     <div class="flex items-center gap-2 mb-3">
                         <span class="badge badge-ghost badge-sm">Municipal</span>
                     </div>
@@ -405,7 +409,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 </div>
 
                 {{-- Técnicos Asignados --}}
-                <div class="bg-base-200/30 rounded-box p-4 border border-base-300">
+                <div class="bg-base-200/30 rounded-box p-4 border border-base-content/5">
                     <div class="flex items-center gap-2 mb-3">
                         <span class="badge badge-info badge-sm">Técnico(s)</span>
                         <span class="badge badge-ghost badge-xs">{{ $this->tecnicosAsignados->count() }}</span>
@@ -448,7 +452,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {{-- Total Expedientes --}}
         <div
-            class="stat bg-linear-to-br from-primary/5 to-primary/10 rounded-box shadow border border-primary/20 hover:shadow-lg transition-shadow">
+            class="stat bg-primary/5 rounded-box shadow-sm border border-primary/20 hover:shadow-md transition-shadow">
             <div class="stat-figure text-primary opacity-80">
                 <x-heroicon-o-folder-open class="w-10 h-10" />
             </div>
@@ -459,7 +463,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
         {{-- Aprobados --}}
         <div
-            class="stat bg-linear-to-br from-success/5 to-success/10 rounded-box shadow border border-success/20 hover:shadow-lg transition-shadow">
+            class="stat bg-success/5 rounded-box shadow-sm border border-success/20 hover:shadow-md transition-shadow">
             <div class="stat-figure text-success opacity-80">
                 <x-heroicon-o-check-circle class="w-10 h-10" />
             </div>
@@ -470,7 +474,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
         {{-- En proceso --}}
         <div
-            class="stat bg-linear-to-br from-warning/5 to-warning/10 rounded-box shadow border border-warning/20 hover:shadow-lg transition-shadow">
+            class="stat bg-warning/5 rounded-box shadow-sm border border-warning/20 hover:shadow-md transition-shadow">
             <div class="stat-figure text-warning opacity-80">
                 <x-heroicon-o-clock class="w-10 h-10" />
             </div>
@@ -482,8 +486,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
         </div>
 
         {{-- Rechazados --}}
-        <div
-            class="stat bg-linear-to-br from-error/5 to-error/10 rounded-box shadow border border-error/20 hover:shadow-lg transition-shadow">
+        <div class="stat bg-error/5 rounded-box shadow-sm border border-error/20 hover:shadow-md transition-shadow">
             <div class="stat-figure text-error opacity-80">
                 <x-heroicon-o-x-circle class="w-10 h-10" />
             </div>
@@ -494,7 +497,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
     </div>
 
     {{-- Sección por Año con Filtro --}}
-    <div class="card bg-base-100 shadow-lg border border-base-300">
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
         <div class="card-body">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <h2 class="card-title text-lg gap-3">
@@ -513,16 +516,16 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
             {{-- Badges de estados del año --}}
             <div class="flex flex-wrap gap-2 mt-4">
-                <span class="badge badge-info gap-1">
+                <span class="badge badge-soft badge-info gap-1">
                     <span class="font-bold">{{ $this->estadisticasAnio['recibidos'] }}</span> Recibidos
                 </span>
-                <span class="badge badge-warning gap-1">
+                <span class="badge badge-soft badge-warning gap-1">
                     <span class="font-bold">{{ $this->estadisticasAnio['en_revision'] }}</span> En Revisión
                 </span>
-                <span class="badge badge-success gap-1">
+                <span class="badge badge-soft badge-success gap-1">
                     <span class="font-bold">{{ $this->estadisticasAnio['aprobados'] }}</span> Aprobados
                 </span>
-                <span class="badge badge-error gap-1">
+                <span class="badge badge-soft badge-error gap-1">
                     <span class="font-bold">{{ $this->estadisticasAnio['rechazados'] }}</span> Rechazados
                 </span>
                 <span class="badge badge-ghost gap-1">
@@ -533,7 +536,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
             {{-- Gráficas --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 {{-- Gráfica de barras por mes --}}
-                <div class="bg-base-200/30 rounded-box p-4 border border-base-300">
+                <div class="bg-base-200/20 rounded-box p-4 border border-base-content/5">
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70">Expedientes por Mes —
                         {{ $anioFiltro }}</h3>
                     <div class="w-full h-64" wire:ignore x-data="barChart(@js($this->chartData))" x-init="initChart()"
@@ -543,7 +546,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 </div>
 
                 {{-- Gráfica de pie por estados --}}
-                <div class="bg-base-200/30 rounded-box p-4 border border-base-300">
+                <div class="bg-base-200/20 rounded-box p-4 border border-base-content/5">
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70">Distribución por Estado —
                         {{ $anioFiltro }}</h3>
                     <div class="w-full h-64" wire:ignore x-data="pieChart(@js($this->chartEstados))" x-init="initChart()"
@@ -557,7 +560,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
 
     {{-- Tabla de Expedientes del Año --}}
     @if ($this->expedientesAnio->isNotEmpty())
-        <div class="card bg-base-100 shadow-lg border border-base-300">
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
             <div class="card-body">
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <h2 class="card-title text-lg gap-3">
@@ -569,10 +572,10 @@ new #[Title('- Detalle Municipio')] class extends Component {
                     </h2>
                 </div>
 
-                <div class="overflow-x-auto mt-3">
+                <div class="overflow-x-auto mt-3 rounded-box border border-base-content/5">
                     <table class="table table-zebra table-pin-rows">
                         <thead>
-                            <tr class="bg-base-200">
+                            <tr class="bg-base-200/60 text-xs uppercase tracking-wide text-base-content/70">
                                 <th class="text-center">No.</th>
                                 <th>Código SNIP</th>
                                 <th>Proyecto</th>
@@ -599,7 +602,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                     </td>
                                     <td>
                                         <span
-                                            class="badge badge-outline badge-xs">{{ $expediente->tipo_asignacion ?? '—' }}</span>
+                                            class="badge badge-soft badge-outline badge-xs">{{ $expediente->tipo_asignacion ?? '—' }}</span>
                                     </td>
                                     <td class="text-center">
                                         @php
@@ -612,7 +615,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                                                 default => 'badge-ghost',
                                             };
                                         @endphp
-                                        <span class="badge badge-sm gap-1 {{ $estadoBadgeClass }}">
+                                        <span class="badge badge-soft badge-sm gap-1 {{ $estadoBadgeClass }}">
                                             @if ($expediente->estado === 'Aprobado')
                                                 <x-heroicon-o-check class="w-3 h-3" />
                                             @elseif($expediente->estado === 'Rechazado')
@@ -641,7 +644,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
             </div>
         </div>
     @else
-        <div class="card bg-base-100 shadow-lg border border-base-300">
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
             <div class="card-body">
                 <div class="flex flex-col items-center justify-center py-8 gap-3">
                     <x-heroicon-o-folder-open class="w-16 h-16 text-base-content/20" />

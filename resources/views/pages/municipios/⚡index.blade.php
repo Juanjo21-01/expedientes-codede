@@ -57,42 +57,36 @@ new #[Title('- Municipalidades')] class extends Component {
 };
 ?>
 
-<div>
-    {{-- Header --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div class="flex items-center gap-3">
-            <div class="bg-primary/10 text-primary rounded-btn p-2.5">
-                <x-heroicon-o-building-library class="w-6 h-6" />
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold">Municipalidades</h1>
-                <p class="text-base-content/60 text-sm">
-                    @if (auth()->user()->hasGlobalAccess())
-                        Vista general de los municipios de San Marcos
-                    @else
-                        Municipios asignados a tu usuario
-                    @endif
-                </p>
-            </div>
-        </div>
+@php
+    $municipiosPublicSubtitle = auth()->user()->hasGlobalAccess()
+        ? 'Vista general de los municipios de San Marcos'
+        : 'Municipios asignados a tu usuario';
+@endphp
 
-        <div class="stats bg-base-100 shadow-sm border border-base-300">
-            <div class="stat py-2 px-5">
-                <div class="stat-figure text-primary">
-                    <x-heroicon-o-map class="w-6 h-6" />
-                </div>
-                <div class="stat-title text-xs">
+<div class="space-y-6">
+    {{-- Header --}}
+    <x-patterns.page-header title="Municipalidades" tone="info" :subtitle="$municipiosPublicSubtitle" badge="Consulta">
+        <x-slot:icon>
+            <x-heroicon-o-building-library class="w-6 h-6" />
+        </x-slot:icon>
+
+        <x-slot:actions>
+            <div class="rounded-box border border-info/20 bg-base-100 px-4 py-3 min-w-44">
+                <p class="text-[11px] uppercase tracking-wide text-base-content/55">
                     {{ auth()->user()->hasGlobalAccess() ? 'Total Municipios' : 'Asignados' }}
+                </p>
+                <div class="mt-1 flex items-end justify-between">
+                    <p class="text-3xl font-black leading-none text-info">{{ $this->totalMunicipios }}</p>
+                    <x-heroicon-o-map class="w-5 h-5 text-info/70" />
                 </div>
-                <div class="stat-value text-xl text-primary">{{ $this->totalMunicipios }}</div>
             </div>
-        </div>
-    </div>
+        </x-slot:actions>
+    </x-patterns.page-header>
 
     {{-- Búsqueda --}}
     @if ($this->totalMunicipios > 1)
-        <div class="mb-6">
-            <label class="input flex items-center gap-2 max-w-md">
+        <x-patterns.filter-card title="Búsqueda" description="Filtra municipios por nombre." tone="info">
+            <label class="input input-bordered flex items-center gap-2 max-w-md bg-base-100">
                 <x-heroicon-o-magnifying-glass class="w-4 h-4 opacity-50" />
                 <input type="text" wire:model.live.debounce.300ms="search"
                     placeholder="Buscar municipio por nombre..." class="grow" />
@@ -102,40 +96,40 @@ new #[Title('- Municipalidades')] class extends Component {
                     </button>
                 @endif
             </label>
-        </div>
+        </x-patterns.filter-card>
     @endif
 
     {{-- Grid de Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         @forelse ($this->municipios as $municipio)
             <a href="{{ route('municipios.show', $municipio->id) }}" wire:navigate wire:key="mun-{{ $municipio->id }}"
-                class="card bg-base-100 shadow-sm border border-base-300 hover:shadow-lg hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group">
+                class="card bg-linear-to-br from-base-100 via-base-100 to-info/5 shadow-sm border border-info/15 hover:shadow-md hover:border-info/35 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group">
                 <div class="card-body p-4 gap-3">
                     {{-- Header: Nombre + Estado --}}
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0 flex items-center gap-2">
                             <div class="avatar placeholder shrink-0">
-                                <div class="bg-primary/10 text-primary rounded-lg w-9 h-9 flex items-center justify-center">
+                                <div class="bg-info/15 text-info rounded-xl w-9 h-9 flex items-center justify-center">
                                     <x-heroicon-o-building-library class="w-4 h-4" />
                                 </div>
                             </div>
                             <div class="min-w-0">
-                                <h3 class="font-bold text-sm group-hover:text-primary transition-colors truncate">
+                                <h3 class="font-extrabold text-sm group-hover:text-info transition-colors truncate">
                                     {{ $municipio->nombre }}
                                 </h3>
                                 <p class="text-xs text-base-content/50">{{ $municipio->departamento }}</p>
                             </div>
                         </div>
                         <span
-                            class="badge badge-xs shrink-0 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                            class="badge badge-xs badge-soft shrink-0 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
                             {{ $municipio->estaActivo() ? 'Activo' : 'Inactivo' }}
                         </span>
                     </div>
 
                     {{-- Estadísticas de expedientes --}}
                     <div class="grid grid-cols-3 gap-1.5">
-                        <div class="bg-primary/5 rounded-lg py-2 px-1 text-center">
-                            <div class="text-lg font-bold text-primary leading-none">{{ $municipio->expedientes_count }}
+                        <div class="bg-info/10 rounded-lg py-2 px-1 text-center">
+                            <div class="text-lg font-bold text-info leading-none">{{ $municipio->expedientes_count }}
                             </div>
                             <div class="text-[10px] text-base-content/50 uppercase mt-1">Total</div>
                         </div>
@@ -158,7 +152,7 @@ new #[Title('- Municipalidades')] class extends Component {
                                 <span>Progreso de aprobación</span>
                                 <span>{{ $municipio->expedientes_count > 0 ? round(($municipio->expedientes_aprobados_count / $municipio->expedientes_count) * 100) : 0 }}%</span>
                             </div>
-                            <progress class="progress progress-success w-full h-1.5"
+                            <progress class="progress progress-info w-full h-1.5"
                                 value="{{ $municipio->expedientes_aprobados_count }}"
                                 max="{{ $municipio->expedientes_count }}"></progress>
                         </div>
@@ -195,7 +189,8 @@ new #[Title('- Municipalidades')] class extends Component {
                                         <div class="tooltip tooltip-top"
                                             data-tip="{{ $usuario->nombre_completo }} ({{ $usuario->role->nombre }})">
                                             <div class="avatar placeholder">
-                                                <div class="bg-neutral text-neutral-content rounded-full w-6 h-6 flex items-center justify-center">
+                                                <div
+                                                    class="bg-info/85 text-info-content rounded-full w-6 h-6 flex items-center justify-center">
                                                     <span class="text-[10px]">{{ $usuario->iniciales }}</span>
                                                 </div>
                                             </div>
@@ -208,13 +203,13 @@ new #[Title('- Municipalidades')] class extends Component {
                                     @endif
                                 </div>
                                 <x-heroicon-o-arrow-right
-                                    class="w-4 h-4 text-base-content/30 group-hover:text-primary transition-colors" />
+                                    class="w-4 h-4 text-base-content/30 group-hover:text-info transition-colors" />
                             </div>
                         @else
                             <div class="flex items-center justify-between">
                                 <p class="text-xs text-base-content/30 italic">Sin usuarios asignados</p>
                                 <x-heroicon-o-arrow-right
-                                    class="w-4 h-4 text-base-content/30 group-hover:text-primary transition-colors" />
+                                    class="w-4 h-4 text-base-content/30 group-hover:text-info transition-colors" />
                             </div>
                         @endif
                     </div>
@@ -222,7 +217,7 @@ new #[Title('- Municipalidades')] class extends Component {
             </a>
         @empty
             <div class="col-span-full">
-                <div class="card bg-base-100 border border-base-300">
+                <div class="card bg-base-100 border border-base-content/10 shadow-sm">
                     <div class="card-body items-center text-center py-16">
                         <div class="bg-base-200 rounded-full p-4 mb-2">
                             <x-heroicon-o-building-library class="w-10 h-10 text-base-content/30" />

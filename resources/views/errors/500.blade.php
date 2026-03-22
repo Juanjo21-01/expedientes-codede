@@ -20,11 +20,11 @@
 </head>
 
 <body class="min-h-screen bg-base-200">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-lg w-full text-center">
+    <div class="min-h-screen flex items-center justify-center px-4 py-8">
+        <div class="w-full max-w-xl text-center">
 
             {{-- Ilustración SVG - Servidor / engranaje roto --}}
-            <div class="flex justify-center mb-0">
+            <div class="flex justify-center">
                 <div class="relative">
                     <x-heroicon-o-server-stack class="w-44 h-44 text-error/20" stroke-width="0.5" />
                     <div class="absolute inset-0 flex items-center justify-center">
@@ -36,11 +36,12 @@
             </div>
 
             {{-- Código de error --}}
-            <h1 class="text-9xl font-black text-error/80 leading-none tracking-tighter mt-0">500</h1>
+            <h1 class="text-9xl font-black leading-none tracking-tighter text-error/80">500</h1>
 
             {{-- Card con detalles --}}
-            <div class="card bg-base-100 shadow-xl border border-base-300 mt-2">
+            <div class="card mt-3 border border-base-content/10 bg-base-100 shadow-lg">
                 <div class="card-body items-center text-center">
+                    <span class="badge badge-error badge-soft badge-sm">HTTP 500</span>
                     <h2 class="card-title text-2xl font-bold">Error del Servidor</h2>
                     <div class="divider my-1"></div>
                     <p class="text-base-content/70">
@@ -60,7 +61,7 @@
                             <x-heroicon-o-arrow-uturn-left class="w-5 h-5" />
                             Volver atrás
                         </a>
-                        <a href="/" class="btn btn-error gap-2">
+                        <a href="{{ auth()->check() ? route('dashboard') : '/' }}" class="btn btn-error gap-2">
                             <x-heroicon-o-home class="w-5 h-5" />
                             Ir al Inicio
                         </a>

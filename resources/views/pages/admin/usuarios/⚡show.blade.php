@@ -152,9 +152,9 @@ new #[Title('- Detalle Usuario')] class extends Component {
     </div>
 
     {{-- Tarjeta de Perfil Principal --}}
-    <div class="card bg-gradient-to-br from-base-100 to-base-200 shadow-xl border border-base-300 overflow-hidden">
+    <div class="card bg-base-100 shadow-sm border border-base-content/5 overflow-hidden">
         {{-- Header decorativo --}}
-        <div class="h-24 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20"></div>
+        <div class="h-16 bg-linear-to-r from-primary/10 to-secondary/10"></div>
 
         <div class="card-body -mt-16">
             {{-- Encabezado con avatar y nombre --}}
@@ -173,7 +173,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
                     </span>
                     <div class="avatar placeholder">
                         <div
-                            class="bg-primary text-primary-content rounded-full w-28 h-28 ring-4 ring-base-100 shadow-lg flex justify-center items-center">
+                            class="bg-primary text-primary-content rounded-full w-24 h-24 ring-4 ring-base-100 shadow-md flex justify-center items-center">
                             <span class="text-4xl font-bold">{{ $usuario->iniciales }}</span>
                         </div>
                     </div>
@@ -181,7 +181,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
 
                 {{-- Información principal --}}
                 <div class="flex-1 text-center sm:text-left">
-                    <h1 class="text-3xl font-bold tracking-tight">{{ $usuario->nombre_completo }}</h1>
+                    <h1 class="text-3xl font-semibold tracking-tight">{{ $usuario->nombre_completo }}</h1>
                     @if ($usuario->cargo)
                         <p class="text-base-content/70 text-lg">{{ $usuario->cargo }}</p>
                     @endif
@@ -191,19 +191,22 @@ new #[Title('- Detalle Usuario')] class extends Component {
                     </div>
 
                     {{-- Badges de rol y estado --}}
+                    @php
+                        $rolBadgeClass = match (true) {
+                            $usuario->isAdmin() => 'badge-secondary',
+                            $usuario->isDirector() => 'badge-primary',
+                            $usuario->isJefeFinanciero() => 'badge-warning',
+                            $usuario->isTecnico() => 'badge-info',
+                            default => 'badge-ghost',
+                        };
+                    @endphp
                     <div class="flex flex-wrap gap-2 mt-4 justify-center sm:justify-start">
-                        <div
-                            class="badge badge-lg gap-2
-                            @if ($usuario->isAdmin()) badge-secondary
-                            @elseif($usuario->isDirector()) badge-primary
-                            @elseif($usuario->isJefeFinanciero()) badge-warning
-                            @elseif($usuario->isTecnico()) badge-info
-                            @else badge-ghost @endif">
+                        <div class="badge badge-lg gap-2 {{ $rolBadgeClass }}">
                             <x-heroicon-o-check-badge class="w-4 h-4" />
                             {{ $usuario->role->nombre }}
                         </div>
                         <div
-                            class="badge badge-lg gap-2 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                            class="badge badge-soft badge-lg gap-2 {{ $usuario->estaActivo() ? 'badge-success' : 'badge-error' }}">
                             <div class="inline-grid *:[grid-area:1/1]">
                                 @if ($usuario->estaActivo())
                                     <div class="status status-success animate-ping"></div>
@@ -245,7 +248,8 @@ new #[Title('- Detalle Usuario')] class extends Component {
             {{-- Detalles del usuario en grid --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {{-- Teléfono --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-primary/10 text-primary rounded-btn p-3">
                             <x-heroicon-o-phone class="w-5 h-5" />
@@ -258,7 +262,8 @@ new #[Title('- Detalle Usuario')] class extends Component {
                 </div>
 
                 {{-- Fecha de registro --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-info/10 text-info rounded-btn p-3">
                             <x-heroicon-o-calendar class="w-5 h-5" />
@@ -271,7 +276,8 @@ new #[Title('- Detalle Usuario')] class extends Component {
                 </div>
 
                 {{-- Último acceso --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="bg-success/10 text-success rounded-btn p-3">
                             <x-heroicon-o-clock class="w-5 h-5" />
@@ -284,7 +290,8 @@ new #[Title('- Detalle Usuario')] class extends Component {
                 </div>
 
                 {{-- 2FA --}}
-                <div class="bg-base-200/50 rounded-box p-4 hover:bg-base-200 transition-colors">
+                <div
+                    class="bg-base-200/40 border border-base-content/5 rounded-box p-4 hover:bg-base-200/70 transition-colors">
                     <div class="flex items-center gap-3">
                         <div
                             class="rounded-btn p-3 {{ $usuario->two_factor_secret ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning' }}">
@@ -305,7 +312,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
 
     {{-- Municipios asignados --}}
     @if ($usuario->municipios->isNotEmpty())
-        <div class="card bg-base-100 shadow-lg border border-base-300">
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
             <div class="card-body">
                 <h2 class="card-title text-lg gap-3">
                     <div class="bg-accent/10 text-accent rounded-btn p-2">
@@ -317,7 +324,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
                 <div class="flex flex-wrap gap-2 mt-3">
                     @foreach ($usuario->municipios as $municipio)
                         <a href="{{ route('admin.municipios.show', $municipio->id) }}" wire:navigate
-                            class="badge badge-outline badge-lg gap-4 hover:badge-primary transition-colors cursor-pointer flex justify-between align-content-center"
+                            class="badge badge-soft badge-outline badge-lg gap-4 hover:badge-primary transition-colors cursor-pointer flex justify-between align-content-center"
                             title="Ver Municipio">
                             <x-heroicon-o-map-pin class="w-4 h-4" />
                             <span class="">
@@ -335,7 +342,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             {{-- Total Expedientes --}}
             <div
-                class="stat bg-gradient-to-br from-primary/5 to-primary/10 rounded-box shadow border border-primary/20 hover:shadow-lg transition-shadow">
+                class="stat bg-primary/5 rounded-box shadow-sm border border-primary/20 hover:shadow-md transition-shadow">
                 <div class="stat-figure text-primary opacity-80">
                     <x-heroicon-o-folder-open class="w-10 h-10" />
                 </div>
@@ -346,7 +353,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
 
             {{-- Aprobados --}}
             <div
-                class="stat bg-gradient-to-br from-success/5 to-success/10 rounded-box shadow border border-success/20 hover:shadow-lg transition-shadow">
+                class="stat bg-success/5 rounded-box shadow-sm border border-success/20 hover:shadow-md transition-shadow">
                 <div class="stat-figure text-success opacity-80">
                     <x-heroicon-o-check-circle class="w-10 h-10" />
                 </div>
@@ -357,7 +364,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
 
             {{-- Pendientes --}}
             <div
-                class="stat bg-gradient-to-br from-warning/5 to-warning/10 rounded-box shadow border border-warning/20 hover:shadow-lg transition-shadow">
+                class="stat bg-warning/5 rounded-box shadow-sm border border-warning/20 hover:shadow-md transition-shadow">
                 <div class="stat-figure text-warning opacity-80">
                     <x-heroicon-o-clock class="w-10 h-10" />
                 </div>
@@ -368,7 +375,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
 
             {{-- Rechazados --}}
             <div
-                class="stat bg-gradient-to-br from-error/5 to-error/10 rounded-box shadow border border-error/20 hover:shadow-lg transition-shadow">
+                class="stat bg-error/5 rounded-box shadow-sm border border-error/20 hover:shadow-md transition-shadow">
                 <div class="stat-figure text-error opacity-80">
                     <x-heroicon-o-x-circle class="w-10 h-10" />
                 </div>
@@ -379,7 +386,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
         </div>
 
         {{-- Gráfica de expedientes por mes --}}
-        <div class="card bg-base-100 shadow-lg border border-base-300">
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
             <div class="card-body">
                 <h2 class="card-title text-lg gap-3">
                     <div class="bg-secondary/10 text-secondary rounded-btn p-2">
@@ -396,7 +403,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
 
         {{-- Últimos expedientes --}}
         @if ($this->ultimosExpedientes->isNotEmpty())
-            <div class="card bg-base-100 shadow-lg border border-base-300">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
                 <div class="card-body">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <h2 class="card-title text-lg gap-3">
@@ -406,16 +413,16 @@ new #[Title('- Detalle Usuario')] class extends Component {
                             Últimos Expedientes
                         </h2>
                         <a href="{{ route('expedientes.index') }}" wire:navigate
-                            class="btn btn-primary btn-sm btn-outline gap-1">
+                            class="btn btn-primary btn-sm gap-1">
                             Ver todos
                             <x-heroicon-o-chevron-right class="w-4 h-4" />
                         </a>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto rounded-box border border-base-content/5">
                         <table class="table table-zebra">
                             <thead>
-                                <tr class="bg-base-200">
+                                <tr class="bg-base-200/60 text-xs uppercase tracking-wide text-base-content/70">
                                     <th>Código SNIP</th>
                                     <th>Proyecto</th>
                                     <th>Municipio</th>
@@ -427,6 +434,15 @@ new #[Title('- Detalle Usuario')] class extends Component {
                             </thead>
                             <tbody>
                                 @foreach ($this->ultimosExpedientes as $expediente)
+                                    @php
+                                        $estadoBadgeClass = match ($expediente->estado) {
+                                            'Aprobado' => 'badge-success',
+                                            'Rechazado' => 'badge-error',
+                                            'En Revisión' => 'badge-warning',
+                                            'Recibido' => 'badge-info',
+                                            default => 'badge-ghost',
+                                        };
+                                    @endphp
                                     <tr class="hover:bg-base-200/50 transition-colors">
                                         <td>
                                             <span
@@ -445,13 +461,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
                                                 class="badge badge-ghost badge-sm">{{ $expediente->municipio->nombre }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <span
-                                                class="badge badge-sm gap-1
-                                                @if ($expediente->estado === 'Aprobado') badge-success
-                                                @elseif($expediente->estado === 'Rechazado') badge-error
-                                                @elseif($expediente->estado === 'En Revisión') badge-warning
-                                                @elseif($expediente->estado === 'Recibido') badge-info
-                                                @else badge-ghost @endif">
+                                            <span class="badge badge-sm gap-1 {{ $estadoBadgeClass }}">
                                                 @if ($expediente->estado === 'Aprobado')
                                                     <x-heroicon-o-check class="w-3 h-3" />
                                                 @elseif($expediente->estado === 'Rechazado')

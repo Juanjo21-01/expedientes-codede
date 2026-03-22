@@ -25,34 +25,32 @@ new #[Title('- Usuarios')] class extends Component {
 };
 ?>
 
-<div>
+<div class="space-y-6">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-            <h1 class="text-2xl font-bold flex items-center gap-3">
-                <div class="bg-primary/10 text-primary rounded-btn p-2">
-                    <x-heroicon-o-users class="w-6 h-6" />
-                </div>
-                Gestión de Usuarios
-            </h1>
-            <p class="text-base-content/60 text-sm mt-1">Administra los usuarios del sistema</p>
-        </div>
+    <x-patterns.page-header title="Gestión de Usuarios" subtitle="Administra usuarios, roles y acceso al sistema."
+        tone="primary" badge="Administración">
+        <x-slot:icon>
+            <x-heroicon-o-users class="h-6 w-6" />
+        </x-slot:icon>
 
         @if ($this->canManageUsuarios)
-            <button @click="$dispatch('crear-usuario')"
-                class="btn btn-primary gap-2 shadow-md hover:shadow-lg transition-shadow">
-                <x-heroicon-o-user-plus class="w-5 h-5" />
-                Nuevo Usuario
-            </button>
+            <x-slot:actions>
+                <button @click="$dispatch('crear-usuario')" class="btn btn-primary gap-2">
+                    <x-heroicon-o-user-plus class="w-5 h-5" />
+                    Nuevo Usuario
+                </button>
+            </x-slot:actions>
         @endif
-    </div>
+    </x-patterns.page-header>
 
     <!-- Filtros -->
-    <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
-        <div class="card-body p-4">
-            <div class="flex flex-col sm:flex-row gap-4">
-                <div class="flex-1">
-                    <label class="input flex items-center gap-2">
+    <x-patterns.filter-card title="Filtros" description="Puedes buscar por nombre o correo y filtrar por rol."
+        tone="base">
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1">
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Buscar</legend>
+                    <label class="input input-sm flex items-center gap-2">
                         <x-heroicon-o-magnifying-glass class="h-[1em] opacity-50" />
                         <input type="text" wire:model.live.debounce.300ms="search" class="grow"
                             placeholder="Buscar por nombre o correo..." />
@@ -62,18 +60,21 @@ new #[Title('- Usuarios')] class extends Component {
                             </button>
                         @endif
                     </label>
-                </div>
-                <div class="w-full sm:w-56">
-                    <select wire:model.live="rolFiltro" class="select w-full">
+                </fieldset>
+            </div>
+            <div class="w-full sm:w-56">
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend text-xs uppercase tracking-wide">Rol</legend>
+                    <select wire:model.live="rolFiltro" class="select select-sm w-full">
                         <option value="">Todos los roles</option>
                         @foreach ($this->roles as $rol)
                             <option value="{{ $rol->id }}">{{ $rol->nombre }}</option>
                         @endforeach
                     </select>
-                </div>
+                </fieldset>
             </div>
         </div>
-    </div>
+    </x-patterns.filter-card>
 
     <!-- Tabla -->
     <livewire:table.usuario-table :search="$search" :rolFiltro="$rolFiltro" />

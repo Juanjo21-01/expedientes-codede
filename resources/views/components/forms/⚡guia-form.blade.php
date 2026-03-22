@@ -217,10 +217,10 @@ new class extends Component {
 ?>
 
 <div>
-    <form wire:submit="intentarGuardar" class="space-y-6">
+    <form wire:submit="intentarGuardar" class="space-y-5">
         {{-- Sección: Categoría y Versión --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
-            <div class="card-body">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
+            <div class="card-body p-4 sm:p-6">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-tag class="w-5 h-5 text-primary" />
                     Categoría y Versión
@@ -232,7 +232,7 @@ new class extends Component {
                         <fieldset class="fieldset w-full">
                             <legend class="fieldset-legend">Categoría <span class="text-error">*</span></legend>
                             <select wire:model.live="categoriaSeleccionada" id="categoriaSeleccionada"
-                                class="select w-full @error('categoriaSeleccionada') select-error @enderror">
+                                class="select w-full border-base-content/20 @error('categoriaSeleccionada') select-error @enderror">
                                 <option value="" selected disabled>Seleccionar categoría...</option>
                                 @foreach ($this->categorias as $cat)
                                     <option value="{{ $cat }}">{{ $cat }}</option>
@@ -250,7 +250,8 @@ new class extends Component {
                         {{-- En edición, categoría es de solo lectura --}}
                         <fieldset class="fieldset w-full">
                             <legend class="fieldset-legend">Categoría</legend>
-                            <input type="text" value="{{ $categoriaActual }}" class="input w-full" disabled />
+                            <input type="text" value="{{ $categoriaActual }}"
+                                class="input w-full border-base-content/20" disabled />
                             <p class="label text-base-content/50">La categoría no se puede cambiar</p>
                         </fieldset>
                     @endif
@@ -258,8 +259,8 @@ new class extends Component {
                     {{-- Versión auto-calculada --}}
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Versión</legend>
-                        <input type="text" value="v{{ $versionCalculada }}" class="input w-full font-mono"
-                            disabled />
+                        <input type="text" value="v{{ $versionCalculada }}"
+                            class="input w-full border-base-content/20 font-mono" disabled />
                         <p class="label text-base-content/50">
                             @if ($modoEdicion)
                                 Versión actual
@@ -275,7 +276,7 @@ new class extends Component {
                             <legend class="fieldset-legend">Nombre de la nueva categoría <span
                                     class="text-error">*</span></legend>
                             <input type="text" wire:model.live.debounce.300ms="nuevaCategoria" id="nuevaCategoria"
-                                class="input w-full @error('nuevaCategoria') input-error @enderror"
+                                class="input w-full border-base-content/20 @error('nuevaCategoria') input-error @enderror"
                                 placeholder="Ej: GUÍA DE LLENADO DE EXPEDIENTES" maxlength="100" />
                             @error('nuevaCategoria')
                                 <p class="label text-error">{{ $message }}</p>
@@ -289,11 +290,11 @@ new class extends Component {
             </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
 
         {{-- Sección: Información de la Guía --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
-            <div class="card-body">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
+            <div class="card-body p-4 sm:p-6">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-information-circle class="w-5 h-5 text-primary" />
                     Información de la Guía
@@ -303,7 +304,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Título <span class="text-error">*</span></legend>
                         <input type="text" wire:model="titulo" id="titulo"
-                            class="input w-full @error('titulo') input-error @enderror"
+                            class="input w-full border-base-content/20 @error('titulo') input-error @enderror"
                             placeholder="Ej: Guía de Llenado de Expedientes" maxlength="100" />
                         @error('titulo')
                             <p class="label text-error">{{ $message }}</p>
@@ -313,7 +314,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full">
                         <legend class="fieldset-legend">Fecha de Publicación <span class="text-error">*</span></legend>
                         <input type="date" wire:model="fecha_publicacion" id="fecha_publicacion"
-                            class="input w-full @error('fecha_publicacion') input-error @enderror" />
+                            class="input w-full border-base-content/20 @error('fecha_publicacion') input-error @enderror" />
                         @error('fecha_publicacion')
                             <p class="label text-error">{{ $message }}</p>
                         @enderror
@@ -322,11 +323,11 @@ new class extends Component {
             </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
 
         {{-- Sección: Archivo PDF --}}
-        <div class="card bg-base-200 shadow-sm border border-base-300 rounded-lg">
-            <div class="card-body">
+        <div class="card rounded-box border border-base-content/10 bg-base-100 shadow-sm">
+            <div class="card-body p-4 sm:p-6">
                 <h3 class="font-semibold text-lg flex items-center gap-2 mb-4">
                     <x-heroicon-o-document-arrow-up class="w-5 h-5 text-primary" />
                     Archivo PDF
@@ -347,7 +348,7 @@ new class extends Component {
                         $archivoBorderClass = $errors->has('archivo_pdf') ? 'border-error' : 'border-base-content/10';
                     @endphp
                     <div
-                        class="border-2 border-dashed {{ $archivoBorderClass }} rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
+                        class="rounded-box border-2 border-dashed {{ $archivoBorderClass }} p-6 text-center transition-colors hover:border-primary/50">
                         <x-heroicon-o-cloud-arrow-up class="w-10 h-10 mx-auto text-base-content/30 mb-3" />
 
                         <input type="file" wire:model="archivo_pdf" accept=".pdf"
@@ -384,7 +385,7 @@ new class extends Component {
         </div>
 
         {{-- Botones --}}
-        <div class="divider"></div>
+        <div class="divider my-1"></div>
         <div class="flex justify-end gap-3">
             <button type="button" wire:click="cancelar" class="btn btn-ghost">Cancelar</button>
             <button type="submit" class="btn btn-primary gap-2" wire:loading.attr="disabled"
@@ -402,7 +403,7 @@ new class extends Component {
             <div class="modal-box max-w-md">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
-                        <div class="bg-warning/10 text-warning rounded-lg w-10 h-10">
+                        <div class="bg-warning/10 text-warning rounded-lg w-10 h-10 flex items-center justify-center">
                             <x-heroicon-o-exclamation-triangle class="w-5 h-5" />
                         </div>
                     </div>

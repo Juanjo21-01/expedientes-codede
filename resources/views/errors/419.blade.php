@@ -20,8 +20,8 @@
 </head>
 
 <body class="min-h-screen bg-base-200">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-lg w-full text-center">
+    <div class="min-h-screen flex items-center justify-center px-4 py-8">
+        <div class="w-full max-w-xl text-center">
 
             {{-- Ilustración SVG - Reloj / tiempo expirado --}}
             <div class="flex justify-center">
@@ -39,8 +39,9 @@
             <h1 class="text-9xl font-black text-info/80 leading-none tracking-tighter">419</h1>
 
             {{-- Card con detalles --}}
-            <div class="card bg-base-100 shadow-xl border border-base-300 mt-3">
+            <div class="card mt-3 border border-base-content/10 bg-base-100 shadow-lg">
                 <div class="card-body items-center text-center">
+                    <span class="badge badge-info badge-soft badge-sm">HTTP 419</span>
                     <h2 class="card-title text-2xl font-bold">Página Expirada</h2>
                     <div class="divider my-1"></div>
                     <p class="text-base-content/70">

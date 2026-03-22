@@ -81,7 +81,8 @@ new class extends Component {
                 {{-- Encabezado --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div class="avatar placeholder">
-                        <div class="bg-error/10 text-error rounded-lg w-10 h-10 flex items-center justify-center">
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-lg border border-error/20 bg-error/10 text-error">
                             <x-heroicon-o-exclamation-triangle class="w-5 h-5" />
                         </div>
                     </div>
@@ -92,7 +93,7 @@ new class extends Component {
                 </div>
 
                 {{-- Info de la guía --}}
-                <div class="bg-base-200 rounded-lg p-4 space-y-2 text-sm mb-4">
+                <div class="rounded-box border border-base-content/10 bg-base-200/60 p-4 text-sm space-y-2 mb-4">
                     <div class="flex justify-between">
                         <span class="text-base-content/60">Título:</span>
                         <span class="font-medium">{{ $tituloGuia }}</span>
@@ -117,7 +118,7 @@ new class extends Component {
                     <fieldset class="fieldset w-full mb-4">
                         <legend class="fieldset-legend">Ingrese su contraseña para confirmar</legend>
                         <input type="password" wire:model="password"
-                            class="input w-full @error('password') input-error @enderror"
+                            class="input w-full border-base-content/20 @error('password') input-error @enderror"
                             placeholder="Su contraseña actual" autocomplete="off" />
                         @error('password')
                             <p class="label text-error">{{ $message }}</p>

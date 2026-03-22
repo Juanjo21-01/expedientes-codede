@@ -172,9 +172,7 @@ new #[Title('Dashboard')] class extends Component {
     #[Computed]
     public function chartRevisiones(): array
     {
-        $queryMes = RevisionFinanciera::query()
-            ->deEsteMes()
-            ->whereHas('expediente', fn($q) => $q->accesiblesPor($this->user));
+        $queryMes = RevisionFinanciera::query()->deEsteMes()->whereHas('expediente', fn($q) => $q->accesiblesPor($this->user));
 
         $acciones = [
             RevisionFinanciera::ACCION_APROBAR => ['label' => 'Aprobadas', 'color' => '#22c55e'],
@@ -250,11 +248,12 @@ new #[Title('Dashboard')] class extends Component {
         $accesos = [];
 
         // Todos pueden ver expedientes
-        $accesos[] = ['label' => 'Ver Expedientes', 'route' => 'expedientes.index', 'icon' => 'folder-open', 'color' => 'btn-primary'];
 
         if ($user->isAdmin() || $user->isTecnico()) {
             $accesos[] = ['label' => 'Nuevo Expediente', 'route' => 'expedientes.create', 'icon' => 'plus-circle', 'color' => 'btn-success'];
         }
+
+        $accesos[] = ['label' => 'Ver Expedientes', 'route' => 'expedientes.index', 'icon' => 'folder-open', 'color' => 'btn-primary'];
 
         // Guías - todos
         $accesos[] = ['label' => 'Ver Guías', 'route' => 'guias', 'icon' => 'clipboard-document-list', 'color' => 'btn-accent'];
@@ -279,7 +278,7 @@ new #[Title('Dashboard')] class extends Component {
 <div>
     {{-- Banner de bienvenida --}}
     <div
-        class="bg-linear-to-r from-primary/10 via-primary/5 to-transparent rounded-box p-5 mb-6 border border-primary/20">
+        class="bg-linear-to-r from-primary/15 via-primary/5 to-base-100 rounded-box p-5 mb-6 border border-primary/15 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold">
@@ -293,14 +292,14 @@ new #[Title('Dashboard')] class extends Component {
             <div class="flex flex-wrap gap-2">
                 @foreach ($this->accesosRapidos as $acceso)
                     <a href="{{ route($acceso['route']) }}" wire:navigate
-                        class="btn btn-sm {{ $acceso['color'] }} btn-outline gap-1">
+                        class="btn btn-sm {{ $acceso['color'] }} gap-1 shadow-xs">
                         @switch($acceso['icon'])
-                            @case('folder-open')
-                                <x-heroicon-o-folder-open class="w-4 h-4" />
-                            @break
-
                             @case('plus-circle')
                                 <x-heroicon-o-plus-circle class="w-4 h-4" />
+                            @break
+
+                            @case('folder-open')
+                                <x-heroicon-o-folder-open class="w-4 h-4" />
                             @break
 
                             @case('clipboard-document-list')
@@ -330,15 +329,15 @@ new #[Title('Dashboard')] class extends Component {
     @php
         $statsCount = count($this->stats);
     @endphp
-    <div
-        @class([
-            'grid grid-cols-2 gap-4 mb-6',
-            'lg:grid-cols-4' => $statsCount >= 7 || $statsCount === 4,
-            'lg:grid-cols-3' => in_array($statsCount, [3, 5, 6], true),
-            'lg:grid-cols-2' => $statsCount <= 2,
-        ])>
+    <div @class([
+        'grid grid-cols-2 gap-4 mb-6',
+        'lg:grid-cols-4' => $statsCount >= 7 || $statsCount === 4,
+        'lg:grid-cols-3' => in_array($statsCount, [3, 5, 6], true),
+        'lg:grid-cols-2' => $statsCount <= 2,
+    ])>
         @foreach ($this->stats as $stat)
-            <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 p-4">
+            <div
+                class="stat bg-base-100 rounded-box shadow-sm border border-base-content/5 p-4 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="stat-title text-xs">{{ $stat['label'] }}</div>
@@ -396,7 +395,7 @@ new #[Title('Dashboard')] class extends Component {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
         {{-- Gráfica: Distribución por Estado (dona) --}}
-        <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-5">
+        <div class="bg-base-100 rounded-box shadow-sm border border-base-content/5 p-5">
             <h3 class="font-bold text-sm mb-4 flex items-center gap-2">
                 <x-heroicon-o-chart-pie class="w-5 h-5 text-primary" />
                 Distribución por Estado (Mes Actual)
@@ -415,7 +414,7 @@ new #[Title('Dashboard')] class extends Component {
 
         {{-- Gráfica: Tendencia Mensual (líneas) --}}
         @if ($this->user->hasGlobalAccess() || $this->user->isTecnico() || $this->user->isMunicipal())
-            <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-5">
+            <div class="bg-base-100 rounded-box shadow-sm border border-base-content/5 p-5">
                 <h3 class="font-bold text-sm mb-4 flex items-center gap-2">
                     <x-heroicon-o-arrow-trending-up class="w-5 h-5 text-success" />
                     Tendencia Mensual (últimos 6 meses)
@@ -429,7 +428,7 @@ new #[Title('Dashboard')] class extends Component {
 
         {{-- Gráfica: Expedientes por Municipio (barras horizontales) --}}
         @if ($this->user->hasGlobalAccess())
-            <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-5">
+            <div class="bg-base-100 rounded-box shadow-sm border border-base-content/5 p-5">
                 <h3 class="font-bold text-sm mb-4 flex items-center gap-2">
                     <x-heroicon-o-building-library class="w-5 h-5 text-accent" />
                     Top Municipios con más Expedientes (Mes Actual)
@@ -449,7 +448,7 @@ new #[Title('Dashboard')] class extends Component {
 
         {{-- Gráfica: Revisiones por Acción (solo Jefe Financiero) --}}
         @if ($this->user->isJefeFinanciero())
-            <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-5">
+            <div class="bg-base-100 rounded-box shadow-sm border border-base-content/5 p-5">
                 <h3 class="font-bold text-sm mb-4 flex items-center gap-2">
                     <x-heroicon-o-clipboard-document-check class="w-5 h-5 text-warning" />
                     Revisiones por Tipo de Acción (Mes Actual)
@@ -469,7 +468,7 @@ new #[Title('Dashboard')] class extends Component {
 
         {{-- Gráfica: Expedientes por Municipio (Técnico — sus municipios) --}}
         @if ($this->user->isTecnico() && count($this->chartMunicipios['data']) > 0)
-            <div class="bg-base-100 rounded-box shadow-sm border border-base-300 p-5">
+            <div class="bg-base-100 rounded-box shadow-sm border border-base-content/5 p-5">
                 <h3 class="font-bold text-sm mb-4 flex items-center gap-2">
                     <x-heroicon-o-building-library class="w-5 h-5 text-accent" />
                     Expedientes en Mis Municipios (Mes Actual)
@@ -483,8 +482,8 @@ new #[Title('Dashboard')] class extends Component {
 
         {{-- Actividad Reciente (subida para admin/director) --}}
         @if ($this->user->hasGlobalAccess() && !$this->user->isJefeFinanciero())
-            <div class="bg-base-100 rounded-box shadow-sm border border-base-300 h-96 flex flex-col">
-                <div class="p-4 border-b border-base-300 flex items-center justify-between">
+            <div class="bg-base-100 rounded-box shadow-sm border border-base-content/5 h-96 flex flex-col">
+                <div class="p-4 border-b border-base-content/5 flex items-center justify-between">
                     <h3 class="font-bold text-sm flex items-center gap-2">
                         <x-heroicon-o-bell-alert class="w-5 h-5 text-info" />
                         Actividad Reciente
@@ -536,8 +535,8 @@ new #[Title('Dashboard')] class extends Component {
 
     {{-- Sección inferior: Expedientes recientes --}}
     <div>
-        <div class="bg-base-100 rounded-box shadow-sm border border-base-300">
-            <div class="p-4 border-b border-base-300 flex items-center justify-between">
+        <div class="bg-base-100 rounded-box shadow-sm border border-base-content/5">
+            <div class="p-4 border-b border-base-content/5 flex items-center justify-between">
                 <h3 class="font-bold text-sm flex items-center gap-2">
                     <x-heroicon-o-document-text class="w-5 h-5 text-primary" />
                     Expedientes Recientes
@@ -550,7 +549,7 @@ new #[Title('Dashboard')] class extends Component {
             <div class="overflow-x-auto">
                 <table class="table table-sm table-zebra">
                     <thead>
-                        <tr class="bg-base-200/50">
+                        <tr class="bg-base-200/50 text-xs uppercase tracking-wide text-base-content/70">
                             <th>Código SNIP</th>
                             <th>Proyecto</th>
                             <th>Municipio</th>

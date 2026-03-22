@@ -123,20 +123,20 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
         <ul>
             <li>
                 <a href="{{ route('dashboard') }}" wire:navigate
-                    class="gap-1 text-base-content/60 hover:text-primary transition-colors">
+                    class="gap-1 text-base-content/60 hover:text-info transition-colors">
                     <x-heroicon-o-home class="w-4 h-4" />
                     Inicio
                 </a>
             </li>
             <li>
                 <a href="{{ route('municipios.index') }}" wire:navigate
-                    class="gap-1 text-base-content/60 hover:text-primary transition-colors">
+                    class="gap-1 text-base-content/60 hover:text-info transition-colors">
                     <x-heroicon-o-building-library class="w-4 h-4" />
                     Municipalidades
                 </a>
             </li>
             <li>
-                <span class="inline-flex items-center gap-1 text-primary">
+                <span class="inline-flex items-center gap-1 text-info font-semibold">
                     <x-heroicon-o-map-pin class="w-4 h-4" />
                     {{ $municipio->nombre }}
                 </span>
@@ -145,12 +145,12 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
     </div>
 
     {{-- Header Card --}}
-    <div class="card bg-base-100 shadow-lg border border-base-300">
+    <div class="card bg-linear-to-r from-base-100 via-info/5 to-success/10 shadow-sm border border-info/20">
         <div class="card-body p-5">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <div class="avatar placeholder">
-                        <div class="bg-primary/10 text-primary rounded-xl w-14 h-14 flex items-center justify-center">
+                        <div class="bg-info/20 text-info rounded-xl w-14 h-14 flex items-center justify-center">
                             <x-heroicon-o-building-library class="w-7 h-7" />
                         </div>
                     </div>
@@ -164,13 +164,14 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                 </div>
                 <div class="flex items-center gap-2">
                     @if (auth()->user()->isMunicipal())
-                        <a href="{{ route('notificaciones.index') }}" wire:navigate class="btn btn-info btn-sm gap-2">
+                        <a href="{{ route('notificaciones.index') }}" wire:navigate
+                            class="btn btn-outline btn-info btn-sm gap-2">
                             <x-heroicon-o-envelope-open class="w-4 h-4" />
                             Mis Notificaciones
                         </a>
                     @endif
                     <div
-                        class="badge badge-lg gap-1.5 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
+                        class="badge badge-soft badge-lg gap-1.5 {{ $municipio->estaActivo() ? 'badge-success' : 'badge-error' }}">
                         <span
                             class="w-2 h-2 rounded-full {{ $municipio->estaActivo() ? 'bg-success-content' : 'bg-error-content' }}"></span>
                         {{ $municipio->estaActivo() ? 'Activo' : 'Inactivo' }}
@@ -182,8 +183,8 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
 
             {{-- Datos de contacto --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div class="flex items-center gap-3 bg-base-200/50 rounded-box px-4 py-3">
-                    <div class="bg-primary/10 text-primary rounded-btn p-2">
+                <div class="flex items-center gap-3 bg-base-100/80 rounded-box px-4 py-3 border border-base-content/10">
+                    <div class="bg-info/15 text-info rounded-btn p-2">
                         <x-heroicon-o-user class="w-4 h-4" />
                     </div>
                     <div class="min-w-0">
@@ -191,7 +192,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         <p class="font-semibold text-sm truncate">{{ $municipio->contacto_nombre ?? 'Sin asignar' }}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 bg-base-200/50 rounded-box px-4 py-3">
+                <div class="flex items-center gap-3 bg-base-100/80 rounded-box px-4 py-3 border border-base-content/10">
                     <div class="bg-info/10 text-info rounded-btn p-2">
                         <x-heroicon-o-envelope class="w-4 h-4" />
                     </div>
@@ -201,7 +202,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3 bg-base-200/50 rounded-box px-4 py-3">
+                <div class="flex items-center gap-3 bg-base-100/80 rounded-box px-4 py-3 border border-base-content/10">
                     <div class="bg-success/10 text-success rounded-btn p-2">
                         <x-heroicon-o-phone class="w-4 h-4" />
                     </div>
@@ -217,15 +218,16 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
 
     {{-- Stats generales --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 py-3 px-4">
-            <div class="stat-figure text-primary">
+        <div class="stat bg-linear-to-br from-info/5 to-info/10 rounded-box shadow-sm border border-info/20 py-3 px-4">
+            <div class="stat-figure text-info">
                 <x-heroicon-o-folder-open class="w-6 h-6" />
             </div>
             <div class="stat-title text-xs">Total</div>
-            <div class="stat-value text-2xl text-primary">{{ $this->estadisticas['total'] }}</div>
+            <div class="stat-value text-2xl text-info">{{ $this->estadisticas['total'] }}</div>
             <div class="stat-desc">Expedientes</div>
         </div>
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 py-3 px-4">
+        <div
+            class="stat bg-linear-to-br from-success/5 to-success/10 rounded-box shadow-sm border border-success/20 py-3 px-4">
             <div class="stat-figure text-success">
                 <x-heroicon-o-check-circle class="w-6 h-6" />
             </div>
@@ -233,7 +235,8 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
             <div class="stat-value text-2xl text-success">{{ $this->estadisticas['aprobados'] }}</div>
             <div class="stat-desc">Finalizados</div>
         </div>
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 py-3 px-4">
+        <div
+            class="stat bg-linear-to-br from-warning/5 to-warning/10 rounded-box shadow-sm border border-warning/20 py-3 px-4">
             <div class="stat-figure text-warning">
                 <x-heroicon-o-clock class="w-6 h-6" />
             </div>
@@ -243,7 +246,8 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
             </div>
             <div class="stat-desc">Activos</div>
         </div>
-        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-300 py-3 px-4">
+        <div
+            class="stat bg-linear-to-br from-error/5 to-error/10 rounded-box shadow-sm border border-error/20 py-3 px-4">
             <div class="stat-figure text-error">
                 <x-heroicon-o-x-circle class="w-6 h-6" />
             </div>
@@ -254,11 +258,11 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
     </div>
 
     {{-- Expedientes por Año --}}
-    <div class="card bg-base-100 shadow-lg border border-base-300">
+    <div class="card bg-base-100 shadow-sm border border-base-content/10">
         <div class="card-body p-5">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
-                    <div class="bg-primary/10 text-primary rounded-btn p-1.5">
+                    <div class="bg-info/15 text-info rounded-btn p-1.5">
                         <x-heroicon-o-calendar-days class="w-5 h-5" />
                     </div>
                     <h2 class="card-title text-lg">Expedientes por Año</h2>
@@ -288,7 +292,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
 
             {{-- Gráficas --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
-                <div class="bg-base-200/30 rounded-box p-4 border border-base-300">
+                <div class="bg-base-100 rounded-box p-4 border border-base-content/10">
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70 flex items-center gap-1.5">
                         <x-heroicon-o-chart-bar class="w-4 h-4" />
                         Expedientes por Mes — {{ $anioFiltro }}
@@ -298,7 +302,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         <canvas x-ref="barChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
-                <div class="bg-base-200/30 rounded-box p-4 border border-base-300">
+                <div class="bg-base-100 rounded-box p-4 border border-base-content/10">
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70 flex items-center gap-1.5">
                         <x-heroicon-o-chart-pie class="w-4 h-4" />
                         Distribución por Estado — {{ $anioFiltro }}
@@ -313,7 +317,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
     </div>
 
     {{-- Usuarios Asignados --}}
-    <div class="card bg-base-100 shadow-lg border border-base-300">
+    <div class="card bg-base-100 shadow-sm border border-base-content/10">
         <div class="card-body p-5">
             <div class="flex items-center gap-2 mb-3">
                 <div class="bg-secondary/10 text-secondary rounded-btn p-1.5">
@@ -388,7 +392,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
     </div>
 
     {{-- Tabla de Expedientes del año --}}
-    <div class="card bg-base-100 shadow-lg border border-base-300">
+    <div class="card bg-base-100 shadow-sm border border-base-content/10">
         <div class="card-body p-5">
             <div class="flex items-center justify-between gap-3 mb-3">
                 <div class="flex items-center gap-2">
@@ -398,7 +402,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                     <h2 class="card-title text-lg">Expedientes {{ $anioFiltro }}</h2>
                 </div>
                 @if ($this->expedientesAnio->isNotEmpty())
-                    <span class="badge badge-primary badge-outline badge-sm">
+                    <span class="badge badge-info badge-soft badge-sm">
                         {{ $this->expedientesAnio->count() }}
                         {{ $this->expedientesAnio->count() === 1 ? 'registro' : 'registros' }}
                     </span>
@@ -406,10 +410,10 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
             </div>
 
             @if ($this->expedientesAnio->isNotEmpty())
-                <div class="overflow-x-auto">
+                <div class="rounded-box border border-base-content/10 overflow-x-auto">
                     <table class="table table-zebra table-sm">
                         <thead>
-                            <tr class="bg-base-200/70">
+                            <tr class="bg-base-200/60 text-xs uppercase tracking-wide text-base-content/70">
                                 <th class="font-semibold text-xs uppercase text-base-content/60">No.</th>
                                 <th class="font-semibold text-xs uppercase text-base-content/60">SNIP</th>
                                 <th class="font-semibold text-xs uppercase text-base-content/60">Proyecto</th>
@@ -424,7 +428,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                                     <td class="text-base-content/50">{{ $index + 1 }}</td>
                                     <td>
                                         <span
-                                            class="font-mono text-primary font-semibold">{{ $expediente->codigo_snip }}</span>
+                                            class="font-mono text-info font-semibold">{{ $expediente->codigo_snip }}</span>
                                     </td>
                                     <td>
                                         <span
@@ -432,7 +436,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                                     </td>
                                     <td>
                                         <span
-                                            class="badge badge-sm {{ $expediente->estado_badge_class }}">{{ $expediente->estado }}</span>
+                                            class="badge badge-soft badge-sm {{ $expediente->estado_badge_class }}">{{ $expediente->estado }}</span>
                                     </td>
                                     <td class="text-sm">{{ $expediente->fecha_recibido?->format('d/m/Y') ?? '—' }}
                                     </td>

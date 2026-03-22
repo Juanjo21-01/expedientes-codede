@@ -6,7 +6,7 @@
     <title>Reporte - Resumen General</title>
     <style>
         @page {
-            margin: 28px 28px 24px 28px;
+            margin: 38px 24px 26px 24px;
         }
 
         * {
@@ -45,6 +45,7 @@
         .header-logo {
             width: 46px;
             height: 46px;
+            border-radius: 6px;
         }
 
         .header-title {

@@ -101,41 +101,34 @@ new #[Title('- Expedientes')] class extends Component {
 };
 ?>
 
-<div>
-    {{-- Header --}}
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-            <h1 class="text-2xl font-bold flex items-center gap-3">
-                <div class="bg-primary/10 text-primary rounded-btn p-2">
-                    <x-heroicon-o-folder class="w-6 h-6" />
-                </div>
-                Expedientes
-            </h1>
-            <p class="text-base-content/60 text-sm mt-1">
-                @if (auth()->user()->isMunicipal())
-                    Expedientes de tu municipio
-                @elseif (auth()->user()->isTecnico())
-                    Gestión de expedientes de tus municipios asignados
-                @else
-                    Gestión y seguimiento de expedientes
-                @endif
-            </p>
-        </div>
+@php
+    $expedientesSubtitle = auth()->user()->isMunicipal()
+        ? 'Expedientes de tu municipio'
+        : (auth()->user()->isTecnico()
+            ? 'Gestión de expedientes de tus municipios asignados'
+            : 'Gestión y seguimiento de expedientes');
+@endphp
 
-        <div class="flex items-center gap-2">
-            {{-- Botón Crear (Técnico y Admin) --}}
-            @can('create', Expediente::class)
+<div class="space-y-6">
+    {{-- Header --}}
+    <x-patterns.page-header title="Expedientes" tone="primary" :subtitle="$expedientesSubtitle" badge="Operación">
+        <x-slot:icon>
+            <x-heroicon-o-folder class="h-6 w-6" />
+        </x-slot:icon>
+
+        @can('create', Expediente::class)
+            <x-slot:actions>
                 <a href="{{ route('expedientes.create') }}" wire:navigate class="btn btn-primary gap-2">
                     <x-heroicon-o-plus class="w-5 h-5" />
                     Nuevo Expediente
                 </a>
-            @endcan
-        </div>
-    </div>
+            </x-slot:actions>
+        @endcan
+    </x-patterns.page-header>
 
     {{-- Info municipio para rol Municipal --}}
     @if (auth()->user()->isMunicipal() && $this->miMunicipio)
-        <div class="card bg-linear-to-r from-primary/10 to-secondary/10 border border-primary/20 shadow-sm mb-6">
+        <div class="card border border-primary/20 bg-linear-to-r from-primary/10 to-secondary/10 shadow-sm">
             <div class="card-body p-4">
                 <div class="flex items-center gap-4">
                     <div class="avatar placeholder">
@@ -160,43 +153,43 @@ new #[Title('- Expedientes')] class extends Component {
     @endif
 
     {{-- Estadísticas --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div class="stat rounded-box border border-base-content/10 bg-base-100 p-3 shadow-sm">
             <div class="stat-figure text-base-content/20">
                 <x-heroicon-o-folder class="w-5 h-5" />
             </div>
             <div class="stat-title text-xs">Total</div>
             <div class="stat-value text-lg">{{ $this->estadisticas['total'] }}</div>
         </div>
-        <div class="stat bg-info/5 shadow-sm border border-info/10 rounded-box p-3">
+        <div class="stat rounded-box border border-info/20 bg-info/5 p-3 shadow-sm">
             <div class="stat-figure text-info/40">
                 <x-heroicon-o-inbox-arrow-down class="w-5 h-5" />
             </div>
             <div class="stat-title text-xs">Recibidos</div>
             <div class="stat-value text-lg text-info">{{ $this->estadisticas['recibidos'] }}</div>
         </div>
-        <div class="stat bg-warning/5 shadow-sm border border-warning/10 rounded-box p-3">
+        <div class="stat rounded-box border border-warning/20 bg-warning/5 p-3 shadow-sm">
             <div class="stat-figure text-warning/40">
                 <x-heroicon-o-clock class="w-5 h-5" />
             </div>
             <div class="stat-title text-xs">En Revisión</div>
             <div class="stat-value text-lg text-warning">{{ $this->estadisticas['en_revision'] }}</div>
         </div>
-        <div class="stat bg-success/5 shadow-sm border border-success/10 rounded-box p-3">
+        <div class="stat rounded-box border border-success/20 bg-success/5 p-3 shadow-sm">
             <div class="stat-figure text-success/40">
                 <x-heroicon-o-check-circle class="w-5 h-5" />
             </div>
             <div class="stat-title text-xs">Aprobados</div>
             <div class="stat-value text-lg text-success">{{ $this->estadisticas['aprobados'] }}</div>
         </div>
-        <div class="stat bg-error/5 shadow-sm border border-error/10 rounded-box p-3">
+        <div class="stat rounded-box border border-error/20 bg-error/5 p-3 shadow-sm">
             <div class="stat-figure text-error/40">
                 <x-heroicon-o-x-circle class="w-5 h-5" />
             </div>
             <div class="stat-title text-xs">Rechazados</div>
             <div class="stat-value text-lg text-error">{{ $this->estadisticas['rechazados'] }}</div>
         </div>
-        <div class="stat bg-base-100 shadow-sm border border-base-content/5 rounded-box p-3">
+        <div class="stat rounded-box border border-base-content/10 bg-base-100 p-3 shadow-sm">
             <div class="stat-figure text-base-content/20">
                 <x-heroicon-o-archive-box class="w-5 h-5" />
             </div>
@@ -206,57 +199,58 @@ new #[Title('- Expedientes')] class extends Component {
     </div>
 
     {{-- Filtros --}}
-    <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
-        <div class="card-body p-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-                {{-- Búsqueda --}}
-                <div class="xl:col-span-2">
-                    <label class="input input-sm">
-                        <x-heroicon-o-magnifying-glass class="h-[1em] opacity-50" />
-                        <input type="text" wire:model.live.debounce.300ms="search" class="grow"
-                            placeholder="Buscar por código SNIP o proyecto..." />
-                        @if ($search)
-                            <button wire:click="$set('search', '')" class="btn btn-ghost btn-xs btn-circle">
-                                <x-heroicon-o-x-mark class="w-4 h-4" />
-                            </button>
-                        @endif
-                    </label>
-                </div>
+    <x-patterns.filter-card title="Filtros" description="Acota por búsqueda, estado, municipio y año." tone="base">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {{-- Búsqueda --}}
+            <div class="xl:col-span-2">
+                <label class="input input-sm border-base-content/20 focus-within:border-primary">
+                    <x-heroicon-o-magnifying-glass class="h-[1em] opacity-50" />
+                    <input type="text" wire:model.live.debounce.300ms="search" class="grow"
+                        placeholder="Buscar por código SNIP o proyecto..." />
+                    @if ($search)
+                        <button wire:click="$set('search', '')" class="btn btn-ghost btn-xs btn-circle">
+                            <x-heroicon-o-x-mark class="w-4 h-4" />
+                        </button>
+                    @endif
+                </label>
+            </div>
 
-                {{-- Estado --}}
-                <select wire:model.live="estadoFiltro" class="select select-sm w-full">
-                    <option value="">Todos los estados</option>
-                    @foreach (Expediente::getEstados() as $estado)
-                        <option value="{{ $estado }}">{{ $estado }}</option>
+            {{-- Estado --}}
+            <select wire:model.live="estadoFiltro"
+                class="select select-sm w-full border-base-content/20 focus:border-primary">
+                <option value="">Todos los estados</option>
+                @foreach (Expediente::getEstados() as $estado)
+                    <option value="{{ $estado }}">{{ $estado }}</option>
+                @endforeach
+            </select>
+
+            {{-- Municipio (oculto para Municipal) --}}
+            @unless (auth()->user()->isMunicipal())
+                <select wire:model.live="municipioFiltro"
+                    class="select select-sm w-full border-base-content/20 focus:border-primary">
+                    <option value="">Todos los municipios</option>
+                    @foreach ($this->municipiosDisponibles as $mun)
+                        <option value="{{ $mun->id }}">{{ $mun->nombre }}</option>
                     @endforeach
                 </select>
+            @endunless
 
-                {{-- Municipio (oculto para Municipal) --}}
-                @unless (auth()->user()->isMunicipal())
-                    <select wire:model.live="municipioFiltro" class="select select-sm w-full">
-                        <option value="">Todos los municipios</option>
-                        @foreach ($this->municipiosDisponibles as $mun)
-                            <option value="{{ $mun->id }}">{{ $mun->nombre }}</option>
-                        @endforeach
-                    </select>
-                @endunless
-
-                {{-- Año --}}
-                <div class="flex gap-2">
-                    <select wire:model.live="anioFiltro" class="select select-sm w-full">
-                        <option value="">Todos los años</option>
-                        @foreach ($this->aniosDisponibles as $anio)
-                            <option value="{{ $anio }}">{{ $anio }}</option>
-                        @endforeach
-                    </select>
-                    <button wire:click="limpiarFiltros" class="btn btn-ghost btn-sm btn-square tooltip tooltip-left"
-                        data-tip="Limpiar filtros">
-                        <x-heroicon-o-arrow-path class="w-4 h-4" />
-                    </button>
-                </div>
+            {{-- Año --}}
+            <div class="flex gap-2">
+                <select wire:model.live="anioFiltro"
+                    class="select select-sm w-full border-base-content/20 focus:border-primary">
+                    <option value="">Todos los años</option>
+                    @foreach ($this->aniosDisponibles as $anio)
+                        <option value="{{ $anio }}">{{ $anio }}</option>
+                    @endforeach
+                </select>
+                <button wire:click="limpiarFiltros" class="btn btn-ghost btn-sm btn-square tooltip tooltip-left"
+                    data-tip="Limpiar filtros">
+                    <x-heroicon-o-arrow-path class="w-4 h-4" />
+                </button>
             </div>
         </div>
-    </div>
+    </x-patterns.filter-card>
 
     {{-- Tabla de expedientes --}}
     <livewire:table.expediente-table :search="$search" :estadoFiltro="$estadoFiltro" :municipioFiltro="$municipioFiltro" :tipoFiltro="$tipoFiltro"

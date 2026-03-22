@@ -86,77 +86,77 @@ new class extends Component {
     <h2 class="sr-only">Configuración de perfil</h2>
 
     <x-auth.settings.layout heading="Perfil" subheading="Actualiza tu información de perfil">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Nombres <span class="text-error">*</span></legend>
-                <input id="nombres" wire:model="nombres" type="text" required autofocus autocomplete="given-name"
-                    class="input w-full" />
-                @error('nombres')
-                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+        <form wire:submit="updateProfileInformation" class="my-1 w-full space-y-6">
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Nombres <span class="text-error">*</span></legend>
+                    <input id="nombres" wire:model="nombres" type="text" required autofocus
+                        autocomplete="given-name" class="input input-bordered w-full border-base-content/20" />
+                    @error('nombres')
+                        <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Apellidos <span class="text-error">*</span></legend>
-                <input id="apellidos" wire:model="apellidos" type="text" required autocomplete="family-name"
-                    class="input w-full" />
-                @error('apellidos')
-                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Apellidos <span class="text-error">*</span></legend>
+                    <input id="apellidos" wire:model="apellidos" type="text" required autocomplete="family-name"
+                        class="input input-bordered w-full border-base-content/20" />
+                    @error('apellidos')
+                        <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Cargo</legend>
-                <input id="cargo" wire:model="cargo" type="text" autocomplete="organization-title"
-                    class="input w-full" />
-                @error('cargo')
-                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Cargo</legend>
+                    <input id="cargo" wire:model="cargo" type="text" autocomplete="organization-title"
+                        class="input input-bordered w-full border-base-content/20" />
+                    @error('cargo')
+                        <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Teléfono</legend>
-                <input id="telefono" wire:model="telefono" type="text" autocomplete="tel"
-                    class="input w-full" />
-                @error('telefono')
-                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
-                @enderror
-            </fieldset>
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Teléfono</legend>
+                    <input id="telefono" wire:model="telefono" type="text" autocomplete="tel"
+                        class="input input-bordered w-full border-base-content/20" />
+                    @error('telefono')
+                        <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                    @enderror
+                </fieldset>
 
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Correo electrónico <span class="text-error">*</span></legend>
-                <input id="email" wire:model="email" type="email" required autocomplete="email"
-                    class="input w-full" />
-                @error('email')
-                    <p class="mt-1 text-sm text-error">{{ $message }}</p>
-                @enderror
+                <fieldset class="fieldset md:col-span-2">
+                    <legend class="fieldset-legend">Correo electrónico <span class="text-error">*</span></legend>
+                    <input id="email" wire:model="email" type="email" required autocomplete="email"
+                        class="input input-bordered w-full border-base-content/20" />
+                    @error('email')
+                        <p class="mt-1 text-sm text-error">{{ $message }}</p>
+                    @enderror
 
-                @if ($this->hasUnverifiedEmail)
-                    <div>
-                        <p class="mt-4 text-sm text-base-content/70">
-                            Tu dirección de correo no está verificada.
+                    @if ($this->hasUnverifiedEmail)
+                        <div>
+                            <p class="mt-4 text-sm text-base-content/70">
+                                Tu dirección de correo no está verificada.
 
-                            <button type="button" class="link link-primary text-sm"
-                                wire:click.prevent="resendVerificationNotification">
-                                Haz clic aquí para reenviar el correo de verificación.
-                            </button>
-                        </p>
-
-                        @if (session('status') === 'verification-link-sent')
-                            <p class="mt-2 text-sm font-medium text-success">
-                                Se ha enviado un nuevo enlace de verificación a tu correo electrónico.
+                                <button type="button" class="link link-primary text-sm"
+                                    wire:click.prevent="resendVerificationNotification">
+                                    Haz clic aquí para reenviar el correo de verificación.
+                                </button>
                             </p>
-                        @endif
-                    </div>
-                @endif
-            </fieldset>
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <button type="submit" class="btn btn-primary w-full" data-test="update-profile-button">
-                        Guardar
-                    </button>
-                </div>
+                            @if (session('status') === 'verification-link-sent')
+                                <div class="alert alert-success mt-2 border border-success/20 text-sm shadow-sm">
+                                    <span>Se ha enviado un nuevo enlace de verificación a tu correo electrónico.</span>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </fieldset>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4">
+                <button type="submit" class="btn btn-primary" data-test="update-profile-button">
+                    Guardar
+                </button>
 
                 <x-action-message class="me-3" on="profile-updated">
                     Guardado.
@@ -165,7 +165,9 @@ new class extends Component {
         </form>
 
         @if ($this->showDeleteUser)
-            @livewire('auth::settings.delete-user-form')
+            <div class="mt-8 border-t border-base-content/10 pt-6">
+                @livewire('auth::settings.delete-user-form')
+            </div>
         @endif
     </x-auth.settings.layout>
 </section>

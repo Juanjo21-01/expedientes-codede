@@ -92,7 +92,7 @@ new class extends Component {
         <div class="modal-box max-w-lg">
             {{-- Header --}}
             <div class="flex items-center gap-3 mb-4">
-                <div class="bg-info/10 text-info rounded-btn p-2">
+                <div class="bg-info/10 text-info rounded-btn p-2 border border-info/20">
                     <x-heroicon-o-arrow-path class="w-6 h-6" />
                 </div>
                 <div>
@@ -123,7 +123,7 @@ new class extends Component {
                 <fieldset class="fieldset w-full">
                     <legend class="fieldset-legend">Motivo de reactivación <span class="text-error">*</span></legend>
                     <textarea wire:model="observaciones" rows="4"
-                        class="textarea w-full @error('observaciones') textarea-error @enderror"
+                        class="textarea w-full border-base-content/20 @error('observaciones') textarea-error @enderror"
                         placeholder="Explique por qué se reactiva esta fase (ej: documentación corregida, error administrativo, etc.)"
                         maxlength="2000"></textarea>
                     @error('observaciones')

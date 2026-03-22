@@ -6,7 +6,7 @@
     <title>Reporte - Por Tipo de Solicitud</title>
     <style>
         @page {
-            margin: 28px 24px 24px 24px;
+            margin: 38px 24px 26px 24px;
         }
 
         * {

@@ -20,13 +20,13 @@
 </head>
 
 <body class="min-h-screen bg-base-200">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-lg w-full text-center">
+    <div class="min-h-screen flex items-center justify-center px-4 py-8">
+        <div class="w-full max-w-xl text-center">
 
             {{-- Ilustración SVG - Brújula / mapa perdido --}}
-            <div class="flex justify-center mb-0">
+            <div class="flex justify-center">
                 <div class="relative">
-                    <x-heroicon-o-map class="w-40 h-40 text-warning/20" stroke-width="0.5" />
+                    <x-heroicon-o-map class="w-44 h-44 text-warning/20" stroke-width="0.5" />
                     <div class="absolute inset-0 flex items-center justify-center">
                         <div class="bg-warning/10 rounded-full p-4">
                             <x-heroicon-o-magnifying-glass class="w-12 h-12 text-warning" />
@@ -36,11 +36,12 @@
             </div>
 
             {{-- Código de error --}}
-            <h1 class="text-9xl font-black text-warning/80 leading-none tracking-tighter mt-0">404</h1>
+            <h1 class="text-9xl font-black leading-none tracking-tighter text-warning/80">404</h1>
 
             {{-- Card con detalles --}}
-            <div class="card bg-base-100 shadow-xl border border-base-300 mt-2">
+            <div class="card mt-3 border border-base-content/10 bg-base-100 shadow-lg">
                 <div class="card-body items-center text-center">
+                    <span class="badge badge-warning badge-soft badge-sm">HTTP 404</span>
                     <h2 class="card-title text-2xl font-bold">Página No Encontrada</h2>
                     <div class="divider my-1"></div>
                     <p class="text-base-content/70">

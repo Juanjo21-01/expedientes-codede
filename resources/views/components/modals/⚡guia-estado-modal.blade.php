@@ -58,6 +58,10 @@ new class extends Component {
     <div class="modal" :class="{ 'modal-open': $wire.mostrar }">
         <div class="modal-box max-w-md" wire:click.stop>
             @if ($mostrar)
+                @php
+                    $accionClase = $estadoActual ? 'btn-warning' : 'btn-success';
+                    $estadoBadgeClase = $estadoActual ? 'badge-success badge-soft' : 'badge-warning badge-soft';
+                @endphp
                 {{-- Header --}}
                 <div class="flex items-center gap-3 mb-4">
                     <div
@@ -75,7 +79,7 @@ new class extends Component {
                 </div>
 
                 {{-- Info de la guía --}}
-                <div class="bg-base-200 rounded-lg p-4 space-y-2 text-sm mb-4">
+                <div class="rounded-box border border-base-content/10 bg-base-200/60 p-4 text-sm space-y-2 mb-4">
                     <div class="flex justify-between">
                         <span class="text-base-content/60">Título:</span>
                         <span class="font-medium">{{ $tituloGuia }}</span>
@@ -90,11 +94,8 @@ new class extends Component {
                     </div>
                     <div class="flex justify-between">
                         <span class="text-base-content/60">Estado actual:</span>
-                        @if ($estadoActual)
-                            <span class="badge badge-success badge-sm">Activo</span>
-                        @else
-                            <span class="badge badge-ghost badge-sm">Inactivo</span>
-                        @endif
+                        <span
+                            class="badge badge-sm {{ $estadoBadgeClase }}">{{ $estadoActual ? 'Activo' : 'Inactivo' }}</span>
                     </div>
                 </div>
 
@@ -109,8 +110,7 @@ new class extends Component {
                 {{-- Botones --}}
                 <div class="modal-action">
                     <button type="button" wire:click="cerrar" class="btn btn-ghost">Cancelar</button>
-                    <button type="button" wire:click="confirmar"
-                        class="btn {{ $estadoActual ? 'btn-warning' : 'btn-success' }} gap-2"
+                    <button type="button" wire:click="confirmar" class="btn {{ $accionClase }} gap-2"
                         wire:loading.attr="disabled">
                         <span wire:loading wire:target="confirmar" class="loading loading-spinner loading-sm"></span>
                         @if ($estadoActual)
