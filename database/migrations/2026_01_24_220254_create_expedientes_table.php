@@ -38,7 +38,6 @@ return new class extends Migration
             $table->decimal('monto_contrato', 15, 2)->nullable();
             $table->decimal('aporte_municipalidad', 15, 2)->nullable();
             $table->string('observaciones')->nullable();
-            $table->json('etiquetas')->nullable();
             
             $table->timestamps();
 

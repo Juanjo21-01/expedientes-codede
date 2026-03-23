@@ -172,6 +172,9 @@ new #[Title('- Detalle Municipio')] class extends Component {
         unset($this->expedientesAnio);
         unset($this->chartData);
         unset($this->chartEstados);
+
+        $this->dispatch('admin-municipio-chart-data-updated', data: $this->chartData);
+        $this->dispatch('admin-municipio-chart-estados-updated', data: $this->chartEstados);
     }
 };
 ?>
@@ -540,7 +543,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70">Expedientes por Mes —
                         {{ $anioFiltro }}</h3>
                     <div class="w-full h-64" wire:ignore x-data="adminMunicipioBarChart(@js($this->chartData))" x-init="initChart()"
-                        x-effect="updateChart(@js($this->chartData))">
+                        x-on:admin-municipio-chart-data-updated.window="updateChart($event.detail.data)">
                         <canvas x-ref="barChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
@@ -550,7 +553,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70">Distribución por Estado —
                         {{ $anioFiltro }}</h3>
                     <div class="w-full h-64" wire:ignore x-data="adminMunicipioPieChart(@js($this->chartEstados))" x-init="initChart()"
-                        x-effect="updateChart(@js($this->chartEstados))">
+                        x-on:admin-municipio-chart-estados-updated.window="updateChart($event.detail.data)">
                         <canvas x-ref="pieChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
@@ -668,151 +671,175 @@ new #[Title('- Detalle Municipio')] class extends Component {
 {{-- Scripts para Chart.js --}}
 @script
     <script>
-        Alpine.data('adminMunicipioBarChart', (initialData) => ({
-            chart: null,
-            initChart() {
-                this.destroyChart();
-                const ctx = this.$refs.barChart.getContext('2d');
-                this.chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: initialData.labels,
-                        datasets: [{
-                            label: 'Expedientes',
-                            data: initialData.data,
-                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                            borderColor: 'rgb(59, 130, 246)',
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            borderSkipped: false,
-                            hoverBackgroundColor: 'rgba(59, 130, 246, 0.8)',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                padding: 12,
-                                cornerRadius: 8,
-                                displayColors: false,
-                                callbacks: {
-                                    label: (ctx) =>
-                                        `${ctx.parsed.y} expediente${ctx.parsed.y !== 1 ? 's' : ''}`
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1,
-                                    font: {
-                                        size: 11
-                                    }
-                                },
-                                grid: {
-                                    color: 'rgba(0, 0, 0, 0.05)'
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    font: {
-                                        size: 11
-                                    }
-                                },
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        },
-                        animation: {
-                            duration: 800,
-                            easing: 'easeOutQuart'
-                        }
-                    }
-                });
-            },
-            updateChart(newData) {
-                if (this.chart) {
-                    this.chart.data.labels = newData.labels;
-                    this.chart.data.datasets[0].data = newData.data;
-                    this.chart.update('active');
-                }
-            },
-            destroyChart() {
-                if (!this.chart) return;
-                this.chart.destroy();
-                this.chart = null;
-            }
-        }));
+        if (!window.__adminMunicipioChartsRegistered) {
+            window.__adminMunicipioChartsRegistered = true;
 
-        Alpine.data('adminMunicipioPieChart', (initialData) => ({
-            chart: null,
-            initChart() {
-                this.destroyChart();
-                const ctx = this.$refs.pieChart.getContext('2d');
-                this.chart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: initialData.labels,
-                        datasets: [{
-                            data: initialData.data,
-                            backgroundColor: initialData.colors,
-                            borderWidth: 2,
-                            borderColor: 'rgba(255, 255, 255, 0.8)',
-                            hoverOffset: 6,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    font: {
-                                        size: 11
-                                    },
-                                    padding: 12,
-                                    usePointStyle: true,
-                                    pointStyle: 'circle'
-                                }
+            Alpine.data('adminMunicipioBarChart', (initialData) => {
+                let chart = null;
+
+                return {
+                    initChart() {
+                        this.destroyChart();
+                        const canvas = this.$refs.barChart;
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: initialData.labels,
+                                datasets: [{
+                                    label: 'Expedientes',
+                                    data: initialData.data,
+                                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    borderWidth: 2,
+                                    borderRadius: 8,
+                                    borderSkipped: false,
+                                    hoverBackgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                }]
                             },
-                            tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                padding: 12,
-                                cornerRadius: 8,
-                                callbacks: {
-                                    label: (ctx) =>
-                                        ` ${ctx.label}: ${ctx.parsed} expediente${ctx.parsed !== 1 ? 's' : ''}`
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        padding: 12,
+                                        cornerRadius: 8,
+                                        displayColors: false,
+                                        callbacks: {
+                                            label: (ctx) =>
+                                                `${ctx.parsed.y} expediente${ctx.parsed.y !== 1 ? 's' : ''}`
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1,
+                                            font: {
+                                                size: 11
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.05)'
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            font: {
+                                                size: 11
+                                            }
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    duration: 800,
+                                    easing: 'easeOutQuart'
                                 }
                             }
-                        },
-                        animation: {
-                            duration: 800,
-                            easing: 'easeOutQuart'
+                        });
+                    },
+                    updateChart(newData) {
+                        if (!chart) return;
+                        if (!chart.data?.datasets?.[0]) {
+                            this.initChart();
+                            return;
                         }
+
+                        chart.data.labels = newData.labels;
+                        chart.data.datasets[0].data = newData.data;
+                        chart.update('none');
+                    },
+                    destroyChart() {
+                        if (!chart) return;
+                        chart.destroy();
+                        chart = null;
                     }
-                });
-            },
-            updateChart(newData) {
-                if (this.chart) {
-                    this.chart.data.labels = newData.labels;
-                    this.chart.data.datasets[0].data = newData.data;
-                    this.chart.data.datasets[0].backgroundColor = newData.colors;
-                    this.chart.update('active');
-                }
-            },
-            destroyChart() {
-                if (!this.chart) return;
-                this.chart.destroy();
-                this.chart = null;
-            }
-        }));
+                };
+            });
+
+            Alpine.data('adminMunicipioPieChart', (initialData) => {
+                let chart = null;
+
+                return {
+                    initChart() {
+                        this.destroyChart();
+                        const canvas = this.$refs.pieChart;
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: initialData.labels,
+                                datasets: [{
+                                    data: initialData.data,
+                                    backgroundColor: initialData.colors,
+                                    borderWidth: 2,
+                                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                                    hoverOffset: 6,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            font: {
+                                                size: 11
+                                            },
+                                            padding: 12,
+                                            usePointStyle: true,
+                                            pointStyle: 'circle'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        padding: 12,
+                                        cornerRadius: 8,
+                                        callbacks: {
+                                            label: (ctx) =>
+                                                ` ${ctx.label}: ${ctx.parsed} expediente${ctx.parsed !== 1 ? 's' : ''}`
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    duration: 800,
+                                    easing: 'easeOutQuart'
+                                }
+                            }
+                        });
+                    },
+                    updateChart(newData) {
+                        if (!chart) return;
+                        if (!chart.data?.datasets?.[0]) {
+                            this.initChart();
+                            return;
+                        }
+
+                        chart.data.labels = newData.labels;
+                        chart.data.datasets[0].data = newData.data;
+                        chart.data.datasets[0].backgroundColor = newData.colors;
+                        chart.update('none');
+                    },
+                    destroyChart() {
+                        if (!chart) return;
+                        chart.destroy();
+                        chart = null;
+                    }
+                };
+            });
+        }
     </script>
 @endscript

@@ -113,6 +113,9 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
     public function updatedAnioFiltro()
     {
         unset($this->estadisticasAnio, $this->expedientesAnio, $this->chartData, $this->chartEstados);
+
+        $this->dispatch('municipio-chart-data-updated', data: $this->chartData);
+        $this->dispatch('municipio-chart-estados-updated', data: $this->chartEstados);
     }
 };
 ?>
@@ -298,7 +301,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         Expedientes por Mes — {{ $anioFiltro }}
                     </h3>
                     <div class="w-full h-64" wire:ignore x-data="municipioDetalleBarChart(@js($this->chartData))" x-init="initChart()"
-                        x-effect="updateChart(@js($this->chartData))">
+                        x-on:municipio-chart-data-updated.window="updateChart($event.detail.data)">
                         <canvas x-ref="barChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
@@ -308,7 +311,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         Distribución por Estado — {{ $anioFiltro }}
                     </h3>
                     <div class="w-full h-64" wire:ignore x-data="municipioDetallePieChart(@js($this->chartEstados))" x-init="initChart()"
-                        x-effect="updateChart(@js($this->chartEstados))">
+                        x-on:municipio-chart-estados-updated.window="updateChart($event.detail.data)">
                         <canvas x-ref="pieChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
@@ -461,95 +464,121 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
 
 @script
     <script>
-        Alpine.data('municipioDetalleBarChart', (initialData) => ({
-            chart: null,
-            initChart() {
-                this.destroyChart();
-                const ctx = this.$refs.barChart.getContext('2d');
-                this.chart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: initialData.labels,
-                        datasets: [{
-                            label: 'Expedientes',
-                            data: initialData.data,
-                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                            borderColor: 'rgb(59, 130, 246)',
-                            borderWidth: 2,
-                            borderRadius: 8,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
+        if (!window.__municipioDetalleChartsRegistered) {
+            window.__municipioDetalleChartsRegistered = true;
+
+            Alpine.data('municipioDetalleBarChart', (initialData) => {
+                let chart = null;
+
+                return {
+                    initChart() {
+                        this.destroyChart();
+                        const canvas = this.$refs.barChart;
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: initialData.labels,
+                                datasets: [{
+                                    label: 'Expedientes',
+                                    data: initialData.data,
+                                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    borderWidth: 2,
+                                    borderRadius: 8,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    }
-                });
-            },
-            updateChart(newData) {
-                if (!this.chart) return;
-                this.chart.data.labels = newData.labels;
-                this.chart.data.datasets[0].data = newData.data;
-                this.chart.update('active');
-            },
-            destroyChart() {
-                if (!this.chart) return;
-                this.chart.destroy();
-                this.chart = null;
-            }
-        }));
-
-        Alpine.data('municipioDetallePieChart', (initialData) => ({
-            chart: null,
-            initChart() {
-                this.destroyChart();
-                const ctx = this.$refs.pieChart.getContext('2d');
-                this.chart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: initialData.labels,
-                        datasets: [{
-                            data: initialData.data,
-                            backgroundColor: initialData.colors,
-                            borderWidth: 2,
-                            borderColor: 'rgba(255, 255, 255, 0.8)',
-                        }]
+                        });
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
+                    updateChart(newData) {
+                        if (!chart) return;
+                        if (!chart.data?.datasets?.[0]) {
+                            this.initChart();
+                            return;
                         }
+
+                        chart.data.labels = newData.labels;
+                        chart.data.datasets[0].data = newData.data;
+                        chart.update('none');
+                    },
+                    destroyChart() {
+                        if (!chart) return;
+                        chart.destroy();
+                        chart = null;
                     }
-                });
-            },
-            updateChart(newData) {
-                if (!this.chart) return;
-                this.chart.data.labels = newData.labels;
-                this.chart.data.datasets[0].data = newData.data;
-                this.chart.data.datasets[0].backgroundColor = newData.colors;
-                this.chart.update('active');
-            },
-            destroyChart() {
-                if (!this.chart) return;
-                this.chart.destroy();
-                this.chart = null;
-            }
-        }));
+                };
+            });
+
+            Alpine.data('municipioDetallePieChart', (initialData) => {
+                let chart = null;
+
+                return {
+                    initChart() {
+                        this.destroyChart();
+                        const canvas = this.$refs.pieChart;
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: initialData.labels,
+                                datasets: [{
+                                    data: initialData.data,
+                                    backgroundColor: initialData.colors,
+                                    borderWidth: 2,
+                                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom'
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    updateChart(newData) {
+                        if (!chart) return;
+                        if (!chart.data?.datasets?.[0]) {
+                            this.initChart();
+                            return;
+                        }
+
+                        chart.data.labels = newData.labels;
+                        chart.data.datasets[0].data = newData.data;
+                        chart.data.datasets[0].backgroundColor = newData.colors;
+                        chart.update('none');
+                    },
+                    destroyChart() {
+                        if (!chart) return;
+                        chart.destroy();
+                        chart = null;
+                    }
+                };
+            });
+        }
     </script>
 @endscript

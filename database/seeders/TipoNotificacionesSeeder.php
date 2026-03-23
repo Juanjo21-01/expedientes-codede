@@ -13,10 +13,10 @@ class TipoNotificacionesSeeder extends Seeder
     public function run(): void
     {
         $tipos = [
-            'Documentación incompleta',
-            'Solicitud de corrección',
-            'Revisión financiera',
-            'Solicitud de información',
+            'Documentación Incompleta',
+            'Solicitud de Corrección',
+            'Revisión Financiera',
+            'Solicitud de Información',
             'General',
         ];
 

@@ -39,27 +39,32 @@ new #[Title(' - Reportes')] class extends Component {
     {
         $this->setFechasPeriodo();
         $this->resetComputadas();
+        $this->dispatchChartUpdates();
     }
 
     public function updatedFechaDesde(): void
     {
         $this->resetComputadas();
+        $this->dispatchChartUpdates();
     }
 
     public function updatedFechaHasta(): void
     {
         $this->resetComputadas();
+        $this->dispatchChartUpdates();
     }
 
     public function updatedMunicipioId(): void
     {
         $this->resetComputadas();
+        $this->dispatchChartUpdates();
     }
 
     public function updatedTab(): void
     {
         $this->asegurarTabPermitida();
         $this->resetComputadas();
+        $this->dispatchChartUpdates();
     }
 
     // ---- Reglas de Acceso por Rol ----
@@ -385,6 +390,7 @@ new #[Title(' - Reportes')] class extends Component {
         $this->municipio_id = '';
         $this->setFechasPeriodo();
         $this->resetComputadas();
+        $this->dispatchChartUpdates();
     }
 
     public function exportarPdf(): void
@@ -478,6 +484,13 @@ new #[Title(' - Reportes')] class extends Component {
     private function resetComputadas(): void
     {
         unset($this->estadisticas, $this->datosPorMunicipio, $this->datosPorTipo, $this->montoContratadoPorEstado, $this->datosFinancieros, $this->datosFinancierosAgrupados, $this->resumenFinanciero, $this->chartEstados, $this->chartMunicipios, $this->chartFinanciero);
+    }
+
+    private function dispatchChartUpdates(): void
+    {
+        $this->dispatch('reportes-chart-estados-updated', data: $this->chartEstados);
+        $this->dispatch('reportes-chart-municipios-updated', data: $this->chartMunicipios);
+        $this->dispatch('reportes-chart-financiero-updated', data: $this->chartFinanciero);
     }
 
     public function formatoMoneda(float|int|null $monto): string
@@ -775,7 +788,8 @@ new #[Title(' - Reportes')] class extends Component {
                     <h3 class="font-semibold text-sm text-base-content/70 mb-3">Distribución por Estado</h3>
                     @if ($this->estadisticas['total'] > 0)
                         <div class="w-full h-72 max-w-md mx-auto" wire:ignore x-data="reportePieChart(@js($this->chartEstados))"
-                            x-init="initChart()" x-effect="updateChart(@js($this->chartEstados))">
+                            x-init="initChart()"
+                            x-on:reportes-chart-estados-updated.window="updateChart($event.detail.data)">
                             <canvas x-ref="pieChart" class="w-full h-full"></canvas>
                         </div>
                     @else
@@ -867,7 +881,7 @@ new #[Title(' - Reportes')] class extends Component {
                     </h3>
                     @if ($this->datosPorMunicipio->sum('total') > 0)
                         <div class="w-full h-80" wire:ignore x-data="reporteStackedBarChart(@js($this->chartMunicipios))" x-init="initChart()"
-                            x-effect="updateChart(@js($this->chartMunicipios))">
+                            x-on:reportes-chart-municipios-updated.window="updateChart($event.detail.data)">
                             <canvas x-ref="stackedChart" class="w-full h-full"></canvas>
                         </div>
                     @else
@@ -1098,7 +1112,7 @@ new #[Title(' - Reportes')] class extends Component {
                         Municipio</h3>
                     @if (count($this->chartFinanciero['labels']) > 0)
                         <div class="w-full h-80" wire:ignore x-data="reporteFinancieroChart(@js($this->chartFinanciero))" x-init="initChart()"
-                            x-effect="updateChart(@js($this->chartFinanciero))">
+                            x-on:reportes-chart-financiero-updated.window="updateChart($event.detail.data)">
                             <canvas x-ref="financieroChart" class="w-full h-full"></canvas>
                         </div>
                     @else
@@ -1116,182 +1130,111 @@ new #[Title(' - Reportes')] class extends Component {
 {{-- Scripts --}}
 @script
     <script>
-        // Descarga de PDF via base64
-        if (!window.__reportesPdfListenerRegistered) {
-            window.__reportesPdfListenerRegistered = true;
+        if (!window.__reportesChartsRegistered) {
+            window.__reportesChartsRegistered = true;
 
-            Livewire.on('descargar-pdf', ([data]) => {
-                const link = document.createElement('a');
-                link.href = 'data:application/pdf;base64,' + data.contenido;
-                link.download = data.nombre;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
-        }
+            // Descarga de PDF via base64
+            if (!window.__reportesPdfListenerRegistered) {
+                window.__reportesPdfListenerRegistered = true;
 
-        // Gráfica Pie/Dona - Distribución por Estado
-        Alpine.data('reportePieChart', (initialData) => {
-            let chart = null;
+                Livewire.on('descargar-pdf', ([data]) => {
+                    const link = document.createElement('a');
+                    link.href = 'data:application/pdf;base64,' + data.contenido;
+                    link.download = data.nombre;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
 
-            return {
-                initChart() {
-                    this.destroyChart();
-                    const canvas = this.$refs.pieChart;
-                    if (!canvas) return;
+            // Gráfica Pie/Dona - Distribución por Estado
+            Alpine.data('reportePieChart', (initialData) => {
+                let chart = null;
 
-                    const ctx = canvas.getContext('2d');
-                    chart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: initialData.labels,
-                            datasets: [{
-                                data: initialData.data,
-                                backgroundColor: initialData.colors,
-                                borderWidth: 2,
-                                borderColor: 'rgba(255, 255, 255, 0.8)',
-                                hoverOffset: 6,
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: {
-                                        font: {
-                                            size: 11
-                                        },
+                return {
+                    initChart() {
+                        this.destroyChart();
+                        const canvas = this.$refs.pieChart;
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: initialData.labels,
+                                datasets: [{
+                                    data: initialData.data,
+                                    backgroundColor: initialData.colors,
+                                    borderWidth: 2,
+                                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                                    hoverOffset: 6,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            font: {
+                                                size: 11
+                                            },
+                                            padding: 12,
+                                            usePointStyle: true,
+                                            pointStyle: 'circle'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
                                         padding: 12,
-                                        usePointStyle: true,
-                                        pointStyle: 'circle'
+                                        cornerRadius: 8,
+                                        callbacks: {
+                                            label: (ctx) =>
+                                                ` ${ctx.label}: ${ctx.parsed} expediente${ctx.parsed !== 1 ? 's' : ''}`
+                                        }
                                     }
                                 },
-                                tooltip: {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                    padding: 12,
-                                    cornerRadius: 8,
-                                    callbacks: {
-                                        label: (ctx) =>
-                                            ` ${ctx.label}: ${ctx.parsed} expediente${ctx.parsed !== 1 ? 's' : ''}`
-                                    }
+                                animation: {
+                                    duration: 800,
+                                    easing: 'easeOutQuart'
                                 }
-                            },
-                            animation: {
-                                duration: 800,
-                                easing: 'easeOutQuart'
                             }
+                        });
+                    },
+                    updateChart(newData) {
+                        if (!chart) return;
+                        if (!chart.data?.datasets?.[0]) {
+                            this.initChart();
+                            return;
                         }
-                    });
-                },
-                updateChart(newData) {
-                    if (!chart) return;
 
-                    chart.data.labels = newData.labels;
-                    chart.data.datasets[0].data = newData.data;
-                    chart.data.datasets[0].backgroundColor = newData.colors;
-                    chart.update();
-                },
-                destroyChart() {
-                    if (chart) {
-                        chart.destroy();
-                        chart = null;
+                        chart.data.labels = newData.labels;
+                        chart.data.datasets[0].data = newData.data;
+                        chart.data.datasets[0].backgroundColor = newData.colors;
+                        chart.update('none');
+                    },
+                    destroyChart() {
+                        if (chart) {
+                            chart.destroy();
+                            chart = null;
+                        }
                     }
-                }
-            };
-        });
+                };
+            });
 
-        // Gráfica Barras Apiladas - Por Municipio
-        Alpine.data('reporteStackedBarChart', (initialData) => {
-            let chart = null;
+            // Gráfica Barras Apiladas - Por Municipio
+            Alpine.data('reporteStackedBarChart', (initialData) => {
+                let chart = null;
 
-            return {
-                initChart() {
-                    this.destroyChart();
-                    const canvas = this.$refs.stackedChart;
-                    if (!canvas) return;
+                return {
+                    initChart() {
+                        this.destroyChart();
+                        const canvas = this.$refs.stackedChart;
+                        if (!canvas) return;
 
-                    const ctx = canvas.getContext('2d');
-                    const datasets = initialData.datasets.map(ds => ({
-                        label: ds.label,
-                        data: ds.data,
-                        backgroundColor: ds.color,
-                        borderWidth: 1,
-                        borderColor: 'rgba(255,255,255,0.5)',
-                        borderRadius: 2,
-                    }));
-                    chart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: initialData.labels,
-                            datasets
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                    labels: {
-                                        font: {
-                                            size: 11
-                                        },
-                                        usePointStyle: true,
-                                        pointStyle: 'circle'
-                                    }
-                                },
-                                tooltip: {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                    padding: 12,
-                                    cornerRadius: 8,
-                                    callbacks: {
-                                        label: (ctx) =>
-                                            ` ${ctx.dataset.label}: ${ctx.parsed.x} expediente${ctx.parsed.x !== 1 ? 's' : ''}`
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    stacked: true,
-                                    beginAtZero: true,
-                                    ticks: {
-                                        stepSize: 1,
-                                        font: {
-                                            size: 11
-                                        }
-                                    },
-                                    grid: {
-                                        color: 'rgba(0,0,0,0.05)'
-                                    }
-                                },
-                                y: {
-                                    stacked: true,
-                                    ticks: {
-                                        font: {
-                                            size: 11
-                                        }
-                                    },
-                                    grid: {
-                                        display: false
-                                    }
-                                }
-                            },
-                            animation: {
-                                duration: 800,
-                                easing: 'easeOutQuart'
-                            }
-                        }
-                    });
-                },
-                updateChart(newData) {
-                    if (!chart) return;
-
-                    chart.data.labels = newData.labels;
-
-                    if ((chart.data.datasets?.length ?? 0) !== (newData.datasets?.length ?? 0)) {
-                        chart.data.datasets = newData.datasets.map(ds => ({
+                        const ctx = canvas.getContext('2d');
+                        const datasets = initialData.datasets.map(ds => ({
                             label: ds.label,
                             data: ds.data,
                             backgroundColor: ds.color,
@@ -1299,134 +1242,218 @@ new #[Title(' - Reportes')] class extends Component {
                             borderColor: 'rgba(255,255,255,0.5)',
                             borderRadius: 2,
                         }));
-                    } else {
-                        newData.datasets.forEach((ds, i) => {
-                            if (chart.data.datasets[i]) {
-                                chart.data.datasets[i].label = ds.label;
-                                chart.data.datasets[i].data = ds.data;
-                                chart.data.datasets[i].backgroundColor = ds.color;
+                        chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: initialData.labels,
+                                datasets
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            font: {
+                                                size: 11
+                                            },
+                                            usePointStyle: true,
+                                            pointStyle: 'circle'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        padding: 12,
+                                        cornerRadius: 8,
+                                        callbacks: {
+                                            label: (ctx) =>
+                                                ` ${ctx.dataset.label}: ${ctx.parsed.x} expediente${ctx.parsed.x !== 1 ? 's' : ''}`
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        stacked: true,
+                                        beginAtZero: true,
+                                        ticks: {
+                                            stepSize: 1,
+                                            font: {
+                                                size: 11
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0,0,0,0.05)'
+                                        }
+                                    },
+                                    y: {
+                                        stacked: true,
+                                        ticks: {
+                                            font: {
+                                                size: 11
+                                            }
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    duration: 800,
+                                    easing: 'easeOutQuart'
+                                }
                             }
                         });
-                    }
+                    },
+                    updateChart(newData) {
+                        if (!chart) return;
 
-                    chart.update();
-                },
-                destroyChart() {
-                    if (chart) {
-                        chart.destroy();
-                        chart = null;
-                    }
-                }
-            };
-        });
+                        chart.data.labels = newData.labels;
 
-        // Gráfica Barras Comparativas - Financiero
-        Alpine.data('reporteFinancieroChart', (initialData) => {
-            let chart = null;
-
-            return {
-                initChart() {
-                    this.destroyChart();
-                    const canvas = this.$refs.financieroChart;
-                    if (!canvas) return;
-
-                    const ctx = canvas.getContext('2d');
-                    chart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: initialData.labels,
-                            datasets: [{
-                                    label: 'Monto Contratado',
-                                    data: initialData.contratado,
-                                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                                    borderColor: 'rgb(59, 130, 246)',
-                                    borderWidth: 2,
-                                    borderRadius: 6,
-                                    borderSkipped: false,
-                                },
-                                {
-                                    label: 'Monto Aprobado',
-                                    data: initialData.aprobado,
-                                    backgroundColor: 'rgba(16, 185, 129, 0.6)',
-                                    borderColor: 'rgb(16, 185, 129)',
-                                    borderWidth: 2,
-                                    borderRadius: 6,
-                                    borderSkipped: false,
+                        if ((chart.data.datasets?.length ?? 0) !== (newData.datasets?.length ?? 0)) {
+                            chart.data.datasets = newData.datasets.map(ds => ({
+                                label: ds.label,
+                                data: ds.data,
+                                backgroundColor: ds.color,
+                                borderWidth: 1,
+                                borderColor: 'rgba(255,255,255,0.5)',
+                                borderRadius: 2,
+                            }));
+                        } else {
+                            newData.datasets.forEach((ds, i) => {
+                                if (chart.data.datasets[i]) {
+                                    chart.data.datasets[i].label = ds.label;
+                                    chart.data.datasets[i].data = ds.data;
+                                    chart.data.datasets[i].backgroundColor = ds.color;
                                 }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                    labels: {
-                                        font: {
-                                            size: 11
-                                        },
-                                        usePointStyle: true,
-                                        pointStyle: 'circle'
-                                    }
-                                },
-                                tooltip: {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                    padding: 12,
-                                    cornerRadius: 8,
-                                    callbacks: {
-                                        label: (ctx) =>
-                                            ` ${ctx.dataset.label}: Q ${ctx.parsed.y.toLocaleString('es-GT', { minimumFractionDigits: 2 })}`
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        font: {
-                                            size: 11
-                                        },
-                                        callback: (v) => 'Q ' + (v >= 1000 ? (v / 1000).toFixed(0) + 'k' :
-                                            v)
-                                    },
-                                    grid: {
-                                        color: 'rgba(0,0,0,0.05)'
-                                    }
-                                },
-                                x: {
-                                    ticks: {
-                                        font: {
-                                            size: 10
-                                        },
-                                        maxRotation: 45
-                                    },
-                                    grid: {
-                                        display: false
-                                    }
-                                }
-                            },
-                            animation: {
-                                duration: 800,
-                                easing: 'easeOutQuart'
-                            }
+                            });
                         }
-                    });
-                },
-                updateChart(newData) {
-                    if (!chart) return;
 
-                    chart.data.labels = newData.labels;
-                    chart.data.datasets[0].data = newData.contratado;
-                    chart.data.datasets[1].data = newData.aprobado;
-                    chart.update();
-                },
-                destroyChart() {
-                    if (chart) {
-                        chart.destroy();
-                        chart = null;
+                        chart.update('none');
+                    },
+                    destroyChart() {
+                        if (chart) {
+                            chart.destroy();
+                            chart = null;
+                        }
                     }
-                }
-            };
-        });
+                };
+            });
+
+            // Gráfica Barras Comparativas - Financiero
+            Alpine.data('reporteFinancieroChart', (initialData) => {
+                let chart = null;
+
+                return {
+                    initChart() {
+                        this.destroyChart();
+                        const canvas = this.$refs.financieroChart;
+                        if (!canvas) return;
+
+                        const ctx = canvas.getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: initialData.labels,
+                                datasets: [{
+                                        label: 'Monto Contratado',
+                                        data: initialData.contratado,
+                                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                        borderColor: 'rgb(59, 130, 246)',
+                                        borderWidth: 2,
+                                        borderRadius: 6,
+                                        borderSkipped: false,
+                                    },
+                                    {
+                                        label: 'Monto Aprobado',
+                                        data: initialData.aprobado,
+                                        backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                                        borderColor: 'rgb(16, 185, 129)',
+                                        borderWidth: 2,
+                                        borderRadius: 6,
+                                        borderSkipped: false,
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            font: {
+                                                size: 11
+                                            },
+                                            usePointStyle: true,
+                                            pointStyle: 'circle'
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        padding: 12,
+                                        cornerRadius: 8,
+                                        callbacks: {
+                                            label: (ctx) =>
+                                                ` ${ctx.dataset.label}: Q ${ctx.parsed.y.toLocaleString('es-GT', { minimumFractionDigits: 2 })}`
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            font: {
+                                                size: 11
+                                            },
+                                            callback: (v) => 'Q ' + (v >= 1000 ? (v / 1000).toFixed(0) +
+                                                'k' :
+                                                v)
+                                        },
+                                        grid: {
+                                            color: 'rgba(0,0,0,0.05)'
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            font: {
+                                                size: 10
+                                            },
+                                            maxRotation: 45
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                },
+                                animation: {
+                                    duration: 800,
+                                    easing: 'easeOutQuart'
+                                }
+                            }
+                        });
+                    },
+                    updateChart(newData) {
+                        if (!chart) return;
+                        if (!chart.data?.datasets?.[0] || !chart.data?.datasets?.[1]) {
+                            this.initChart();
+                            return;
+                        }
+
+                        chart.data.labels = newData.labels;
+                        chart.data.datasets[0].data = newData.contratado;
+                        chart.data.datasets[1].data = newData.aprobado;
+                        chart.update('none');
+                    },
+                    destroyChart() {
+                        if (chart) {
+                            chart.destroy();
+                            chart = null;
+                        }
+                    }
+                };
+            });
+        }
     </script>
 @endscript
