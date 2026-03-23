@@ -1,6 +1,7 @@
 <?php
 
 use Livewire\Component;
+use App\Actions\Expedientes\GuardarExpedienteAction;
 use App\Models\Expediente;
 use App\Models\Municipio;
 use App\Models\User;
@@ -104,7 +105,7 @@ new class extends Component {
         $user = auth()->user();
         // Si es admin y cambió de municipio, verificar si el responsable actual sigue siendo válido
         if ($user->isAdmin() && $this->responsable_id) {
-            $responsableValido = User::activos()->tecnicos()->whereHas('municipios', fn($q) => $q->where('municipios.id', $this->municipio_id))->where('id', $this->responsable_id)->exists();
+            $responsableValido = $this->responsablesDisponibles->contains('id', (int) $this->responsable_id);
 
             if (!$responsableValido) {
                 $this->responsable_id = '';
@@ -114,62 +115,37 @@ new class extends Component {
 
     public function guardar()
     {
-        $user = auth()->user();
+        $action = app(GuardarExpedienteAction::class);
+        $validated = $action->validar(
+            [
+                'codigo_snip' => $this->codigo_snip,
+                'nombre_proyecto' => $this->nombre_proyecto,
+                'municipio_id' => $this->municipio_id,
+                'responsable_id' => $this->responsable_id,
+                'tipo_asignacion' => $this->tipo_asignacion,
+                'fecha_recibido' => $this->fecha_recibido,
+                'monto_contrato' => $this->monto_contrato,
+                'aporte_municipalidad' => $this->aporte_municipalidad,
+                'observaciones' => $this->observaciones,
+            ],
+            $this->modoEdicion,
+            $this->expedienteId,
+        );
 
-        // Reglas de validación
-        $rules = [
-            'codigo_snip' => 'required|string|max:50' . ($this->modoEdicion ? '|unique:expedientes,codigo_snip,' . $this->expedienteId : '|unique:expedientes,codigo_snip'),
-            'nombre_proyecto' => 'required|string|max:255',
-            'municipio_id' => 'required|exists:municipios,id',
-            'responsable_id' => 'required|exists:users,id',
-            'tipo_asignacion' => 'required|in:ORDINARIO,EXTRAORDINARIO',
-            'fecha_recibido' => 'required|date',
-            'monto_contrato' => 'nullable|numeric|min:0|max:999999999999.99',
-            'aporte_municipalidad' => 'nullable|numeric|min:0|max:999999999999.99',
-            'observaciones' => 'nullable|string|max:1000',
-        ];
+        $expediente = $action->ejecutar($validated, $this->modoEdicion, $this->expedienteId);
 
-        $messages = [
-            'codigo_snip.required' => 'El código SNIP es obligatorio.',
-            'codigo_snip.unique' => 'Este código SNIP ya está registrado.',
-            'nombre_proyecto.required' => 'El nombre del proyecto es obligatorio.',
-            'municipio_id.required' => 'Debes seleccionar un municipio.',
-            'responsable_id.required' => 'Debes seleccionar un responsable.',
-            'tipo_asignacion.required' => 'Debes seleccionar el tipo de asignación.',
-            'fecha_recibido.required' => 'La fecha de recibido es obligatoria.',
-            'monto_contrato.numeric' => 'El monto del contrato debe ser un número válido.',
-            'aporte_municipalidad.numeric' => 'El aporte de la municipalidad debe ser un número válido.',
-            'observaciones.max' => 'Las observaciones no deben exceder 1000 caracteres.',
-        ];
-
-        $this->validate($rules, $messages);
-
-        $data = [
-            'codigo_snip' => $this->codigo_snip,
-            'nombre_proyecto' => $this->nombre_proyecto,
-            'municipio_id' => $this->municipio_id,
-            'responsable_id' => $this->responsable_id,
-            'tipo_asignacion' => $this->tipo_asignacion,
-            'fecha_recibido' => $this->fecha_recibido,
-            'monto_contrato' => $this->monto_contrato ?: null,
-            'aporte_municipalidad' => $this->aporte_municipalidad ?: null,
-            'observaciones' => $this->observaciones ?: null,
-        ];
+        if (!$expediente) {
+            $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'Expediente no encontrado.');
+            return;
+        }
 
         if ($this->modoEdicion) {
-            $expediente = Expediente::find($this->expedienteId);
-            if (!$expediente) {
-                $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'Expediente no encontrado.');
-                return;
-            }
-            $expediente->update($data);
             $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: "Expediente '{$expediente->codigo_snip}' actualizado correctamente.");
             $this->dispatch('expediente-guardado');
         } else {
-            $data['estado'] = Expediente::ESTADO_RECIBIDO;
-            $expediente = Expediente::create($data);
             $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: "Expediente '{$expediente->codigo_snip}' creado correctamente.");
         }
+
         return $this->redirect(route('expedientes.show', $expediente->id), navigate: true);
     }
 

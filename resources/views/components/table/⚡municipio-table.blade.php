@@ -7,7 +7,6 @@ use Livewire\Attributes\Reactive;
 use Livewire\WithPagination;
 use Livewire\WithoutUrlPagination;
 use App\Models\Municipio;
-use App\Models\User;
 use App\Models\Role;
 
 new class extends Component {
@@ -31,8 +30,8 @@ new class extends Component {
             ->when($this->estadoFiltro === 'activo', fn($q) => $q->activos())
             ->when($this->estadoFiltro === 'inactivo', fn($q) => $q->inactivos())
             ->ordenados()
-            ->withCount(['expedientes', 'expedientes as expedientes_activos_count' => fn($q) => $q->where('estado', 'activo')])
-            ->with(['users' => fn($q) => $q->whereHas('role', fn($r) => $r->whereIn('nombre', [Role::MUNICIPAL, Role::TECNICO]))->where('users.estado', true)])
+            ->withCount(['expedientes', 'expedientes as expedientes_activos_count' => fn($q) => $q->activos()])
+            ->with(['users' => fn($q) => $q->whereHas('role', fn($r) => $r->whereIn('nombre', [Role::MUNICIPAL, Role::TECNICO]))->where('users.estado', true)->with('role:id,nombre')])
             ->paginate($this->perPage);
     }
 
@@ -47,7 +46,7 @@ new class extends Component {
     public function cambiarEstado($id)
     {
         abort_unless(auth()->user()->isAdmin(), 403);
-        $municipio = Municipio::withCount(['expedientes as expedientes_activos_count' => fn($q) => $q->where('estado', 'activo')])->find($id);
+        $municipio = Municipio::withCount(['expedientes as expedientes_activos_count' => fn($q) => $q->activos()])->find($id);
 
         if (!$municipio) {
             return;

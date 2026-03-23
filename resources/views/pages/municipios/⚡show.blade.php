@@ -297,7 +297,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         <x-heroicon-o-chart-bar class="w-4 h-4" />
                         Expedientes por Mes — {{ $anioFiltro }}
                     </h3>
-                    <div class="w-full h-64" wire:ignore x-data="barChart(@js($this->chartData))" x-init="initChart()"
+                    <div class="w-full h-64" wire:ignore x-data="municipioDetalleBarChart(@js($this->chartData))" x-init="initChart()"
                         x-effect="updateChart(@js($this->chartData))">
                         <canvas x-ref="barChart" class="w-full h-full"></canvas>
                     </div>
@@ -307,7 +307,7 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                         <x-heroicon-o-chart-pie class="w-4 h-4" />
                         Distribución por Estado — {{ $anioFiltro }}
                     </h3>
-                    <div class="w-full h-64" wire:ignore x-data="pieChart(@js($this->chartEstados))" x-init="initChart()"
+                    <div class="w-full h-64" wire:ignore x-data="municipioDetallePieChart(@js($this->chartEstados))" x-init="initChart()"
                         x-effect="updateChart(@js($this->chartEstados))">
                         <canvas x-ref="pieChart" class="w-full h-full"></canvas>
                     </div>
@@ -461,9 +461,10 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
 
 @script
     <script>
-        Alpine.data('barChart', (initialData) => ({
+        Alpine.data('municipioDetalleBarChart', (initialData) => ({
             chart: null,
             initChart() {
+                this.destroyChart();
                 const ctx = this.$refs.barChart.getContext('2d');
                 this.chart = new Chart(ctx, {
                     type: 'bar',
@@ -502,12 +503,18 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                 this.chart.data.labels = newData.labels;
                 this.chart.data.datasets[0].data = newData.data;
                 this.chart.update('active');
+            },
+            destroyChart() {
+                if (!this.chart) return;
+                this.chart.destroy();
+                this.chart = null;
             }
         }));
 
-        Alpine.data('pieChart', (initialData) => ({
+        Alpine.data('municipioDetallePieChart', (initialData) => ({
             chart: null,
             initChart() {
+                this.destroyChart();
                 const ctx = this.$refs.pieChart.getContext('2d');
                 this.chart = new Chart(ctx, {
                     type: 'doughnut',
@@ -537,6 +544,11 @@ new #[Title('- Detalle Municipalidad')] class extends Component {
                 this.chart.data.datasets[0].data = newData.data;
                 this.chart.data.datasets[0].backgroundColor = newData.colors;
                 this.chart.update('active');
+            },
+            destroyChart() {
+                if (!this.chart) return;
+                this.chart.destroy();
+                this.chart = null;
             }
         }));
     </script>

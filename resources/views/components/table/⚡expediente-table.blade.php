@@ -130,14 +130,14 @@ new class extends Component {
                                 @if ($expediente->monto_contrato)
                                     ·
                                 @endif
-                                {{ $expediente->municipio->nombre }}
+                                {{ $expediente->municipio?->nombre ?? 'Sin municipio' }}
                             </span>
                         </div>
                     </div>
                 </td>
                 <td class="hidden lg:table-cell">
-                    <div class="text-sm">{{ $expediente->municipio->nombre }}</div>
-                    <div class="text-xs text-base-content/50">{{ $expediente->municipio->departamento }}</div>
+                    <div class="text-sm">{{ $expediente->municipio?->nombre ?? 'Sin municipio' }}</div>
+                    <div class="text-xs text-base-content/50">{{ $expediente->municipio?->departamento ?? 'N/A' }}</div>
                 </td>
                 <td class="text-center">
                     <span
@@ -149,7 +149,7 @@ new class extends Component {
                     {{ $expediente->fecha_recibido->format('d/m/Y') }}
                 </td>
                 <td class="hidden xl:table-cell">
-                    <div class="text-sm">{{ $expediente->responsable->nombre_completo }}</div>
+                    <div class="text-sm">{{ $expediente->responsable?->nombre_completo ?? 'Sin responsable' }}</div>
                 </td>
                 <td>
                     <div class="flex justify-center items-center gap-0.5 flex-nowrap">

@@ -395,7 +395,7 @@ new #[Title('- Detalle Usuario')] class extends Component {
                     Expedientes por Mes
                     <span class="badge badge-ghost badge-sm font-normal">Últimos 6 meses</span>
                 </h2>
-                <div class="w-full h-72 mt-2" x-data="chartComponent(@js($this->chartData))" x-init="initChart()">
+                <div class="w-full h-72 mt-2" x-data="adminUsuarioChartComponent(@js($this->chartData))" x-init="initChart()">
                     <canvas x-ref="chart" class="w-full h-full"></canvas>
                 </div>
             </div>
@@ -501,11 +501,12 @@ new #[Title('- Detalle Usuario')] class extends Component {
 {{-- Script para Chart.js con colores dinámicos del tema --}}
 @script
     <script>
-        Alpine.data('chartComponent', (chartData) => ({
+        Alpine.data('adminUsuarioChartComponent', (chartData) => ({
             chart: null,
             chartData: chartData,
 
             initChart() {
+                this.destroyChart();
                 const ctx = this.$refs.chart.getContext('2d');
 
                 // Obtener colores del tema DaisyUI
@@ -590,6 +591,11 @@ new #[Title('- Detalle Usuario')] class extends Component {
                         }
                     }
                 });
+            },
+            destroyChart() {
+                if (!this.chart) return;
+                this.chart.destroy();
+                this.chart = null;
             }
         }));
     </script>

@@ -539,7 +539,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 <div class="bg-base-200/20 rounded-box p-4 border border-base-content/5">
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70">Expedientes por Mes —
                         {{ $anioFiltro }}</h3>
-                    <div class="w-full h-64" wire:ignore x-data="barChart(@js($this->chartData))" x-init="initChart()"
+                    <div class="w-full h-64" wire:ignore x-data="adminMunicipioBarChart(@js($this->chartData))" x-init="initChart()"
                         x-effect="updateChart(@js($this->chartData))">
                         <canvas x-ref="barChart" class="w-full h-full"></canvas>
                     </div>
@@ -549,7 +549,7 @@ new #[Title('- Detalle Municipio')] class extends Component {
                 <div class="bg-base-200/20 rounded-box p-4 border border-base-content/5">
                     <h3 class="font-semibold text-sm mb-3 text-base-content/70">Distribución por Estado —
                         {{ $anioFiltro }}</h3>
-                    <div class="w-full h-64" wire:ignore x-data="pieChart(@js($this->chartEstados))" x-init="initChart()"
+                    <div class="w-full h-64" wire:ignore x-data="adminMunicipioPieChart(@js($this->chartEstados))" x-init="initChart()"
                         x-effect="updateChart(@js($this->chartEstados))">
                         <canvas x-ref="pieChart" class="w-full h-full"></canvas>
                     </div>
@@ -668,9 +668,10 @@ new #[Title('- Detalle Municipio')] class extends Component {
 {{-- Scripts para Chart.js --}}
 @script
     <script>
-        Alpine.data('barChart', (initialData) => ({
+        Alpine.data('adminMunicipioBarChart', (initialData) => ({
             chart: null,
             initChart() {
+                this.destroyChart();
                 const ctx = this.$refs.barChart.getContext('2d');
                 this.chart = new Chart(ctx, {
                     type: 'bar',
@@ -742,12 +743,18 @@ new #[Title('- Detalle Municipio')] class extends Component {
                     this.chart.data.datasets[0].data = newData.data;
                     this.chart.update('active');
                 }
+            },
+            destroyChart() {
+                if (!this.chart) return;
+                this.chart.destroy();
+                this.chart = null;
             }
         }));
 
-        Alpine.data('pieChart', (initialData) => ({
+        Alpine.data('adminMunicipioPieChart', (initialData) => ({
             chart: null,
             initChart() {
+                this.destroyChart();
                 const ctx = this.$refs.pieChart.getContext('2d');
                 this.chart = new Chart(ctx, {
                     type: 'doughnut',
@@ -800,6 +807,11 @@ new #[Title('- Detalle Municipio')] class extends Component {
                     this.chart.data.datasets[0].backgroundColor = newData.colors;
                     this.chart.update('active');
                 }
+            },
+            destroyChart() {
+                if (!this.chart) return;
+                this.chart.destroy();
+                this.chart = null;
             }
         }));
     </script>

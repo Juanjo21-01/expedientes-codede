@@ -1,6 +1,5 @@
 <?php
 
-use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Expediente;
 
@@ -13,7 +12,6 @@ new class extends Component {
     public bool $tieneRevisiones = false;
     public bool $puedeEliminar = false;
 
-    #[On('abrir-modal-eliminar')]
     public function abrir(int $expedienteId)
     {
         $expediente = Expediente::withCount('revisionesFinancieras')->findOrFail($expedienteId);

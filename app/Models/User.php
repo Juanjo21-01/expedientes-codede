@@ -60,7 +60,7 @@ class User extends Authenticatable
      */
     public function getNombreCompletoAttribute(): string
     {
-        return "{$this->nombres} {$this->apellidos}";
+        return trim(($this->nombres ?? '') . ' ' . ($this->apellidos ?? ''));
     }
 
     /**
@@ -68,9 +68,12 @@ class User extends Authenticatable
      */
     public function getInicialesAttribute(): string
     {
+        $nombres = (string) ($this->nombres ?? '');
+        $apellidos = (string) ($this->apellidos ?? '');
+
         return strtoupper(
-            Str::substr($this->nombres, 0, 1) .
-            Str::substr($this->apellidos, 0, 1)
+            Str::substr($nombres, 0, 1) .
+            Str::substr($apellidos, 0, 1)
         );
     }
 
@@ -200,42 +203,42 @@ class User extends Authenticatable
      */
     public function hasRole(string ...$roles): bool
     {
-        return in_array($this->role->nombre, $roles);
+        return in_array($this->role?->nombre, $roles, true);
     }
 
     public function isAdmin(): bool
     {
-        return $this->role->esAdmin();
+        return $this->role?->esAdmin() ?? false;
     }
 
     public function isDirector(): bool
     {
-        return $this->role->esDirector();
+        return $this->role?->esDirector() ?? false;
     }
 
     public function isJefeFinanciero(): bool
     {
-        return $this->role->esJefeFinanciero();
+        return $this->role?->esJefeFinanciero() ?? false;
     }
 
     public function isTecnico(): bool
     {
-        return $this->role->esTecnico();
+        return $this->role?->esTecnico() ?? false;
     }
 
     public function isMunicipal(): bool
     {
-        return $this->role->esMunicipal();
+        return $this->role?->esMunicipal() ?? false;
     }
 
     public function hasGlobalAccess(): bool
     {
-        return $this->role->tieneAccesoGlobal();
+        return $this->role?->tieneAccesoGlobal() ?? false;
     }
 
     public function requiereMunicipios(): bool
     {
-        return $this->role->requiereMunicipios();
+        return $this->role?->requiereMunicipios() ?? false;
     }
 
     // ---- Helpers de Estado ----

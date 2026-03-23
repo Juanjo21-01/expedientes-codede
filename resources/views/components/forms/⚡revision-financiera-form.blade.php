@@ -3,10 +3,10 @@
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use App\Actions\Revisiones\RegistrarRevisionFinancieraAction;
 use App\Models\Expediente;
 use App\Models\RevisionFinanciera;
 use App\Models\TipoSolicitud;
-use App\Models\Bitacora;
 
 new class extends Component {
     public int $expedienteId;
@@ -47,7 +47,7 @@ new class extends Component {
     #[Computed]
     public function fasesCompletadas()
     {
-        return $this->expediente->revisionesFinancieras()->where('estado', RevisionFinanciera::ESTADO_COMPLETO)->distinct('tipo_solicitud_id')->pluck('tipo_solicitud_id')->toArray();
+        return $this->expediente->revisionesFinancieras->where('estado', RevisionFinanciera::ESTADO_COMPLETO)->pluck('tipo_solicitud_id')->unique()->values()->toArray();
     }
 
     /**
@@ -121,7 +121,7 @@ new class extends Component {
             return 1;
         }
 
-        return $this->expediente->revisionesFinancieras()->where('tipo_solicitud_id', $this->tipo_solicitud_id)->count() + 1;
+        return $this->expediente->revisionesFinancieras->where('tipo_solicitud_id', (int) $this->tipo_solicitud_id)->count() + 1;
     }
 
     /**
@@ -130,7 +130,7 @@ new class extends Component {
     #[Computed]
     public function montoTotalAprobado()
     {
-        return (float) $this->expediente->revisionesFinancieras()->where('estado', RevisionFinanciera::ESTADO_COMPLETO)->whereNotNull('monto_aprobado')->sum('monto_aprobado');
+        return (float) $this->expediente->revisionesFinancieras->where('estado', RevisionFinanciera::ESTADO_COMPLETO)->whereNotNull('monto_aprobado')->sum('monto_aprobado');
     }
 
     /**
@@ -232,40 +232,19 @@ new class extends Component {
             $this->accion = RevisionFinanciera::ACCION_APROBAR;
         }
 
-        $rules = [
-            'tipo_solicitud_id' => 'required|exists:tipo_solicitudes,id',
-            'estado' => 'required|in:' . implode(',', RevisionFinanciera::getEstados()),
-            'observaciones' => 'required|string|max:2000',
-        ];
-
-        // Acción obligatoria para ambos estados
-        $rules['accion'] = 'required|in:' . implode(',', RevisionFinanciera::getAcciones());
-
-        // Monto aprobado requerido si el estado es Completo
-        if ($this->estado === RevisionFinanciera::ESTADO_COMPLETO) {
-            $maxMonto = $this->montoRestante ?? 999999999;
-            $rules['monto_aprobado'] = "required|numeric|min:0.01|max:{$maxMonto}";
-        } elseif ($this->monto_aprobado !== '') {
-            $rules['monto_aprobado'] = 'numeric|min:0';
-        }
-
-        $validated = $this->validate($rules, [
-            'tipo_solicitud_id.required' => 'La fase de desembolso es obligatoria.',
-            'estado.required' => 'El estado es obligatorio.',
-            'estado.in' => 'El estado seleccionado no es válido.',
-            'observaciones.required' => 'Las observaciones son obligatorias.',
-            'observaciones.max' => 'Las observaciones no pueden exceder 2000 caracteres.',
-            'accion.required' => 'La acción es obligatoria.',
-            'accion.in' => 'La acción seleccionada no es válida.',
-            'monto_aprobado.required' => 'El monto aprobado es obligatorio para fases completas.',
-            'monto_aprobado.numeric' => 'El monto debe ser un número válido.',
-            'monto_aprobado.min' => 'El monto debe ser mayor a 0.',
-            'monto_aprobado.max' => 'El monto excede el restante disponible (Q ' . number_format($this->montoRestante ?? 0, 2) . ').',
-        ]);
+        $action = app(RegistrarRevisionFinancieraAction::class);
+        $validated = $action->validar(
+            [
+                'tipo_solicitud_id' => $this->tipo_solicitud_id,
+                'estado' => $this->estado,
+                'accion' => $this->accion,
+                'monto_aprobado' => $this->monto_aprobado,
+                'observaciones' => $this->observaciones,
+            ],
+            $this->montoRestante,
+        );
 
         // Verificar que no se registre revisión de una fase que no corresponde (secuencialidad)
-        $fasesCompletadas = $this->fasesCompletadas;
-        $tiposSolicitud = $this->tiposSolicitud;
         $faseSeleccionada = (int) $this->tipo_solicitud_id;
 
         // Validar que la fase seleccionada sea la siguiente en secuencia (si va a completar)
@@ -277,32 +256,7 @@ new class extends Component {
             }
         }
 
-        // Crear la revisión
-        $revision = RevisionFinanciera::create([
-            'expediente_id' => $expediente->id,
-            'tipo_solicitud_id' => $this->tipo_solicitud_id,
-            'numero_revision' => $this->numeroRevision,
-            'revisor_id' => $user->id,
-            'estado' => $this->estado,
-            'accion' => $this->accion ?: null,
-            'monto_aprobado' => $this->monto_aprobado !== '' ? $this->monto_aprobado : null,
-            'observaciones' => $this->observaciones,
-            'fecha_revision' => now(),
-        ]);
-
-        // Si se completó la ÚLTIMA fase (Pago Final 100%), aprobar el expediente
-        $totalFases = $tiposSolicitud->count();
-        $fasesCompletadasDespues = $expediente->fresh()->revisionesFinancieras()->where('estado', RevisionFinanciera::ESTADO_COMPLETO)->distinct('tipo_solicitud_id')->count('tipo_solicitud_id');
-
-        if ($fasesCompletadasDespues >= $totalFases) {
-            $expediente->aprobar();
-        }
-
-        // Registrar en bitácora
-        $fase = TipoSolicitud::find($this->tipo_solicitud_id);
-        $faseNombre = $fase ? $fase->nombre : 'N/A';
-        $montoTexto = $this->monto_aprobado ? ' – Monto: Q' . number_format((float) $this->monto_aprobado, 2) : '';
-        Bitacora::registrarRevision("Revisión #{$this->numeroRevision} de {$faseNombre} en Expediente {$expediente->codigo_snip} – Estado: {$this->estado}{$montoTexto}", $expediente->id);
+        $action->ejecutar($expediente, $user, $validated, $this->numeroRevision);
 
         $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: '¡Revisión registrada con éxito!');
         $this->redirectRoute('expedientes.show', $expediente->id, navigate: true);

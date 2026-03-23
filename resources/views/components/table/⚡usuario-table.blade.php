@@ -200,7 +200,7 @@ new class extends Component {
                         };
                     @endphp
                     <span class="badge badge-sm badge-soft badge-outline {{ $rolBadgeClass }}">
-                        {{ $usuario->role->nombre }}
+                        {{ $usuario->role?->nombre ?? 'Sin rol' }}
                     </span>
                 </td>
                 <td class="text-center">

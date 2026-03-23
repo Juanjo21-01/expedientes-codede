@@ -1,6 +1,5 @@
 <?php
 
-use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Expediente;
 use App\Models\Bitacora;
@@ -13,7 +12,6 @@ new class extends Component {
     public string $municipio = '';
     public string $observaciones = '';
 
-    #[On('abrir-modal-enviar-revision')]
     public function abrir(int $expedienteId)
     {
         $expediente = Expediente::with('municipio')->findOrFail($expedienteId);

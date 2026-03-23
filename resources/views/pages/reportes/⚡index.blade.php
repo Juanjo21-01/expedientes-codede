@@ -1117,14 +1117,18 @@ new #[Title(' - Reportes')] class extends Component {
 @script
     <script>
         // Descarga de PDF via base64
-        Livewire.on('descargar-pdf', ([data]) => {
-            const link = document.createElement('a');
-            link.href = 'data:application/pdf;base64,' + data.contenido;
-            link.download = data.nombre;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
+        if (!window.__reportesPdfListenerRegistered) {
+            window.__reportesPdfListenerRegistered = true;
+
+            Livewire.on('descargar-pdf', ([data]) => {
+                const link = document.createElement('a');
+                link.href = 'data:application/pdf;base64,' + data.contenido;
+                link.download = data.nombre;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
 
         // Gráfica Pie/Dona - Distribución por Estado
         Alpine.data('reportePieChart', (initialData) => {

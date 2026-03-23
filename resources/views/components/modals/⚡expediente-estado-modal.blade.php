@@ -1,6 +1,5 @@
 <?php
 
-use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Expediente;
 use App\Models\Bitacora;
@@ -24,7 +23,6 @@ new class extends Component {
         };
     }
 
-    #[On('abrir-modal-estado')]
     public function abrir(int $expedienteId)
     {
         $expediente = Expediente::findOrFail($expedienteId);

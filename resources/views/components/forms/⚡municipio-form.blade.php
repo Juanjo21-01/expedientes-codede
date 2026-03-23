@@ -1,6 +1,7 @@
 <?php
 
 use Livewire\Component;
+use App\Actions\Municipios\ActualizarContactoMunicipioAction;
 use App\Models\Municipio;
 
 new class extends Component {
@@ -47,35 +48,21 @@ new class extends Component {
     {
         abort_unless(auth()->user()?->isAdmin(), 403);
 
-        $this->validate(
-            [
-                'contactoNombre' => 'nullable|string|max:100',
-                'contactoEmail' => 'nullable|email|max:255',
-                'contactoTelefono' => 'nullable|string|max:8',
-                'observaciones' => 'nullable|string|max:1000',
-            ],
-            [
-                'contactoEmail.email' => 'El correo de contacto debe ser válido.',
-                'contactoNombre.max' => 'El nombre de contacto no debe exceder 100 caracteres.',
-                'contactoTelefono.max' => 'El teléfono debe tener máximo 8 dígitos.',
-                'observaciones.max' => 'Las observaciones no deben exceder 1000 caracteres.',
-            ],
-        );
+        $action = app(ActualizarContactoMunicipioAction::class);
+        $validated = $action->validar([
+            'contactoNombre' => $this->contactoNombre,
+            'contactoEmail' => $this->contactoEmail,
+            'contactoTelefono' => $this->contactoTelefono,
+            'observaciones' => $this->observaciones,
+        ]);
 
-        $municipio = Municipio::find($this->municipioId);
+        $municipio = $action->ejecutar((int) $this->municipioId, $validated);
 
         if (!$municipio) {
             $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'Municipio no encontrado.');
             $this->dispatch('cerrar-modal-municipio');
             return;
         }
-
-        $municipio->update([
-            'contacto_nombre' => $this->contactoNombre ?: null,
-            'contacto_email' => $this->contactoEmail ?: null,
-            'contacto_telefono' => $this->contactoTelefono ?: null,
-            'observaciones' => $this->observaciones ?: null,
-        ]);
 
         $this->dispatch('municipio-guardado');
         $this->dispatch('cerrar-modal-municipio');

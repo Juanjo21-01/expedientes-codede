@@ -12,10 +12,14 @@
         }
 
         if (window.Livewire && typeof Livewire.on === 'function') {
-            Livewire.on('mostrar-mensaje', (data) => {
-                const payload = Array.isArray(data) ? data[0] : data;
-                this.addToast(payload);
-            });
+            if (!window.__toastListenerRegistered) {
+                window.__toastListenerRegistered = true;
+
+                Livewire.on('mostrar-mensaje', (data) => {
+                    const payload = Array.isArray(data) ? data[0] : data;
+                    this.addToast(payload);
+                });
+            }
         }
     },
     addToast({ tipo = 'info', mensaje = '' }) {
@@ -34,11 +38,11 @@
     },
     getTitle(tipo) {
         return {
-            success: 'Operacion completada',
-            warning: 'Atencion',
+            success: 'Operación completada',
+            warning: 'Atención',
             error: 'Error',
-            info: 'Informacion'
-        } [tipo] ?? 'Notificacion';
+            info: 'Información'
+        } [tipo] ?? 'Notificación';
     }
 }" class="toast toast-bottom toast-center sm:toast-end z-100 pointer-events-none">
 

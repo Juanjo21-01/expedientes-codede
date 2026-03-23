@@ -110,12 +110,14 @@ new #[Title('Dashboard')] class extends Component {
             Expediente::ESTADO_ARCHIVADO => '#6b7280',
         ];
 
+        $totalesPorEstado = (clone $base)->select('estado', DB::raw('COUNT(*) as total'))->groupBy('estado')->pluck('total', 'estado');
+
         $labels = [];
         $data = [];
         $colors = [];
 
         foreach ($estados as $estado) {
-            $count = (clone $base)->deEstado($estado)->count();
+            $count = (int) ($totalesPorEstado[$estado] ?? 0);
             if ($count > 0) {
                 $labels[] = $estado;
                 $data[] = $count;
@@ -148,19 +150,23 @@ new #[Title('Dashboard')] class extends Component {
     #[Computed]
     public function chartTendencia(): array
     {
+        $inicio = now()->startOfMonth()->subMonths(5);
+
+        $recibidosAgrupados = (clone $this->expedienteBase())->whereDate('fecha_recibido', '>=', $inicio)->selectRaw('YEAR(fecha_recibido) as y, MONTH(fecha_recibido) as m, COUNT(*) as total')->groupByRaw('YEAR(fecha_recibido), MONTH(fecha_recibido)')->get()->keyBy(fn($row) => sprintf('%04d-%02d', $row->y, $row->m));
+
+        $aprobadosAgrupados = (clone $this->expedienteBase())->aprobados()->whereNotNull('fecha_aprobacion')->whereDate('fecha_aprobacion', '>=', $inicio)->selectRaw('YEAR(fecha_aprobacion) as y, MONTH(fecha_aprobacion) as m, COUNT(*) as total')->groupByRaw('YEAR(fecha_aprobacion), MONTH(fecha_aprobacion)')->get()->keyBy(fn($row) => sprintf('%04d-%02d', $row->y, $row->m));
+
         $labels = [];
         $recibidos = [];
         $aprobadosMes = [];
 
         for ($i = 5; $i >= 0; $i--) {
             $fecha = now()->subMonths($i);
+            $key = $fecha->format('Y-m');
+
             $labels[] = $fecha->translatedFormat('M Y');
-
-            $mesBase = (clone $this->expedienteBase())->whereYear('fecha_recibido', $fecha->year)->whereMonth('fecha_recibido', $fecha->month);
-
-            $recibidos[] = (clone $mesBase)->count();
-
-            $aprobadosMes[] = (clone $this->expedienteBase())->aprobados()->whereNotNull('fecha_aprobacion')->whereYear('fecha_aprobacion', $fecha->year)->whereMonth('fecha_aprobacion', $fecha->month)->count();
+            $recibidos[] = (int) ($recibidosAgrupados[$key]->total ?? 0);
+            $aprobadosMes[] = (int) ($aprobadosAgrupados[$key]->total ?? 0);
         }
 
         return compact('labels', 'recibidos', 'aprobadosMes');
@@ -180,14 +186,15 @@ new #[Title('Dashboard')] class extends Component {
             RevisionFinanciera::ACCION_SOLICITAR_CORRECCIONES => ['label' => 'Correcciones', 'color' => '#f59e0b'],
         ];
 
+        $totalesPorAccion = (clone $queryMes)->select('accion', DB::raw('COUNT(*) as total'))->groupBy('accion')->pluck('total', 'accion');
+
         $labels = [];
         $data = [];
         $colors = [];
 
         foreach ($acciones as $accion => $config) {
-            $count = (clone $queryMes)->where('accion', $accion)->count();
             $labels[] = $config['label'];
-            $data[] = $count;
+            $data[] = (int) ($totalesPorAccion[$accion] ?? 0);
             $colors[] = $config['color'];
         }
 
@@ -211,11 +218,10 @@ new #[Title('Dashboard')] class extends Component {
         // Técnico: solo de sus municipios (a través de expedientes)
         if ($this->user->isTecnico() || $this->user->isMunicipal()) {
             $municipioIds = $this->user->municipios_ids;
-            $expedienteIds = Expediente::deMunicipios($municipioIds)->pluck('id');
 
-            $query->where(function ($q) use ($expedienteIds) {
-                $q->where(function ($sub) use ($expedienteIds) {
-                    $sub->where('entidad', Bitacora::ENTIDAD_EXPEDIENTE)->whereIn('entidad_id', $expedienteIds);
+            $query->where(function ($q) use ($municipioIds) {
+                $q->where(function ($sub) use ($municipioIds) {
+                    $sub->where('entidad', Bitacora::ENTIDAD_EXPEDIENTE)->whereIn('entidad_id', Expediente::query()->deMunicipios($municipioIds)->select('id'));
                 })->orWhere('user_id', $this->user->id);
             });
         }
@@ -559,8 +565,7 @@ new #[Title('Dashboard')] class extends Component {
                     <tbody>
                         @forelse ($this->expedientesRecientes as $exp)
                             <tr class="hover cursor-pointer"
-                                wire:click="$dispatch('navigate', { url: '{{ route('expedientes.show', $exp) }}' })"
-                                onclick="window.location='{{ route('expedientes.show', $exp) }}'">
+                                wire:click="$dispatch('navigate', { url: '{{ route('expedientes.show', $exp) }}' })">
                                 <td class="font-mono text-xs">{{ $exp->codigo_snip }}</td>
                                 <td>
                                     <p class="text-sm max-w-xs truncate">{{ $exp->nombre_proyecto }}</p>

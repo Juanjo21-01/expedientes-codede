@@ -3,6 +3,7 @@
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Computed;
+use App\Actions\Guias\GuardarGuiaAction;
 use App\Models\Guia;
 
 new class extends Component {
@@ -119,93 +120,38 @@ new class extends Component {
 
     private function validarCampos()
     {
-        $rules = [
-            'titulo' => 'required|string|max:100',
-            'fecha_publicacion' => 'required|date',
-        ];
+        $action = app(GuardarGuiaAction::class);
 
-        if (!$this->modoEdicion) {
-            $rules['archivo_pdf'] = 'required|file|mimes:pdf|max:10240';
-
-            if ($this->esNuevaCategoria) {
-                $rules['nuevaCategoria'] = 'required|string|max:100';
-            } else {
-                $rules['categoriaSeleccionada'] = 'required|string';
-            }
-        } else {
-            // En edición, PDF es opcional (reemplazar)
-            if ($this->archivo_pdf) {
-                $rules['archivo_pdf'] = 'file|mimes:pdf|max:10240';
-            }
-        }
-
-        return $this->validate($rules, [
-            'titulo.required' => 'El título es obligatorio.',
-            'titulo.max' => 'El título no puede exceder 100 caracteres.',
-            'archivo_pdf.required' => 'Debe seleccionar un archivo PDF.',
-            'archivo_pdf.mimes' => 'Solo se permiten archivos PDF.',
-            'archivo_pdf.max' => 'El archivo no puede exceder 10 MB.',
-            'fecha_publicacion.required' => 'La fecha de publicación es obligatoria.',
-            'categoriaSeleccionada.required' => 'Debe seleccionar una categoría.',
-            'nuevaCategoria.required' => 'Debe escribir el nombre de la nueva categoría.',
-        ]);
+        return $action->validar(
+            [
+                'titulo' => $this->titulo,
+                'fecha_publicacion' => $this->fecha_publicacion,
+                'archivo_pdf' => $this->archivo_pdf,
+                'categoriaSeleccionada' => $this->categoriaSeleccionada,
+                'nuevaCategoria' => $this->nuevaCategoria,
+            ],
+            $this->modoEdicion,
+            $this->esNuevaCategoria,
+        );
     }
 
     public function guardar()
     {
-        $this->validarCampos();
+        $validated = $this->validarCampos();
+        $action = app(GuardarGuiaAction::class);
 
         $categoria = $this->getCategoriaFinal();
 
         if ($this->modoEdicion) {
-            // --- EDITAR ---
-            $guia = Guia::findOrFail($this->guiaId);
-
-            $guia->titulo = $this->titulo;
-            $guia->fecha_publicacion = $this->fecha_publicacion;
-
-            // Si se sube un nuevo PDF, reemplazar
-            if ($this->archivo_pdf) {
-                $guia->eliminarArchivo();
-                $nombreArchivo = Guia::generarNombreArchivo($guia->categoria);
-                $this->archivo_pdf->storeAs('guia', $nombreArchivo, 'public');
-                $guia->archivo_pdf = $nombreArchivo;
-            }
-
-            $guia->save();
+            $guia = $action->guardarEdicion($this->guiaId, $validated);
 
             $this->redirectRoute('admin.guias.index', navigate: true);
             $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: "Guía '{$guia->titulo}' actualizada correctamente.");
         } else {
-            // --- CREAR ---
-            // Validar límite de versiones
-            if (!Guia::puedeAgregarVersion($categoria) && Guia::contarVersiones($categoria) > 0) {
-                $this->addError('categoriaSeleccionada', "La categoría '{$categoria}' ya tiene el máximo de " . Guia::MAX_VERSIONES_POR_CATEGORIA . ' versiones.');
-                return;
-            }
-
-            $version = Guia::siguienteVersion($categoria);
-            $nombreArchivo = Guia::generarNombreArchivo($categoria);
-
-            // Guardar archivo en storage/app/public/guia/
-            $this->archivo_pdf->storeAs('guia', $nombreArchivo, 'public');
-
-            // Desactivar versiones anteriores de esta categoría
-            Guia::desactivarCategoria($categoria);
-
-            // Crear registro
-            Guia::create([
-                'titulo' => $this->titulo,
-                'archivo_pdf' => $nombreArchivo,
-                'version' => $version,
-                'categoria' => $categoria,
-                'estado' => true,
-                'fecha_publicacion' => $this->fecha_publicacion,
-                'user_id' => auth()->id(),
-            ]);
+            $guia = $action->guardarNueva($validated, $categoria, (int) auth()->id());
 
             $this->redirectRoute('admin.guias.index', navigate: true);
-            $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: 'Guía subida exitosamente. Versión ' . $version . " de \"" . $categoria . "\".");
+            $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: 'Guía subida exitosamente. Versión ' . $guia->version . " de \"" . $categoria . "\".");
         }
     }
 

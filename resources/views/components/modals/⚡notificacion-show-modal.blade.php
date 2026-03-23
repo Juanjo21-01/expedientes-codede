@@ -1,6 +1,5 @@
 <?php
 
-use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\NotificacionEnviada;
 
@@ -20,7 +19,6 @@ new class extends Component {
     public string $creadoAt = '';
     public ?string $enviadoAt = null;
 
-    #[On('ver-detalle-notificacion')]
     public function abrir(int $notificacionId): void
     {
         $user = auth()->user();

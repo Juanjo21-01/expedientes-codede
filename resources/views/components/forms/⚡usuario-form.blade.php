@@ -3,6 +3,7 @@
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Computed;
+use App\Actions\Usuarios\GuardarUsuarioAction;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Municipio;
@@ -39,16 +40,17 @@ new class extends Component {
     {
         $roles = Role::where('nombre', '!=', Role::ADMIN);
 
+        $rolesUnicosActivosOcupados = User::query()->activos()->whereHas('role', fn($q) => $q->whereIn('nombre', [Role::DIRECTOR, Role::JEFE_FINANCIERO]))->with('role:id,nombre')->get()->pluck('role.nombre')->filter()->unique()->toArray();
+
         // si ya hay un usuario con rol Director y Jefe_financiero, no mostrar el rol en la lista, pero si tiene estado inactivo, si puede seleccionarlo
-        $roles = $roles->get()->filter(function ($rol) {
-            if (in_array($rol->nombre, [Role::DIRECTOR, Role::JEFE_FINANCIERO])) {
-                $existe = User::where('role_id', $rol->id)->activos()->exists();
-                if ($existe) {
-                    return false;
-                }
+        $roles = $roles->get()->filter(function ($rol) use ($rolesUnicosActivosOcupados) {
+            if (in_array($rol->nombre, [Role::DIRECTOR, Role::JEFE_FINANCIERO]) && in_array($rol->nombre, $rolesUnicosActivosOcupados, true)) {
+                return false;
             }
+
             return true;
         });
+
         return $roles;
     }
 
@@ -124,7 +126,7 @@ new class extends Component {
     public function cargarUsuario($id)
     {
         // Buscar usuario
-        $usuario = User::with('municipios')->find($id);
+        $usuario = User::with(['municipios', 'role'])->find($id);
 
         // Asignar valores
         if ($usuario) {
@@ -139,7 +141,7 @@ new class extends Component {
             $municipiosIds = $usuario->municipios->pluck('id')->toArray();
 
             // Asignar según el tipo de rol
-            if ($usuario->role->esMunicipal()) {
+            if ($usuario->role?->esMunicipal()) {
                 $this->municipioSeleccionado = $municipiosIds[0] ?? '';
                 $this->municipiosSeleccionados = [];
             } else {
@@ -165,6 +167,8 @@ new class extends Component {
             abort(403, 'Acceso Denegado');
         }
 
+        $action = app(GuardarUsuarioAction::class);
+
         if ($this->usuarioId) {
             $usuarioActual = User::find($this->usuarioId);
             if (!$usuarioActual) {
@@ -174,115 +178,41 @@ new class extends Component {
             $this->roleId = $usuarioActual->role_id;
         }
 
-        // Validación base
-        $rules = [
-            'nombres' => 'required|string|max:50',
-            'apellidos' => 'required|string|max:50',
-            'cargo' => 'nullable|string|max:100',
-            'telefono' => 'nullable|string|max:8',
-            'email' => 'required|email|max:255|unique:users,email,' . $this->usuarioId,
-            'roleId' => 'required|exists:roles,id',
-        ];
+        $validated = $action->validarBase(
+            [
+                'nombres' => $this->nombres,
+                'apellidos' => $this->apellidos,
+                'cargo' => $this->cargo,
+                'telefono' => $this->telefono,
+                'email' => $this->email,
+                'roleId' => $this->roleId,
+                'password' => $this->password,
+            ],
+            $this->usuarioId,
+        );
 
-        // Password requerido solo si es nuevo usuario
-        if (!$this->usuarioId) {
-            $rules['password'] = 'required|string|min:8';
-        } else {
-            $rules['password'] = 'nullable|string|min:8';
+        $validacionMunicipios = $action->validarMunicipiosSegunRol($this->rolSeleccionado, $this->municipiosSeleccionados, $this->municipioSeleccionado !== '' ? (int) $this->municipioSeleccionado : null, $this->usuarioId);
+
+        if (!$validacionMunicipios['ok']) {
+            $this->addError($validacionMunicipios['field'], $validacionMunicipios['message']);
+            return;
         }
 
-        // Validar datos base
-        $this->validate($rules, [
-            'nombres.required' => 'Los nombres son requeridos.',
-            'apellidos.required' => 'Los apellidos son requeridos.',
-            'email.required' => 'El correo es requerido.',
-            'email.email' => 'El correo debe ser válido.',
-            'email.unique' => 'El correo ya está registrado.',
-            'roleId.required' => 'Debe seleccionar un rol.',
-            'password.required' => 'La contraseña es requerida.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-        ]);
-
-        // Validar municipios según rol
-        if ($this->rolSeleccionado?->requiereMunicipios()) {
-            if ($this->rolSeleccionado->esMunicipal()) {
-                // Validar que se haya seleccionado un municipio
-                if (empty($this->municipioSeleccionado)) {
-                    $this->addError('municipioSeleccionado', 'Debe seleccionar un municipio.');
-                    return;
-                }
-
-                // Verificar que no exista otro usuario Municipal activo con el mismo municipio
-                $existeMunicipal = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::MUNICIPAL)->where('users.estado', true)->where('usuario_municipio.estado', true)->where('usuario_municipio.municipio_id', $this->municipioSeleccionado)->when($this->usuarioId, fn($q) => $q->where('users.id', '!=', $this->usuarioId))->exists();
-
-                if ($existeMunicipal) {
-                    $this->addError('municipioSeleccionado', 'Ya existe un usuario Municipal activo asignado a este municipio.');
-                    return;
-                }
-
-                // Convertir a array para el sync
-                $this->municipiosSeleccionados = [(int) $this->municipioSeleccionado];
-            } elseif ($this->rolSeleccionado->esTecnico()) {
-                // Validar que se haya seleccionado al menos un municipio
-                if (empty($this->municipiosSeleccionados)) {
-                    $this->addError('municipiosSeleccionados', 'Debe seleccionar al menos un municipio.');
-                    return;
-                }
-
-                // Verificar que ningún municipio esté asignado a otro técnico activo
-                $municipiosOcupadosPorOtro = DB::table('usuario_municipio')->join('users', 'users.id', '=', 'usuario_municipio.user_id')->join('roles', 'roles.id', '=', 'users.role_id')->where('roles.nombre', Role::TECNICO)->where('users.estado', true)->where('usuario_municipio.estado', true)->whereIn('usuario_municipio.municipio_id', $this->municipiosSeleccionados)->when($this->usuarioId, fn($q) => $q->where('users.id', '!=', $this->usuarioId))->pluck('usuario_municipio.municipio_id')->toArray();
-
-                if (!empty($municipiosOcupadosPorOtro)) {
-                    $nombresMunicipios = Municipio::whereIn('id', $municipiosOcupadosPorOtro)->pluck('nombre')->join(', ');
-                    $this->addError('municipiosSeleccionados', "Los siguientes municipios ya están asignados a otro Técnico activo: {$nombresMunicipios}");
-                    return;
-                }
-            }
+        if (isset($validacionMunicipios['municipios'])) {
+            $this->municipiosSeleccionados = $validacionMunicipios['municipios'];
         }
 
         try {
-            // Si se esta editando
+            $usuario = $action->ejecutar($validated, $this->usuarioId, $this->rolSeleccionado, $this->municipiosSeleccionados);
+
+            if (!$usuario) {
+                $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'Usuario no encontrado.');
+                return;
+            }
+
             if ($this->usuarioId) {
-                // Buscar usuario
-                $usuario = User::find($this->usuarioId);
-
-                $usuario->nombres = $this->nombres;
-                $usuario->apellidos = $this->apellidos;
-                $usuario->cargo = $this->cargo;
-                $usuario->telefono = $this->telefono;
-                $usuario->email = $this->email;
-
-                if ($this->password) {
-                    $usuario->password = bcrypt($this->password);
-                }
-
-                // Guardar
-                $usuario->save();
-
-                // Sync municipios con historial (soft delete)
-                if ($this->rolSeleccionado?->requiereMunicipios()) {
-                    $usuario->syncMunicipiosConHistorial($this->municipiosSeleccionados);
-                } else {
-                    $usuario->desactivarTodosMunicipios();
-                }
-
                 $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: '¡Usuario actualizado correctamente!');
             } else {
-                $usuario = User::create([
-                    'nombres' => $this->nombres,
-                    'apellidos' => $this->apellidos,
-                    'cargo' => $this->cargo,
-                    'telefono' => $this->telefono,
-                    'email' => $this->email,
-                    'password' => bcrypt($this->password),
-                    'role_id' => $this->roleId,
-                ]);
-
-                // Sync municipios con historial
-                if ($this->rolSeleccionado?->requiereMunicipios()) {
-                    $usuario->syncMunicipiosConHistorial($this->municipiosSeleccionados);
-                }
-
                 $this->dispatch('mostrar-mensaje', tipo: 'success', mensaje: '¡Usuario creado correctamente!');
             }
 
@@ -346,9 +276,14 @@ new class extends Component {
             <!-- Teléfono -->
             <fieldset class="fieldset">
                 <legend class="fieldset-legend text-xs uppercase tracking-wide">Teléfono</legend>
-                <input type="text" wire:model="telefono" maxlength="8" placeholder="12345678"
-                    class="input input-bordered w-full" />
-                <p class="label text-base-content/50">8 dígitos</p>
+                <input type="text" wire:model="telefono" wire:keydown="clearError('telefono')" maxlength="8"
+                    inputmode="numeric" placeholder="12345678"
+                    class="input input-bordered w-full @error('telefono') input-error @enderror" />
+                @error('telefono')
+                    <p class="label text-error">{{ $message }}</p>
+                @else
+                    <p class="label text-base-content/50">8 dígitos</p>
+                @enderror
             </fieldset>
 
             <!-- Email -->

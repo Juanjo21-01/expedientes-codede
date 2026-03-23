@@ -21,7 +21,7 @@ class ExpedientePolicy
     // Ver detalle
     public function view(User $user, Expediente $expediente): bool
     {
-        return match ($user->role->nombre) {
+        return match ($user->role?->nombre) {
             Role::ADMIN, Role::DIRECTOR => true,
             Role::JEFE_FINANCIERO => in_array($expediente->estado, [
                 Expediente::ESTADO_EN_REVISION,

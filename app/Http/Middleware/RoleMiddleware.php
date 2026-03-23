@@ -15,7 +15,9 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!auth()->check() || !in_array(auth()->user()->role->nombre, $roles)) {
+        $nombreRol = auth()->user()?->role?->nombre;
+
+        if (!auth()->check() || !$nombreRol || !in_array($nombreRol, $roles, true)) {
             abort(403, 'Acceso Denegado');
         }
 
