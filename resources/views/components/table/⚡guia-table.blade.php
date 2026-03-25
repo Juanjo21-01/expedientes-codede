@@ -11,13 +11,13 @@ new class extends Component {
     use WithPagination;
 
     #[Reactive]
-    public string $search = '';
+    public ?string $search = '';
 
     #[Reactive]
-    public string $categoriaFiltro = '';
+    public ?string $categoriaFiltro = '';
 
     #[Reactive]
-    public string $estadoFiltro = '';
+    public ?string $estadoFiltro = '';
 
     // Resetear paginación al cambiar filtros
     public function updatedSearch()

@@ -10,22 +10,22 @@ new class extends Component {
     use WithPagination;
 
     #[Reactive]
-    public string $search = '';
+    public ?string $search = '';
 
     #[Reactive]
-    public string $entidad = '';
+    public ?string $entidad = '';
 
     #[Reactive]
-    public string $tipo = '';
+    public ?string $tipo = '';
 
     #[Reactive]
-    public string $usuario_id = '';
+    public ?string $usuario_id = '';
 
     #[Reactive]
-    public string $fecha_desde = '';
+    public ?string $fecha_desde = '';
 
     #[Reactive]
-    public string $fecha_hasta = '';
+    public ?string $fecha_hasta = '';
 
     public function updatedSearch(): void
     {

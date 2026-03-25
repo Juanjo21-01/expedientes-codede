@@ -10,13 +10,13 @@ use App\Models\TipoNotificacion;
 
 new #[Title('- Mis Notificaciones')] class extends Component {
     #[Url]
-    public string $search = '';
+    public ?string $search = '';
 
     #[Url]
-    public string $estadoFiltro = '';
+    public ?string $estadoFiltro = '';
 
     #[Url]
-    public string $tipoFiltro = '';
+    public ?string $tipoFiltro = '';
 
     #[On('notificacion-enviada')]
     #[On('notificacion-reenviada')]
@@ -59,7 +59,9 @@ new #[Title('- Mis Notificaciones')] class extends Component {
 
     public function limpiarFiltros(): void
     {
-        $this->reset(['search', 'estadoFiltro', 'tipoFiltro']);
+        $this->search = '';
+        $this->estadoFiltro = '';
+        $this->tipoFiltro = '';
     }
 };
 ?>
@@ -148,7 +150,7 @@ new #[Title('- Mis Notificaciones')] class extends Component {
         </div>
     </x-patterns.filter-card>
 
-    <livewire:table.notificacion-table :search="$search" :estadoFiltro="$estadoFiltro" :tipoFiltro="$tipoFiltro" :modo="$this->modoTabla" />
+    <livewire:table.notificacion-table :search="$search ?? ''" :estadoFiltro="$estadoFiltro ?? ''" :tipoFiltro="$tipoFiltro ?? ''" :modo="$this->modoTabla" />
 
     <livewire:modals.notificacion-show-modal />
 </div>

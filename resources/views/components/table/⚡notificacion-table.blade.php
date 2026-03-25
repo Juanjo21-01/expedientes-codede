@@ -11,16 +11,16 @@ new class extends Component {
     use WithPagination;
 
     #[Reactive]
-    public string $search = '';
+    public ?string $search = '';
 
     #[Reactive]
-    public string $estadoFiltro = '';
+    public ?string $estadoFiltro = '';
 
     #[Reactive]
-    public string $tipoFiltro = '';
+    public ?string $tipoFiltro = '';
 
     #[Reactive]
-    public string $modo = 'general';
+    public ?string $modo = 'general';
 
     // Resetear paginación al cambiar filtros
     public function updatedSearch()
@@ -42,10 +42,11 @@ new class extends Component {
     public function notificaciones()
     {
         $user = auth()->user();
+        $modo = $this->modo ?: 'general';
 
         $query = NotificacionEnviada::query();
 
-        if ($this->modo === 'municipal') {
+        if ($modo === 'municipal') {
             $query->recibidasPorMunicipal($user);
         } else {
             $query->accesiblesPor($user);
