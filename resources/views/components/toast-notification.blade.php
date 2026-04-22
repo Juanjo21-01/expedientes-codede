@@ -4,6 +4,7 @@
 
 <div x-data="{
     toasts: [],
+    toastUnsubscribe: null,
     init() {
         const initialToast = @js(session('toast'));
 
@@ -11,16 +12,43 @@
             this.addToast(initialToast);
         }
 
-        if (window.Livewire && typeof Livewire.on === 'function') {
-            if (!window.__toastListenerRegistered) {
-                window.__toastListenerRegistered = true;
-
-                Livewire.on('mostrar-mensaje', (data) => {
-                    const payload = Array.isArray(data) ? data[0] : data;
-                    this.addToast(payload);
-                });
-            }
+        this.registerToastListener();
+    },
+    destroy() {
+        if (typeof this.toastUnsubscribe === 'function') {
+            this.toastUnsubscribe();
+            this.toastUnsubscribe = null;
         }
+    },
+    registerToastListener() {
+        const register = () => {
+            if (this.toastUnsubscribe || !window.Livewire || typeof window.Livewire.on !== 'function') {
+                return false;
+            }
+
+            this.toastUnsubscribe = window.Livewire.on('mostrar-mensaje', (data) => {
+                const payload = Array.isArray(data) ? data[0] : data;
+                this.addToast(payload);
+            });
+
+            return true;
+        };
+
+        if (register()) {
+            return;
+        }
+
+        const onLivewireReady = () => {
+            register();
+        };
+
+        window.addEventListener('livewire:init', onLivewireReady, { once: true });
+        window.addEventListener('livewire:initialized', onLivewireReady, { once: true });
+
+        // Fallback para escenarios donde Livewire termina de hidratar justo después del init de Alpine.
+        queueMicrotask(() => {
+            register();
+        });
     },
     addToast({ tipo = 'info', mensaje = '' }) {
         const id = Date.now() + Math.random();

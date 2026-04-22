@@ -57,7 +57,7 @@ new class extends Component {
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <a href="{{ $urlPdf }}" download class="btn btn-sm btn-outline gap-2">
+                        <a href="{{ route('guias.descargar', $guiaId) }}" class="btn btn-sm btn-outline gap-2">
                             <x-heroicon-o-arrow-down-tray class="w-4 h-4" />
                             Descargar
                         </a>

@@ -73,7 +73,7 @@ new #[Title('- Guías')] class extends Component {
                                 <x-heroicon-o-eye class="w-4 h-4" />
                                 Ver
                             </button>
-                            <a href="{{ $guia->url_pdf }}" download class="btn btn-outline btn-sm gap-2">
+                            <a href="{{ route('guias.descargar', $guia->id) }}" class="btn btn-outline btn-sm gap-2">
                                 <x-heroicon-o-arrow-down-tray class="w-4 h-4" />
                                 Descargar
                             </a>

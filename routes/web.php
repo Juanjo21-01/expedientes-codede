@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 use App\Models\Expediente;
 use App\Models\Municipio;
@@ -40,6 +41,28 @@ Route::middleware(['auth', 'usuario_activo'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::livewire('/guias', 'pages::guia.index')->name('guias');
+
+    Route::get('/guias/{guia}/descargar', function (Guia $guia) {
+        $rutaArchivo = "guia/{$guia->archivo_pdf}";
+
+        abort_unless(Storage::disk('s3')->exists($rutaArchivo), 404);
+
+        return response()->streamDownload(function () use ($rutaArchivo) {
+            $stream = Storage::disk('s3')->readStream($rutaArchivo);
+
+            if ($stream === false) {
+                return;
+            }
+
+            fpassthru($stream);
+
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }, basename($guia->archivo_pdf), [
+            'Content-Type' => 'application/pdf',
+        ]);
+    })->name('guias.descargar');
 
     /*
     |----------------------------------------------------------------------
