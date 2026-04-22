@@ -51,7 +51,7 @@ class GuardarGuiaAction
         if (!empty($validated['archivo_pdf'])) {
             $guia->eliminarArchivo();
             $nombreArchivo = Guia::generarNombreArchivo($guia->categoria);
-            $validated['archivo_pdf']->storeAs('guia', $nombreArchivo, 'public');
+            $validated['archivo_pdf']->storeAs('guia', $nombreArchivo, 's3');
             $guia->archivo_pdf = $nombreArchivo;
         }
 
@@ -71,7 +71,7 @@ class GuardarGuiaAction
         $version = Guia::siguienteVersion($categoria);
         $nombreArchivo = Guia::generarNombreArchivo($categoria);
 
-        $validated['archivo_pdf']->storeAs('guia', $nombreArchivo, 'public');
+        $validated['archivo_pdf']->storeAs('guia', $nombreArchivo, 's3');
 
         try {
             return DB::transaction(function () use ($validated, $categoria, $userId, $version, $nombreArchivo): Guia {
@@ -88,7 +88,7 @@ class GuardarGuiaAction
                 ]);
             });
         } catch (\Throwable $e) {
-            Storage::disk('public')->delete('guia/' . $nombreArchivo);
+            Storage::disk('s3')->delete('guia/' . $nombreArchivo);
             throw $e;
         }
     }

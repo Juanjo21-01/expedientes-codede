@@ -119,15 +119,10 @@ class Guia extends Model
      */
     public function getUrlPdfAttribute(): string
     {
-        return asset("storage/guia/{$this->archivo_pdf}");
-    }
-
-    /**
-     * Ruta completa del archivo en disco
-     */
-    public function getRutaArchivoAttribute(): string
-    {
-        return Storage::disk('public')->path("guia/{$this->archivo_pdf}");
+        return Storage::disk('s3')->temporaryUrl(
+        "guia/{$this->archivo_pdf}",
+        now()->addMinutes(30)
+    );
     }
 
     /**
@@ -143,7 +138,7 @@ class Guia extends Model
      */
     public function archivoExiste(): bool
     {
-        return Storage::disk('public')->exists("guia/{$this->archivo_pdf}");
+        return Storage::disk('s3')->exists("guia/{$this->archivo_pdf}");
     }
 
     /**
@@ -155,7 +150,7 @@ class Guia extends Model
             return 'N/A';
         }
 
-        $bytes = Storage::disk('public')->size("guia/{$this->archivo_pdf}");
+        $bytes = Storage::disk('s3')->size("guia/{$this->archivo_pdf}");
         $units = ['B', 'KB', 'MB', 'GB'];
         $i = 0;
 
@@ -235,7 +230,7 @@ class Guia extends Model
     public function eliminarArchivo(): bool
     {
         if ($this->archivoExiste()) {
-            return Storage::disk('public')->delete("guia/{$this->archivo_pdf}");
+            return Storage::disk('s3')->delete("guia/{$this->archivo_pdf}");
         }
         return false;
     }
