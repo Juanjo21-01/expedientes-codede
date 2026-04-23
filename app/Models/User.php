@@ -241,6 +241,25 @@ class User extends Authenticatable
         return $this->role?->requiereMunicipios() ?? false;
     }
 
+    /**
+     * Verifica si el usuario tiene información asociada que debe conservarse.
+     */
+    public function tieneInformacionAsociada(): bool
+    {
+        return $this->expedientes()->exists()
+            || $this->revisionesFinancieras()->exists()
+            || $this->guiasCreadas()->exists()
+            || $this->notificacionesEnviadas()->exists();
+    }
+
+    /**
+     * Regla de negocio para permitir eliminación de usuario.
+     */
+    public function puedeSerEliminado(): bool
+    {
+        return !$this->isAdmin() && !$this->tieneInformacionAsociada();
+    }
+
     // ---- Helpers de Estado ----
 
     public function estaActivo(): bool

@@ -78,7 +78,39 @@ new class extends Component {
     #[Computed]
     public function showDeleteUser(): bool
     {
-        return !(Auth::user() instanceof MustVerifyEmail) || (Auth::user() instanceof MustVerifyEmail && Auth::user()->hasVerifiedEmail());
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $emailVerificado = !($user instanceof MustVerifyEmail) || ($user instanceof MustVerifyEmail && $user->hasVerifiedEmail());
+
+        return $emailVerificado && $user->puedeSerEliminado();
+    }
+
+    #[Computed]
+    public function deleteUserBlockedMessage(): ?string
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return null;
+        }
+
+        if ($user->isAdmin()) {
+            return 'La cuenta Administrador no puede eliminarse.';
+        }
+
+        if ($user->tieneInformacionAsociada()) {
+            return 'No puedes eliminar tu cuenta porque ya tiene información asociada en el sistema.';
+        }
+
+        if ($user instanceof MustVerifyEmail && !$user->hasVerifiedEmail()) {
+            return 'Debes verificar tu correo antes de eliminar tu cuenta.';
+        }
+
+        return null;
     }
 }; ?>
 
@@ -167,6 +199,12 @@ new class extends Component {
         @if ($this->showDeleteUser)
             <div class="mt-8 border-t border-base-content/10 pt-6">
                 @livewire('auth::settings.delete-user-form')
+            </div>
+        @elseif ($this->deleteUserBlockedMessage)
+            <div class="mt-8 border-t border-base-content/10 pt-6">
+                <div class="alert alert-warning border border-warning/30 justify-center">
+                    <span>{{ $this->deleteUserBlockedMessage }}</span>
+                </div>
             </div>
         @endif
     </x-auth.settings.layout>

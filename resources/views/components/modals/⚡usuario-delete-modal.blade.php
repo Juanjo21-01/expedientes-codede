@@ -1,7 +1,6 @@
 <?php
 
 use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -20,6 +19,20 @@ new class extends Component {
         }
 
         $this->usuarioEliminar = User::find($usuarioId);
+
+        if (!$this->usuarioEliminar) {
+            $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'Usuario no encontrado.');
+            return;
+        }
+
+        if (!$this->usuarioEliminar->puedeSerEliminado()) {
+            $mensaje = $this->usuarioEliminar->isAdmin() ? 'No se puede eliminar: la cuenta Administrador está protegida.' : 'No se puede eliminar: el usuario tiene información asociada en el sistema.';
+
+            $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: $mensaje);
+            $this->cerrarModal();
+            return;
+        }
+
         $this->passwordConfirm = '';
         $this->resetErrorBag();
         $this->show = true;
@@ -32,6 +45,22 @@ new class extends Component {
             abort(403, 'Acceso Denegado');
         }
 
+        if (!$this->usuarioEliminar instanceof User) {
+            $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'Usuario no válido para eliminar.');
+            $this->cerrarModal();
+            return;
+        }
+
+        $this->usuarioEliminar->refresh();
+
+        if (!$this->usuarioEliminar->puedeSerEliminado()) {
+            $mensaje = $this->usuarioEliminar->isAdmin() ? 'No se puede eliminar: la cuenta Administrador está protegida.' : 'No se puede eliminar: el usuario tiene información asociada en el sistema.';
+
+            $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: $mensaje);
+            $this->cerrarModal();
+            return;
+        }
+
         // Validar contraseña del admin
         if (!Hash::check($this->passwordConfirm, Auth::user()->password)) {
             $this->addError('passwordConfirm', 'La contraseña es incorrecta.');
@@ -39,20 +68,6 @@ new class extends Component {
         }
 
         try {
-            // Verificar si tiene expedientes
-            if ($this->usuarioEliminar->expedientes()->count() > 0) {
-                $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'No se puede eliminar: el usuario tiene expedientes asociados.');
-                $this->cerrarModal();
-                return;
-            }
-
-            // Verificar si tiene revisiones
-            if ($this->usuarioEliminar->revisionesFinancieras()->count() > 0) {
-                $this->dispatch('mostrar-mensaje', tipo: 'error', mensaje: 'No se puede eliminar: el usuario tiene revisiones financieras asociadas.');
-                $this->cerrarModal();
-                return;
-            }
-
             // Eliminar usuario
             $this->usuarioEliminar->municipios()->detach();
             $this->usuarioEliminar->delete();

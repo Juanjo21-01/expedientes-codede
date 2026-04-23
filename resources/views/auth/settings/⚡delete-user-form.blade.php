@@ -15,11 +15,27 @@ new class extends Component {
      */
     public function deleteUser(Logout $logout): void
     {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(403, 'Acceso denegado.');
+        }
+
+        if ($user->isAdmin()) {
+            $this->addError('deleteUser', 'La cuenta Administrador no puede eliminarse.');
+            return;
+        }
+
+        if ($user->tieneInformacionAsociada()) {
+            $this->addError('deleteUser', 'No puedes eliminar tu cuenta porque ya tiene información asociada en el sistema.');
+            return;
+        }
+
         $this->validate([
             'password' => $this->currentPasswordRules(),
         ]);
 
-        tap(Auth::user(), $logout(...))->delete();
+        tap($user, $logout(...))->delete();
 
         $this->redirect('/', navigate: true);
     }
@@ -46,6 +62,12 @@ new class extends Component {
                         Ingresa tu contraseña para confirmar que deseas eliminar tu cuenta.
                     </p>
                 </div>
+
+                @error('deleteUser')
+                    <div class="alert alert-error border border-error/30">
+                        <span>{{ $message }}</span>
+                    </div>
+                @enderror
 
                 <fieldset class="fieldset">
                     <legend class="fieldset-legend">Contraseña</legend>
