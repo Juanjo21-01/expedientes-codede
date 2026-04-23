@@ -6,6 +6,8 @@ use Livewire\Attributes\Reactive;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use App\Models\NotificacionEnviada;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotificacionMail;
 
 new class extends Component {
     use WithPagination;
@@ -73,7 +75,7 @@ new class extends Component {
 
         try {
             $notificacion->load(['remitente', 'expediente.municipio', 'municipio', 'tipoNotificacion']);
-            \Illuminate\Support\Facades\Mail::to($notificacion->destinatario_email)->send(new \App\Mail\NotificacionMail($notificacion));
+            Mail::to($notificacion->destinatario_email)->send(new NotificacionMail($notificacion));
 
             $notificacion->marcarEnviada();
             unset($this->notificaciones);

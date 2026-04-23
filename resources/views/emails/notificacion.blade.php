@@ -37,8 +37,8 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                     <td align="center" style="padding-bottom: 12px;">
-                                        <img src="{{ asset('img/logo.png') }}" alt="CODEDE San Marcos" width="64"
-                                            height="64"
+                                        <img src="{{ config('app.url') }}/img/logo.png" alt="CODEDE San Marcos"
+                                            width="64" height="64"
                                             style="display: block; border: 0; outline: none; width: 64px; height: 64px; border-radius: 8px;">
                                     </td>
                                 </tr>
